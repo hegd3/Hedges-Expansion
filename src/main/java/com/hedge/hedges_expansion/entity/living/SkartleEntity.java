@@ -13,9 +13,11 @@ import com.hedge.hedges_expansion.entity.util.AttackHelpers;
 import com.hedge.hedges_expansion.entity.util.AttackStateMob;
 import com.hedge.hedges_expansion.entity.util.EntityHelpers;
 import com.hedge.hedges_expansion.registry.HEEntities;
+import com.hedge.hedges_expansion.registry.HEParticles;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -48,7 +50,7 @@ public class SkartleEntity extends HEAnimStateAnimal implements AttackStateMob, 
     private int attackCD = 0;
     private int spitCD = 0;
 
-    public SkartleEntity(EntityType<? extends Animal> pEntityType, Level pLevel) {
+    public SkartleEntity(EntityType<? extends SkartleEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.lookControl = new ATMLookControl<>(this);
         this.moveControl = new ATMMoveControl<>(this);
@@ -98,7 +100,10 @@ public class SkartleEntity extends HEAnimStateAnimal implements AttackStateMob, 
                     case 1 -> {
                         if (this.animTicks == 10 && target != null) {
                             if (AttackHelpers.singleTargetHitbox(this, target, this.getLookAngle(), 1, 2, 2)) {
-                                this.doHurtTarget(target);
+                                if (this.doHurtTarget(target)) {
+                                    ((ServerLevel) this.level()).sendParticles(HEParticles.CORROSIVE_SPIT.get(),
+                                            target.getX(), target.getY(), target.getZ(), 1, 0, 0, 0, 0.1);
+                                }
                             }
 
                         }
@@ -142,6 +147,14 @@ public class SkartleEntity extends HEAnimStateAnimal implements AttackStateMob, 
     }
 
     @Override
+    public boolean isPushable() {
+        if (this.getAnimState() == 2) {
+            return false;
+        }
+        return super.isPushable();
+    }
+
+    @Override
     public void setUpAnimStates() {
         this.idleAnimationState.animateWhen(this.isAlive(), this.tickCount);
         this.biteAnimationState.animateWhen(this.getAnimState() == 1, this.tickCount);
@@ -168,11 +181,11 @@ public class SkartleEntity extends HEAnimStateAnimal implements AttackStateMob, 
 
     @Override
     public void setAttacking() {
-        if (this.getRandom().nextBoolean()) {
+        if (this.getRandom().nextInt(3) == 0) {
+            this.setAnimState(1);
+        } else {
             this.setLeft(!this.swingingLeft());
             this.setAnimState(2);
-        } else {
-            this.setAnimState(1);
         }
     }
 

@@ -2,8 +2,12 @@ package com.hedge.hedges_expansion.registry;
 
 import com.hedge.hedges_expansion.HedgesExpansion;
 import com.hedge.hedges_expansion.entity.living.*;
+import com.hedge.hedges_expansion.entity.living.ambientfish.GildGliderEntity;
+import com.hedge.hedges_expansion.entity.living.ambientfish.GlimEntity;
+import com.hedge.hedges_expansion.entity.living.ambientfish.SmarmEntity;
 import com.hedge.hedges_expansion.entity.projectile.CorrosiveSpit;
 import com.hedge.hedges_expansion.entity.projectile.MurkSmoke;
+import com.hedge.hedges_expansion.entity.projectile.WaveEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -19,9 +23,6 @@ public class HEEntities {
             ENTITY_TYPES.register("burodon", () -> EntityType.Builder.of(BurodonEntity::new, MobCategory.CREATURE)
                     .sized(1.4f, 1.8f).build("burodon"));
 
-    public static final RegistryObject<EntityType<BehemothEntity>> BEHEMOTH =
-            ENTITY_TYPES.register("behemoth", () -> EntityType.Builder.of(BehemothEntity::new, MobCategory.MONSTER)
-                    .sized(3f, 4f).build("behemoth"));
 
     public static final RegistryObject<EntityType<SpottedStrikerEntity>> SPOTTED_STRIKER =
             ENTITY_TYPES.register("spotted_striker", () -> EntityType.Builder.of(SpottedStrikerEntity::new, MobCategory.WATER_CREATURE)
@@ -38,10 +39,6 @@ public class HEEntities {
     public static final RegistryObject<EntityType<GurkEntity>> GURK =
             ENTITY_TYPES.register("gurk", () -> EntityType.Builder.of(GurkEntity::new, MobCategory.CREATURE)
                     .sized(1.2f, 0.7f).build("gurk"));
-
-    public static final RegistryObject<EntityType<BergBreakerEntity>> BERG_BREAKER =
-            ENTITY_TYPES.register("berg_breaker", () -> EntityType.Builder.of(BergBreakerEntity::new, MobCategory.CREATURE)
-                    .sized(2f, 1.5f).build("berg_breaker"));
 
     public static final RegistryObject<EntityType<MurkEntity>> MURK =
             ENTITY_TYPES.register("murk", () -> EntityType.Builder.of(MurkEntity::new, MobCategory.CREATURE)
@@ -62,6 +59,31 @@ public class HEEntities {
     public static final RegistryObject<EntityType<CorrosiveSpit>> CORROSIVE_SPIT =
             ENTITY_TYPES.register("corrosive_spit", () -> EntityType.Builder.of(CorrosiveSpit::new, MobCategory.MISC)
                     .sized(0.5f, 0.5f).build("corrosive_spit"));
+
+    public static final RegistryObject<EntityType<ZappetEntity>> ZAPPET =
+            ENTITY_TYPES.register("zappet", () -> EntityType.Builder.of(ZappetEntity::new, MobCategory.CREATURE)
+                    .sized(0.8f, 1.3f).build("zappet"));
+
+    public static final RegistryObject<EntityType<GildGliderEntity>> GILD_GLIDER =
+            ENTITY_TYPES.register("gild_glider", () -> EntityType.Builder.of(GildGliderEntity::new, MobCategory.WATER_CREATURE)
+                    .sized(0.8f, 0.25f).build("gild_glider"));
+
+    public static final RegistryObject<EntityType<SmarmEntity>> SMARM =
+            ENTITY_TYPES.register("smarm", () -> EntityType.Builder.of(SmarmEntity::new, MobCategory.WATER_CREATURE)
+                    .sized(0.6f, 0.14f).build("smarm"));
+
+
+    public static final RegistryObject<EntityType<FerocetusEntity>> FEROCETUS =
+            ENTITY_TYPES.register("ferocetus", () -> EntityType.Builder.of(FerocetusEntity::new, MobCategory.WATER_CREATURE)
+                    .sized(2.5f, 1.75f).build("ferocetus"));
+
+    public static final RegistryObject<EntityType<WaveEntity>> WAVE =
+            ENTITY_TYPES.register("wave", () -> EntityType.Builder.of(WaveEntity::new, MobCategory.MISC)
+                    .sized(1.4f, 1.3f).build("wave"));
+
+    public static final RegistryObject<EntityType<GlimEntity>> GLIM =
+            ENTITY_TYPES.register("glim", () -> EntityType.Builder.of(GlimEntity::new, MobCategory.WATER_CREATURE)
+                    .sized(0.625f, 0.375f).build("glim"));
 
     public static void register(IEventBus eventbus) {
         ENTITY_TYPES.register(eventbus);

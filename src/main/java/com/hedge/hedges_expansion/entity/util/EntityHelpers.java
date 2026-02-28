@@ -6,11 +6,14 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.util.AirAndWaterRandomPos;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
+import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.PathComputationType;
@@ -120,21 +123,45 @@ public class EntityHelpers {
         return Vec3.directionFromRotation(0.0f, entity.yBodyRot);
     }
 
+    @Nullable
+    public static Vec3 getSmartFlyingTarget(PathfinderMob mob, int radius, int verticalDistance, int targetDist, int blocksFromGround) {
+        Level level = mob.level();
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        int maxAttempts = radius * radius * radius;
+        boolean nearBoundary = blocksFromGround > targetDist;
+        for (int i = 0; i < maxAttempts; i++) {
+            Vec3 candidate = DefaultRandomPos.getPos(mob, radius * radius, verticalDistance);
+            if (candidate == null) continue;
 
+
+            Vec3 adjusted = candidate.add(0, nearBoundary ? -1 : 1, 0);
+            mutablePos.set(adjusted.x, adjusted.y, adjusted.z);
+            if (level.getBlockState(mutablePos).isPathfindable(level, mutablePos, PathComputationType.AIR)) {
+                return adjusted;
+            }
+
+
+            if (i == maxAttempts - 1) {
+                return candidate;
+            }
+        }
+
+        return null;
+    }
 
     @Nullable
     public static Vec3 getSmartSwimTarget(PathfinderMob mob, int radius, int verticalDistance, boolean preferSurface) {
         Level level = mob.level();
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
         int maxAttempts = radius * radius * radius;
+        boolean nearBoundary = preferSurface
+                ? EntityHelpers.closeToSurface(mob, verticalDistance)
+                : EntityHelpers.closeToBottom(mob, verticalDistance);
 
         for (int i = 0; i < maxAttempts; i++) {
-            Vec3 candidate = DefaultRandomPos.getPos(mob, radius, verticalDistance);
+            Vec3 candidate = DefaultRandomPos.getPos(mob, radius * radius, verticalDistance);
             if (candidate == null) continue;
 
-            boolean nearBoundary = preferSurface
-                    ? EntityHelpers.closeToSurface(mob, verticalDistance)
-                    : EntityHelpers.closeToBottom(mob, verticalDistance);
 
             Vec3 adjusted = candidate.add(0, nearBoundary ? -1 : 1, 0);
             mutablePos.set(adjusted.x, adjusted.y, adjusted.z);
@@ -151,7 +178,46 @@ public class EntityHelpers {
         return null;
     }
 
+    @Nullable
+    public static Vec3 getSmartSwimAwayTarget(PathfinderMob mob, int radius, int verticalDistance, boolean preferSurface) {
+        Level level = mob.level();
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        int maxAttempts = radius * radius * radius;
+        boolean nearBoundary = preferSurface
+                ? EntityHelpers.closeToSurface(mob, verticalDistance)
+                : EntityHelpers.closeToBottom(mob, verticalDistance);
 
+        for (int i = 0; i < maxAttempts; i++) {
+            Vec3 candidate = DefaultRandomPos.getPosAway(mob, radius * radius, verticalDistance, mob.position());
+            if (candidate == null) continue;
+
+
+            Vec3 adjusted = candidate.add(0, nearBoundary ? -1 : 1, 0);
+            mutablePos.set(adjusted.x, adjusted.y, adjusted.z);
+
+            if (level.getBlockState(mutablePos).isPathfindable(level, mutablePos, PathComputationType.WATER)) {
+                return adjusted;
+            }
+
+            if (i == maxAttempts - 1) {
+                return candidate;
+            }
+        }
+
+        return null;
+    }
+
+    public static void snapTowardsEntity(LivingEntity entity, Entity target) {
+        Vec3 towardTarget = target.position().subtract(entity.position()).normalize();
+        float yaw = (float)(Mth.atan2(towardTarget.z, towardTarget.x) * (180F / Math.PI)) - 90.0F;
+
+        entity.setYHeadRot(yaw);
+        entity.setYBodyRot(yaw);
+    }
+
+    public static boolean isAir(Level world, BlockPos pos) {
+        return world.getBlockState(pos).isAir();
+    }
 
     public static boolean isWaterBlock(Level world, BlockPos pos) {
         return world.getFluidState(pos).is(FluidTags.WATER);
@@ -165,7 +231,64 @@ public class EntityHelpers {
         return isNearWaterBoundary(entity, maxDist, Direction.DOWN);
     }
 
-    private static boolean isNearWaterBoundary(LivingEntity entity, int maxDistance, Direction direction) {
+    public static int blocksFromGround(LivingEntity entity, int maxDistance) {
+        BlockPos basePos = entity.blockPosition();
+        Level level = entity.level();
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        int i = 1;
+        while (i <= maxDistance) {
+            mutablePos.set(basePos).move(Direction.DOWN, i);
+            if (!isAir(level, mutablePos)) {
+                return i;
+            }
+            i++;
+        }
+
+        return i;
+    }
+
+    public static int blocksFromWaterBoundary(Level level, BlockPos basePos, int maxDistance, Direction direction) {
+
+
+        if (!isWaterBlock(level, basePos) && !isWaterBlock(level, basePos.above())) {
+            return 0;
+        }
+
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        int i = 1;
+        while (i <= maxDistance) {
+            mutablePos.set(basePos).move(direction, i);
+            if (!isWaterBlock(level, mutablePos)) {
+                return i;
+            }
+            i++;
+        }
+
+        return i;
+    }
+
+    public static int blocksFromWaterBoundary(LivingEntity entity, int maxDistance, Direction direction) {
+        BlockPos basePos = entity.blockPosition();
+        Level level = entity.level();
+
+        if (!isWaterBlock(level, basePos) && !isWaterBlock(level, basePos.above())) {
+            return 0;
+        }
+
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        int i = 1;
+        while (i <= maxDistance) {
+            mutablePos.set(basePos).move(direction, i);
+            if (!isWaterBlock(level, mutablePos)) {
+                return i;
+            }
+            i++;
+        }
+
+        return i;
+    }
+
+    public static boolean isNearWaterBoundary(LivingEntity entity, int maxDistance, Direction direction) {
         BlockPos basePos = entity.blockPosition();
         Level level = entity.level();
 

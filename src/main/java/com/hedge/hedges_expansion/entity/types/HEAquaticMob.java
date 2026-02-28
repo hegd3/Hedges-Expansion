@@ -1,18 +1,19 @@
 package com.hedge.hedges_expansion.entity.types;
 
 import com.hedge.hedges_expansion.entity.util.AnimStateMob;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.AnimationState;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.Pose;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class HEAquaticMob extends WaterAnimal implements AnimStateMob {
@@ -23,7 +24,7 @@ public class HEAquaticMob extends WaterAnimal implements AnimStateMob {
     public final AnimationState idleAnimationState = new AnimationState();
     protected int animTicks;
 
-    public HEAquaticMob(EntityType<? extends WaterAnimal> pEntityType, Level pLevel) {
+    public HEAquaticMob(EntityType<? extends HEAquaticMob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
     }
 
@@ -47,15 +48,14 @@ public class HEAquaticMob extends WaterAnimal implements AnimStateMob {
         setUpAnimStates();
     }
 
-    public void aiStep() {
+
+    protected void flop() {
         if (!this.isInWater() && this.onGround() && this.verticalCollision) {
             this.setDeltaMovement(this.getDeltaMovement().add((double)((this.random.nextFloat() * 2.0F - 1.0F) * 0.05F), (double)0.4F, (double)((this.random.nextFloat() * 2.0F - 1.0F) * 0.05F)));
             this.setOnGround(false);
             this.hasImpulse = true;
             this.playSound(this.getFlopSound(), this.getSoundVolume(), this.getVoicePitch());
         }
-
-        super.aiStep();
     }
 
     protected SoundEvent getFlopSound() {
@@ -79,6 +79,15 @@ public class HEAquaticMob extends WaterAnimal implements AnimStateMob {
         this.walkAnimation.update(f, 0.2f);
     }
 
+    @Override
+    protected SoundEvent getSwimSound() {
+        return SoundEvents.DOLPHIN_SWIM;
+    }
+
+    @Override
+    protected void playStepSound(BlockPos pos, BlockState state) {
+
+    }
 
 
     public void travel(Vec3 pTravelVector) {

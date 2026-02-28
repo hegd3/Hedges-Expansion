@@ -5,6 +5,7 @@ import com.hedge.hedges_expansion.entity.AI.control.HESwimmingMoveControl;
 import com.hedge.hedges_expansion.entity.AI.goal.HECustomSwimGoal;
 import com.hedge.hedges_expansion.entity.AI.navigation.FluidPathNavigation;
 import com.hedge.hedges_expansion.entity.types.HEAquaticMob;
+import com.hedge.hedges_expansion.entity.types.HEBucketableSchoolingMob;
 import com.hedge.hedges_expansion.entity.util.AttackHelpers;
 import com.hedge.hedges_expansion.entity.util.AttackStateMob;
 import com.hedge.hedges_expansion.entity.util.EntityHelpers;
@@ -22,13 +23,16 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+
+import java.util.List;
 
 public class SpottedStrikerEntity extends HEAquaticMob implements AttackStateMob {
 
     private int attackCD = 0;
     private int nextAttack = 1;
     public float tilt = 0.0f;
-    public SpottedStrikerEntity(EntityType<? extends WaterAnimal> pEntityType, Level pLevel) {
+    public SpottedStrikerEntity(EntityType<? extends SpottedStrikerEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.moveControl = new HESwimmingMoveControl(this, 40, 5, 0.02f, 0.1f);
         this.lookControl = new SmoothSwimmingLookControl(this, 5);
@@ -47,11 +51,18 @@ public class SpottedStrikerEntity extends HEAquaticMob implements AttackStateMob
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(4, new HECustomSwimGoal(this, 1.0f, 10, 20, 10, true));
+        this.goalSelector.addGoal(4, new HECustomSwimGoal(this, 1.0f, 30, 4, 5, false));
         this.goalSelector.addGoal(1, new GenericMeleeGoal<>(this, 1.2f));
         this.targetSelector.addGoal(0, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, LivingEntity.class, true));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, HEBucketableSchoolingMob.class, true));
 
+    }
+
+
+    @Override
+    public void aiStep() {
+        this.flop();
+        super.aiStep();
     }
 
     @Override
@@ -74,8 +85,14 @@ public class SpottedStrikerEntity extends HEAquaticMob implements AttackStateMob
                 }
                 case 2 -> {
                     if (this.animTicks == 25) {
-                        this.setDeltaMovement(this.getDeltaMovement().add(this.getLookAngle().scale(0.6)));
-                        EntityHelpers.aoeAttack(this, this.getLookAngle().scale(1.5), 2, 2, 2, 2.5f, 2);
+                        Vec3 v = this.getLookAngle();
+                        this.addDeltaMovement(v.scale(0.6));
+                        List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, v, 2, 2, 2, 5);
+                        for (LivingEntity entity : hit) {
+                            if (!AttackHelpers.blockBreak(this, entity)) {
+                                AttackHelpers.betterHurt(this, entity, 0.8f, 1.4f);
+                            }
+                        }
                     }  else if (this.animTicks >= 33) {
                         this.attackCD = 5;
                         this.resetAnimState();

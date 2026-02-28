@@ -10,13 +10,13 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class ProjectileTrailParticle extends TextureSheetParticle {
     private final SpriteSet sprites;
 
-    public ProjectileTrailParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, SpriteSet pSprites) {
+    public ProjectileTrailParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, SpriteSet pSprites, float quadSize) {
         super(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
         this.xd += ((this.random.nextFloat() - this.random.nextFloat()) * 0.05F);
         this.zd += ((this.random.nextFloat() - this.random.nextFloat()) * 0.05F);
         this.roll = ((this.random.nextFloat() - this.random.nextFloat()) * 20F);
         this.friction = 0.96F;
-        this.quadSize = 0.4F;
+        this.quadSize = quadSize;
         this.lifetime = 5 + this.random.nextInt(4);
         this.sprites = pSprites;
         this.setSpriteFromAge(pSprites);
@@ -68,7 +68,20 @@ public class ProjectileTrailParticle extends TextureSheetParticle {
         }
 
         public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
-            return new ProjectileTrailParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites);
+            return new ProjectileTrailParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites, 0.4f);
+        }
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static class CorrosiveSpitProvider implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet sprites;
+
+        public CorrosiveSpitProvider(SpriteSet pSprites) {
+            this.sprites = pSprites;
+        }
+
+        public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
+            return new ProjectileTrailParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites, 0.3f);
         }
     }
 

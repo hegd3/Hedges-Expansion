@@ -2,20 +2,23 @@ package com.hedge.hedges_expansion.entity.living;
 
 import com.hedge.hedges_expansion.client.particle.SmokeParticleOptions;
 import com.hedge.hedges_expansion.entity.AI.control.HESwimmingMoveControl;
-import com.hedge.hedges_expansion.entity.AI.goal.SchoolingGoal;
-import com.hedge.hedges_expansion.entity.AI.goal.SchoolingMobRandomSwimGoal;
+import com.hedge.hedges_expansion.entity.AI.goal.HECustomSwimGoal;
+import com.hedge.hedges_expansion.entity.AI.goal.GroupFollowLeaderGoal;
 import com.hedge.hedges_expansion.entity.AI.goal.TearacudaAttackGoal;
 import com.hedge.hedges_expansion.entity.AI.navigation.FluidPathNavigation;
+import com.hedge.hedges_expansion.entity.types.HEBucketableSchoolingMob;
 import com.hedge.hedges_expansion.entity.types.HESchoolingMob;
 import com.hedge.hedges_expansion.entity.util.AttackHelpers;
 import com.hedge.hedges_expansion.entity.util.AttackStateMob;
 import com.hedge.hedges_expansion.entity.util.EntityHelpers;
+import com.hedge.hedges_expansion.registry.HEEntities;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.AnimationState;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
@@ -26,8 +29,11 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class TearacudaEntity extends HESchoolingMob implements AttackStateMob {
@@ -40,10 +46,10 @@ public class TearacudaEntity extends HESchoolingMob implements AttackStateMob {
     private int jumpCD = 0;
     public int groundTimer = 0;
 
-    public TearacudaEntity(EntityType<? extends WaterAnimal> pEntityType, Level pLevel) {
+    public TearacudaEntity(EntityType<? extends TearacudaEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        this.moveControl = new HESwimmingMoveControl(this, 40, 8, 0.02f, 0.1f);
-        this.lookControl = new SmoothSwimmingLookControl(this, 8);
+        this.moveControl = new HESwimmingMoveControl(this, 999, 6, 0.02f, 0.1f);
+        this.lookControl = new SmoothSwimmingLookControl(this, 6);
     }
 
     public static AttributeSupplier.Builder bakeAttributes(){
@@ -58,10 +64,10 @@ public class TearacudaEntity extends HESchoolingMob implements AttackStateMob {
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(2, new SchoolingMobRandomSwimGoal(this, 1.0f, 10, 10, 5, true));
-        this.goalSelector.addGoal(1, new SchoolingGoal(this));
+        this.goalSelector.addGoal(2, new HECustomSwimGoal(this, 1.0f, 10, 6, 5, true));
+        this.goalSelector.addGoal(4, new GroupFollowLeaderGoal<>(this));
         this.goalSelector.addGoal(0, new TearacudaAttackGoal(this));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Animal.class, true));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, HEBucketableSchoolingMob.class, true));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
         this.targetSelector.addGoal(0, new HurtByTargetGoal(this).setAlertOthers());
     }
@@ -70,7 +76,7 @@ public class TearacudaEntity extends HESchoolingMob implements AttackStateMob {
     protected void clientTick() {
         super.clientTick();
         if (!this.isInFluidType() && this.onGround()) {
-            this.groundTimer = 10;
+            this.groundTimer = 20;
         } else {
             this.groundTimer = Math.max(groundTimer - 1, 0);
         }
@@ -147,8 +153,8 @@ public class TearacudaEntity extends HESchoolingMob implements AttackStateMob {
     }
 
     @Override
-    public int getMaxSchoolSize() {
-        return 15;
+    public int getMaxGroupSize() {
+        return 8;
     }
 
     @Override
@@ -159,6 +165,11 @@ public class TearacudaEntity extends HESchoolingMob implements AttackStateMob {
         return super.isAlliedTo(pEntity);
     }
 
+    @Override
+    public void aiStep() {
+        this.flop();
+        super.aiStep();
+    }
 
     @Override
     public void setAttacking() {
@@ -189,5 +200,28 @@ public class TearacudaEntity extends HESchoolingMob implements AttackStateMob {
     @Override
     public double getAttackReachSqr(LivingEntity entity) {
         return this.getBbWidth() * 2.2 * this.getBbWidth() * 2.2 + entity.getBbWidth();
+    }
+
+    public static boolean canSpawn(EntityType<TearacudaEntity> entity, LevelAccessor level, MobSpawnType reason, BlockPos pos, RandomSource random) {
+        return WaterAnimal.checkSurfaceWaterAnimalSpawnRules(entity, level, reason, pos, random);
+    }
+
+    @Nullable
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+        if ((pReason == MobSpawnType.CHUNK_GENERATION || pReason == MobSpawnType.NATURAL)) {
+            int groupSize = (int) (this.getMaxGroupSize() * this.getRandom().nextFloat());
+            if (groupSize > 0 && !this.level().isClientSide()) {
+                for (int i = 0; i < groupSize; i++) {
+                    Vec3 rand = EntityHelpers.getRandomVec3(4);
+                    TearacudaEntity entity = new TearacudaEntity(HEEntities.TEARACUDA.get(), this.level());
+                    entity.moveTo(this.getX() + rand.x, this.getY() + rand.y, this.getZ() + rand.z);
+                    entity.startFollowing(this);
+                    this.level().addFreshEntity(entity);
+                }
+            }
+        }
+
+        return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
+
     }
 }

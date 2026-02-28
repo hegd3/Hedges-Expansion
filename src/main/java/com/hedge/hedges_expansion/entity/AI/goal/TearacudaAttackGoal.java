@@ -1,6 +1,7 @@
 package com.hedge.hedges_expansion.entity.AI.goal;
 
 import com.hedge.hedges_expansion.entity.living.TearacudaEntity;
+import com.hedge.hedges_expansion.entity.util.EntityHelpers;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;

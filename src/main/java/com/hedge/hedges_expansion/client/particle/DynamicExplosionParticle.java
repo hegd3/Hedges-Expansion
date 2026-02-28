@@ -14,4 +14,17 @@ public class DynamicExplosionParticle extends HugeExplosionParticle {
         this.setSpriteFromAge(pSprites);
     }
 
+    @OnlyIn(Dist.CLIENT)
+    public static class MurkExplosionProvider implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet sprites;
+
+        public MurkExplosionProvider(SpriteSet pSprites) {
+            this.sprites = pSprites;
+        }
+
+        public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
+            return new DynamicExplosionParticle(pLevel, pX, pY, pZ, pXSpeed, this.sprites, 14, 6);
+        }
+    }
+
 }

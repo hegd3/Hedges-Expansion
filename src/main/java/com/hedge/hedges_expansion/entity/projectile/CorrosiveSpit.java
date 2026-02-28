@@ -43,11 +43,11 @@ public class CorrosiveSpit extends GenericProjectile{
         Vec3 v = getDeltaMovement();
         double length = v.length();
         int c = (int)Math.min(20, Math.round(length) * 3) + 1;
-        float f = (float)length / c / 3;
+        float f = (float)length / c;
         for (int i = 0; i < c; i++) {
             Vec3 rand = EntityHelpers.getRandomVec3(0.02);
             Vec3 p = v.scale(f * i);
-            this.level().addParticle(ParticleTypes.SPIT, this.getX() + rand.x + p.x,
+            this.level().addParticle(HEParticles.CORROSIVE_SPIT.get(), this.getX() + rand.x + p.x,
                     this.getY() + rand.y + p.y, this.getZ() + rand.z + p.z, rand.x, rand.z, rand.y);
         }
     }

@@ -44,31 +44,8 @@ public class HedgesExpansion
 
     }
 
-    // Add the example block item to the building blocks tab
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event)
     {
-    }
-
-    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class ClientModEvents
-    {
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event)
-        {
-            EntityRenderers.register(HEEntities.BURODON.get(), BurodonRenderer::new);
-            EntityRenderers.register(HEEntities.BEHEMOTH.get(), BehemothRenderer::new);
-            EntityRenderers.register(HEEntities.SPOTTED_STRIKER.get(), SpottedStrikerRenderer::new);
-            EntityRenderers.register(HEEntities.TRANSFIGURED.get(), TransfiguredRenderer::new);
-            EntityRenderers.register(HEEntities.GRUIN.get(), GruinRenderer::new);
-            EntityRenderers.register(HEEntities.GURK.get(), GurkRenderer::new);
-            EntityRenderers.register(HEEntities.BERG_BREAKER.get(), BergBreakerRenderer::new);
-            EntityRenderers.register(HEEntities.MURK.get(), MurkRenderer::new);
-            EntityRenderers.register(HEEntities.MURK_SMOKE.get(), ModellessProjectileRenderer::new);
-            EntityRenderers.register(HEEntities.TEARACUDA.get(), TearacudaRenderer::new);
-            EntityRenderers.register(HEEntities.SKARTLE.get(), SkartleRenderer::new);
-            EntityRenderers.register(HEEntities.CORROSIVE_SPIT.get(), ModellessProjectileRenderer::new);
-
-        }
     }
 }

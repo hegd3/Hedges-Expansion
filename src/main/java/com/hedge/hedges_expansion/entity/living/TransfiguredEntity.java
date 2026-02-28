@@ -30,7 +30,7 @@ public class TransfiguredEntity extends HEMonster {
     private boolean mouthSwitch = true;
 
 
-    public TransfiguredEntity(EntityType<? extends Monster> pEntityType, Level pLevel) {
+    public TransfiguredEntity(EntityType<? extends TransfiguredEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
     }
 

@@ -4,12 +4,12 @@ import com.hedge.hedges_expansion.entity.util.AdvancedTurningMob;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
 
-public class ATMSwimLookControl<E extends Mob & AdvancedTurningMob> extends HESwimmingLookControl {
+public class ATMSwimLookControl<E extends Mob & AdvancedTurningMob> extends HESemiaquaticLookControl {
     private final E entity;
 
 
-    public ATMSwimLookControl(E pMob, int pMaxYRotFromCenterWater, int pMaxYRotFromCenterLand) {
-        super(pMob, pMaxYRotFromCenterWater, pMaxYRotFromCenterLand);
+    public ATMSwimLookControl(E pMob, int pMaxYRotFromCenterWater) {
+        super(pMob, pMaxYRotFromCenterWater);
         this.entity = pMob;
     }
 

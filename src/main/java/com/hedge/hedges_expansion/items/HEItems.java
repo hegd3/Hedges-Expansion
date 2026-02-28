@@ -2,12 +2,17 @@ package com.hedge.hedges_expansion.items;
 
 import com.hedge.hedges_expansion.HedgesExpansion;
 import com.hedge.hedges_expansion.registry.HEEntities;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.MobBucketItem;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+
+import java.util.function.Supplier;
 
 public class HEItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, HedgesExpansion.MODID);
@@ -18,9 +23,6 @@ public class HEItems {
 
     public static final RegistryObject<Item> BURODON_SPAWN_EGG = ITEMS.register("burodon_spawn_egg",
             () -> new ForgeSpawnEggItem(HEEntities.BURODON, 0xAEC8D4, 0x7E83CC, new Item.Properties()));
-
-    public static final RegistryObject<Item> BEHEMOTH_SPAWN_EGG = ITEMS.register("behemoth_spawn_egg",
-            () -> new ForgeSpawnEggItem(HEEntities.BEHEMOTH, 0x3F3347, 0x454263, new Item.Properties()));
 
     public static final RegistryObject<Item> SPOTTED_STRIKER_SPAWN_EGG = ITEMS.register("spotted_striker_spawn_egg",
             () -> new ForgeSpawnEggItem(HEEntities.SPOTTED_STRIKER, 0x50555E, 0x8A896B, new Item.Properties()));
@@ -34,9 +36,6 @@ public class HEItems {
     public static final RegistryObject<Item> GURK_SPAWN_EGG = ITEMS.register("gurk_spawn_egg",
             () -> new ForgeSpawnEggItem(HEEntities.GURK, 0x2E7037, 0x63A64E, new Item.Properties()));
 
-    public static final RegistryObject<Item> BERG_BREAKER_SPAWN_EGG = ITEMS.register("berg_breaker_spawn_egg",
-            () -> new ForgeSpawnEggItem(HEEntities.BERG_BREAKER, 0xB2C2D1, 0xD5E3F0, new Item.Properties()));
-
     public static final RegistryObject<Item> MURK_SPAWN_EGG = ITEMS.register("murk_spawn_egg",
             () -> new ForgeSpawnEggItem(HEEntities.MURK, 0x473B8A, 0xC4BE84, new Item.Properties()));
 
@@ -46,9 +45,33 @@ public class HEItems {
     public static final RegistryObject<Item> SKARTLE_SPAWN_EGG = ITEMS.register("skartle_spawn_egg",
             () -> new ForgeSpawnEggItem(HEEntities.SKARTLE, 0x807D74, 0x1F1E2E, new Item.Properties()));
 
+    public static final RegistryObject<Item> ZAPPET_SPAWN_EGG = createEgg("zappet", HEEntities.ZAPPET, 0xE38E66, 0x88ACE3);
+
+    public static final RegistryObject<Item> GILD_GLIDER_SPAWN_EGG = createEgg("gild_glider", HEEntities.GILD_GLIDER, 0xE3D188, 0xDED0B1);
+
+    public static final RegistryObject<Item> SMARM_SPAWN_EGG = createEgg("smarm", HEEntities.SMARM, 0x53A6C9, 0xC9536B);
+
+    public static final RegistryObject<Item> FEROCETUS_SPAWN_EGG = createEgg("ferocetus", HEEntities.FEROCETUS, 0x75604C, 0xC7A169);
+
+    public static final RegistryObject<Item> GLIM_SPAWN_EGG = createEgg("glim", HEEntities.GLIM, 0x252329, 0xBD9E73);
+
+
+    public static final RegistryObject<Item> GILD_GLIDER_BUCKET = createBucket("gild_glider", HEEntities.GILD_GLIDER);
+
+    public static final RegistryObject<Item> SMARM_BUCKET = createBucket("smarm", HEEntities.SMARM);
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
+    }
+
+    private static RegistryObject<Item> createEgg(String name, Supplier<? extends EntityType<? extends Mob>> type, int backgroundColor, int highlightColor) {
+        return ITEMS.register(name + "_spawn_egg",
+                () -> new ForgeSpawnEggItem(type, backgroundColor, highlightColor, new Item.Properties()));
+    }
+
+    private static RegistryObject<Item> createBucket(String name, Supplier<? extends EntityType<?>> type) {
+        return ITEMS.register(name + "_bucket",
+                () -> new WaterMobBucketItem(type));
     }
 
 }

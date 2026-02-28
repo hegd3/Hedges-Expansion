@@ -55,7 +55,7 @@ public class BurodonEntity extends HETamableAnimal implements AttackStateMob, Ad
     public static final int ROAR_ANIM = 3;
     public static final int YAWN_ANIM = 4;
 
-    public BurodonEntity(EntityType<? extends TamableAnimal> pEntityType, Level pLevel) {
+    public BurodonEntity(EntityType<? extends BurodonEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.moveControl = new ATMMoveControl<>(this);
         this.lookControl = new ATMLookControl<>(this);
@@ -252,7 +252,7 @@ public class BurodonEntity extends HETamableAnimal implements AttackStateMob, Ad
     }
 
     private boolean canHurtTarget(LivingEntity entity) {
-        return this.getAttackReachSqr(entity) >= this.distanceToSqr(entity);
+        return this.hasLineOfSight(entity) && this.getAttackReachSqr(entity) >= this.distanceToSqr(entity);
     }
 
     @Override

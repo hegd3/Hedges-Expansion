@@ -14,6 +14,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -43,7 +44,7 @@ public class GruinEntity extends HETamableAnimal implements AttackStateMob, Adva
     public final AnimationState idleAnimationState = new AnimationState();
     private int attackCD = 0;
 
-    public GruinEntity(EntityType<? extends TamableAnimal> pEntityType, Level pLevel) {
+    public GruinEntity(EntityType<? extends GruinEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.lookControl = new ATMLookControl<>(this);
         this.moveControl = new ATMMoveControl<>(this);
@@ -91,8 +92,14 @@ public class GruinEntity extends HETamableAnimal implements AttackStateMob, Adva
     }
 
     @Override
+    public boolean canFreeze() {
+        return false;
+    }
+
+    @Override
     public void tick() {
         super.tick();
+        this.yBodyRot = Mth.approachDegrees(yBodyRotO, this.yBodyRot, 10);
         if (this.level().isClientSide()) {
             this.setUpAnimStates();
         } else {

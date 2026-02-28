@@ -20,15 +20,23 @@ public class HECreativeTab {
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(HEItems.HYDROVSLER_CLAW.get());
                         output.accept(HEItems.BURODON_SPAWN_EGG.get());
-                        output.accept(HEItems.BEHEMOTH_SPAWN_EGG.get());
                         output.accept(HEItems.SPOTTED_STRIKER_SPAWN_EGG.get());
                         output.accept(HEItems.TRANSFIGURED_SPAWN_EGG.get());
                         output.accept(HEItems.GRUIN_SPAWN_EGG.get());
                         output.accept(HEItems.GURK_SPAWN_EGG.get());
-                        output.accept(HEItems.BERG_BREAKER_SPAWN_EGG.get());
                         output.accept(HEItems.MURK_SPAWN_EGG.get());
                         output.accept(HEItems.TEARACUDA_SPAWN_EGG.get());
                         output.accept(HEItems.SKARTLE_SPAWN_EGG.get());
+                        output.accept(HEItems.ZAPPET_SPAWN_EGG.get());
+                        output.accept(HEItems.GILD_GLIDER_SPAWN_EGG.get());
+                        output.accept(HEItems.SMARM_SPAWN_EGG.get());
+                        output.accept(HEItems.FEROCETUS_SPAWN_EGG.get());
+                        output.accept(HEItems.GLIM_SPAWN_EGG.get());
+
+
+
+                        output.accept(HEItems.GILD_GLIDER_BUCKET.get());
+                        output.accept(HEItems.SMARM_BUCKET.get());
 
                     }).build());
 

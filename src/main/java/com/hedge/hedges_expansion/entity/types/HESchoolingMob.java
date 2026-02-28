@@ -18,57 +18,65 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class HESchoolingMob extends HEAquaticMob {
+public class HESchoolingMob extends HEAquaticMob implements HEGroupMob<HESchoolingMob> {
     @Nullable
-    private HESchoolingMob leader;
+    protected HESchoolingMob leader;
     private int schoolSize = 1;
 
-    public HESchoolingMob(EntityType<? extends WaterAnimal> pEntityType, Level pLevel) {
+    public HESchoolingMob(EntityType<? extends HESchoolingMob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
     }
 
 
     public int getMaxSpawnClusterSize() {
-        return this.getMaxSchoolSize();
-    }
-
-    public int getMaxSchoolSize() {
-        return super.getMaxSpawnClusterSize();
+        return 1;
     }
 
     public boolean canRandomSwim() {
         return !this.isFollower();
     }
 
+    @Override
     public boolean isFollower() {
         return this.leader != null && this.leader.isAlive();
     }
 
+    @Override
     public HESchoolingMob getLeader() {
         return this.leader;
     }
 
+    @Override
+    public void setLeader(HESchoolingMob leader) {
+        this.leader = leader;
+    }
+
+    @Override
     public HESchoolingMob startFollowing(HESchoolingMob pLeader) {
         this.leader = pLeader;
         pLeader.addFollower();
         return pLeader;
     }
 
+    @Override
     public void stopFollowing() {
         this.leader.removeFollower();
         this.leader = null;
     }
 
-    private void addFollower() {
+    @Override
+    public void addFollower() {
         ++this.schoolSize;
     }
 
-    private void removeFollower() {
+    @Override
+    public void removeFollower() {
         --this.schoolSize;
     }
 
+    @Override
     public boolean canBeFollowed() {
-        return this.hasFollowers() && this.schoolSize < this.getMaxSchoolSize();
+        return this.hasFollowers() && this.schoolSize < this.getMaxGroupSize();
     }
 
 
@@ -87,43 +95,35 @@ public class HESchoolingMob extends HEAquaticMob {
         return this.schoolSize > 1;
     }
 
-    public boolean inRangeOfLeader() {
-        return this.distanceToSqr(this.leader) <= 200.0D;
+    @Override
+    public int getGroupSize() {
+        return this.schoolSize;
     }
 
+    @Override
+    public int getMaxGroupSize() {
+        return super.getMaxSpawnClusterSize();
+    }
+
+    @Override
+    public boolean inRangeOfLeader() {
+        return this.distanceToSqr(this.leader) <= 400.0D;
+    }
+
+    @Override
     public void pathToLeader() {
         if (this.isFollower()) {
-            Vec3 pos = this.leader.position().add(EntityHelpers.bodyAngle(this.leader).cross(EntityHelpers.UP).normalize().scale(4 * (this.getRandom().nextDouble()- this.getRandom().nextDouble())));
-            this.getNavigation().moveTo(pos.x, pos.y + 0.5, pos.z, 1.0f);
+            Vec3 pos = this.leader.position().add(0, 3 * this.getRandom().nextDouble() - 3 * this.getRandom().nextDouble(), 0);
+            this.getNavigation().moveTo(pos.x, pos.y, pos.z, 1.2f);
         }
-
     }
 
-    public void addFollowers(Stream<? extends HESchoolingMob> pFollowers) {
-        pFollowers.limit((long)(this.getMaxSchoolSize() - this.schoolSize)).filter((p_27538_) -> {
+    public void addFollowers(Stream<HESchoolingMob> pFollowers) {
+        pFollowers.limit((long)(this.getMaxGroupSize() - this.schoolSize)).filter((p_27538_) -> {
             return p_27538_ != this;
         }).forEach((p_27536_) -> {
             p_27536_.startFollowing(this);
         });
     }
 
-    @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
-        super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
-        if (pSpawnData == null) {
-            pSpawnData = new HESchoolingMob.SchoolSpawnGroupData(this);
-        } else {
-            this.startFollowing(((HESchoolingMob.SchoolSpawnGroupData)pSpawnData).leader);
-        }
-
-        return pSpawnData;
-    }
-
-    public static class SchoolSpawnGroupData implements SpawnGroupData {
-        public final HESchoolingMob leader;
-
-        public SchoolSpawnGroupData(HESchoolingMob pLeader) {
-            this.leader = pLeader;
-        }
-    }
 }

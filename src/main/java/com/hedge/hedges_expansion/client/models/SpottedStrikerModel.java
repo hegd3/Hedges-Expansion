@@ -130,14 +130,14 @@ public class SpottedStrikerModel extends HierarchicalModel<SpottedStrikerEntity>
 		netHeadYaw = Mth.clamp(netHeadYaw, -25.0F, 25.0F) * ((float) Math.PI / 180F);
 		headPitch = Mth.clamp(headPitch, -25.0F, 25.0F) * ((float) Math.PI / 180F);
 
-		this.swimcontrol.xRot = entity.isInFluidType()?  headPitch : 0;
 		this.gillsrot.yRot = netHeadYaw * 0.5f;
 		this.headrot.yRot = netHeadYaw;
 		this.tailrot.yRot = -(entity.tilt * (Mth.DEG_TO_RAD) / 1.5f);
 		this.tail2rot.yRot = -(entity.tilt * (Mth.DEG_TO_RAD) / 1.5f);
 
 		if (entity.isInFluidType()) {
-			this.animate(entity.idleAnimationState, SpottedStrikerAnimation.swim, ageInTicks, limbSwingAmount * 1.5f);
+			this.swimcontrol.xRot = headPitch;
+			this.animate(entity.idleAnimationState, SpottedStrikerAnimation.swim, ageInTicks, 0.1f + limbSwingAmount);
 		} else {
 			this.animate(entity.idleAnimationState, SpottedStrikerAnimation.flop, ageInTicks, 1f);
 		}

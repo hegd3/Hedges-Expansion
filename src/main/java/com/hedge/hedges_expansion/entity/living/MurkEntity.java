@@ -6,7 +6,9 @@ import com.hedge.hedges_expansion.entity.AI.control.ATMSwimLookControl;
 import com.hedge.hedges_expansion.entity.AI.control.ATMSwimMoveControl;
 import com.hedge.hedges_expansion.entity.AI.goal.HECustomSwimGoal;
 import com.hedge.hedges_expansion.entity.AI.goal.MurkAttackGoal;
+import com.hedge.hedges_expansion.entity.AI.navigation.HEAmphibiousPathNavigator;
 import com.hedge.hedges_expansion.entity.projectile.MurkSmoke;
+import com.hedge.hedges_expansion.entity.projectile.WaveEntity;
 import com.hedge.hedges_expansion.entity.types.HEAnimStateAnimal;
 import com.hedge.hedges_expansion.entity.util.AdvancedTurningMob;
 import com.hedge.hedges_expansion.entity.util.AttackHelpers;
@@ -17,6 +19,7 @@ import com.hedge.hedges_expansion.registry.HEParticles;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -63,10 +66,10 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
 
 
 
-    public MurkEntity(EntityType<? extends Animal> pEntityType, Level pLevel) {
+    public MurkEntity(EntityType<? extends MurkEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.moveControl = new ATMSemiaquaticMoveControl<>(this, 40, 0.3f);
-        this.lookControl = new ATMSwimLookControl<>(this, 2, 25);
+        this.lookControl = new ATMSwimLookControl<>(this, 30);
 
 
         this.setPathfindingMalus(BlockPathTypes.WATER, 0.0f);
@@ -118,7 +121,7 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                 return !this.mob.isInFluidType() && super.canContinueToUse();
             }
         });
-        this.goalSelector.addGoal(3, new HECustomSwimGoal(this, 1.0, 10, 8, 7, false));
+        this.goalSelector.addGoal(3, new HECustomSwimGoal(this, 1.0, 10, 4, 7, false));
         this.goalSelector.addGoal(2, new LookAtPlayerGoal(this, LivingEntity.class, 5));
         this.goalSelector.addGoal(1, new MurkAttackGoal(this));
 
@@ -157,7 +160,7 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
 
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
-        return new AmphibiousPathNavigation(this, pLevel);
+        return new HEAmphibiousPathNavigator(this, pLevel);
     }
 
     @Override
@@ -183,13 +186,16 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
             } else {
                 this.roarCD = Math.max(this.roarCD  - 1, 0);
             }
+            LivingEntity target = this.getTarget();
+            if (this.tickCount % 200 == 0 && target == null) {
+                this.heal(10);
+            }
             if (this.getAnimState() > 0) {
-                LivingEntity target = this.getTarget();
                 this.animTicks++;
                 switch (this.getAnimState()) {
                     case 1 -> {
                         if (this.animTicks == 10) {
-                            List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, EntityHelpers.bodyAngle(this).scale(1.5), 1.5, 1.5, 1.5, 3);
+                            List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, this.getLookAngle().scale(1.5), 1.5, 1.5, 1.5, 3);
                             for (LivingEntity entity : hit) {
                                 this.doHurtTarget(entity);
                             }
@@ -209,7 +215,7 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                                 MurkSmoke projectile = HEEntities.MURK_SMOKE.get().create(this.level());
                                 if (projectile != null) {
                                     projectile.setCharged(this.isCharged());
-                                    projectile.moveTo(this.position().add(0, 1.8, 0));
+                                    projectile.moveTo(this.position().add(0, 0.8 + this.getLookAngle().y, 0));
                                     projectile.shootFromRotation(this, this.getXRot(), this.getYRot() + i, 0.0f, 3, 0);
                                     this.level().addFreshEntity(projectile);
                                 }
@@ -226,7 +232,10 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                             this.getLookControl().setLookAt(target.position().add(0, 0.5, 0));
                         }
                         if (this.animTicks == 19) {
-                            EntityHelpers.aoeAttack(this, EntityHelpers.bodyAngle(this), 2, 2, 2, 2, 1.5f);
+                            List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, EntityHelpers.bodyAngle(this).scale(1.5), 2, 2, 2, 8);
+                            for (LivingEntity entity : hit) {
+                                AttackHelpers.betterHurt(this, entity, 1.5f, 1.4f);
+                            }
                         } else if (this.animTicks >= 39){
                             this.resetAnimState();
                         }
@@ -236,8 +245,9 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                         if (target != null) {
                             this.getLookControl().setLookAt(target.position().add(0, 0.5, 0));
                         }
-                        if (this.animTicks == 21) {
+                        if (this.animTicks == 23) {
                             this.setCharged(true);
+                            this.chargedExplode();
                             this.chargeTicks = 600;
                         } else if (this.animTicks >= 65) {
                             this.resetAnimState();
@@ -250,9 +260,14 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                             this.getLookControl().setLookAt(target.position().add(0, 0.5, 0));
                         } else if (this.animTicks == 20) {
                             Vec3 v = EntityHelpers.bodyAngle(this);
-                            this.setDeltaMovement(this.getDeltaMovement().add(v.scale(1.4)));
-                            EntityHelpers.aoeAttack(this, v, 3, 3, 3, 1.5f, 1.5f);
-
+                            this.addDeltaMovement(v.scale(0.8));
+                            if (this.isCharged()) {
+                                this.chargedExplode();
+                            }
+                            List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, v, 3, 3, 3, 8);
+                            for (LivingEntity entity : hit) {
+                                AttackHelpers.betterHurt(this, entity, 1.2f, 1.4f);
+                            }
                         } else if (this.animTicks >= 44) {
                             this.resetAnimState();
                         }
@@ -265,9 +280,14 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                         } else if ((this.animTicks >= 25)) {
                             this.animTicks = 0;
                             this.setAnimState(7);
+                            for (int i = -40; i <= 40; i+= 80) {
+                                WaveEntity entity = HEEntities.WAVE.get().create(this.level());
+                                entity.shoot(this, this.getYRot() + i);
+                                this.level().addFreshEntity(entity);
+                            }
                         } else if (this.animTicks >= 15 && this.animTicks % 5 == 0) {
                             Vec3 v = EntityHelpers.bodyAngle(this).scale(1.5);
-                            this.setDeltaMovement(this.getDeltaMovement().add(v));
+                            this.addDeltaMovement(v);
                         }
                     }
                     case 7 -> {
@@ -283,22 +303,28 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                             this.slideCount = 0;
                             this.slideCD = 200;
                         } else if (this.animTicks % 5 == 0) {
-                            Vec3 v = EntityHelpers.bodyAngle(this).scale(1.3);
-                            this.setDeltaMovement(this.getDeltaMovement().add(v));
-                            EntityHelpers.aoeAttack(this, v, 2, 2, 2, 0.7f, 1.5f);
+                            if (this.onGround()) {
+                                Vec3 v = EntityHelpers.bodyAngle(this).scale(1.3);
+                                this.setDeltaMovement(v);
+                                List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, v, 2, 2, 2, 5);
+                                for (LivingEntity entity : hit) {
+                                        AttackHelpers.betterHurt(this, entity, 0.8f, 1.4f);
+                                }
+
+                            }
                         }
                     }
                     case 8 -> {
                         this.getNavigation().stop();
                         if (this.animTicks < 10 && target != null) {
-                            this.getLookControl().setLookAt(target.position().add(0, 1, 0));
+                            this.getLookControl().setLookAt(target.position().add(0, 0.5, 0));
                         }
                         else if (this.animTicks >= 16 && this.animTicks <= 24 && this.animTicks % 2 == 0) {
                             MurkSmoke projectile = HEEntities.MURK_SMOKE.get().create(this.level());
                             if (projectile != null) {
                                 projectile.setCharged(this.isCharged());
                                 Vec3 v = EntityHelpers.bodyAngle(this).cross(EntityHelpers.UP).scale(this.projectileRot * 0.1);
-                                projectile.moveTo(this.position().add(v.x, 0.5, v.z));
+                                projectile.moveTo(this.position().add(v.x, 0.5 + this.getLookAngle().y, v.z));
                                 projectile.shootFromRotation(this, this.getXRot(), this.getYRot() + this.projectileRot, 0.0f, 3, 0);
                                 this.level().addFreshEntity(projectile);
                                 this.projectileRot += this.swingingLeft() ? 5 : -5;
@@ -311,6 +337,20 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private void chargedExplode() {
+        ((ServerLevel) this.level()).sendParticles(HEParticles.MURK_EXPLODE.get(),
+                this.getX(), this.getY(), this.getZ(), 1, 0, 0, 0, 0);
+        for (int i = -180; i <= 180; i+=60) {
+            MurkSmoke projectile = HEEntities.MURK_SMOKE.get().create(this.level());
+            if (projectile != null) {
+                projectile.setCharged(true);
+                projectile.moveTo(this.position().add(0, 0.4, 0));
+                projectile.shootFromRotation(this, 0, this.getYRot() + i, 0.0f, 3, 0);
+                this.level().addFreshEntity(projectile);
             }
         }
     }
@@ -446,7 +486,8 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
     @Override
     public boolean shouldTurnWholeBody() {
         return switch (this.getAnimState()) {
-            case 2, 5 -> true;
+            case 1 -> this.animTicks < 2;
+            case 5 -> true;
             default -> false;
         };
     }
@@ -454,7 +495,7 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
     @Override
     public boolean shouldLockAngle() {
         return switch(this.getAnimState()) {
-            case 5, 6 -> this.getAnimTicks() > 15;
+            case 5, 6 -> this.animTicks > 15;
             case 7 -> true;
             default -> false;
         };
@@ -471,9 +512,8 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
     @Override
     public float getTurnSpeed() {
         return switch (this.getAnimState()) {
-            case 1 -> 35;
-            case 2, 5, 6 -> 45;
-            default -> this.isInFluidType() ? 5 : 25;
+            case 1, 2, 5, 6 -> 45;
+            default -> this.isInFluidType() ? 5 : 10;
         };
     }
 
