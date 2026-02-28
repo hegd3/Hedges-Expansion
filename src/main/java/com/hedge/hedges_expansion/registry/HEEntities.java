@@ -5,7 +5,7 @@ import com.hedge.hedges_expansion.entity.living.*;
 import com.hedge.hedges_expansion.entity.living.ambientfish.GildGliderEntity;
 import com.hedge.hedges_expansion.entity.living.ambientfish.GlimEntity;
 import com.hedge.hedges_expansion.entity.living.ambientfish.SmarmEntity;
-import com.hedge.hedges_expansion.entity.projectile.CorrosiveSpit;
+import com.hedge.hedges_expansion.entity.living.ambientfish.SpeelEntity;
 import com.hedge.hedges_expansion.entity.projectile.MurkSmoke;
 import com.hedge.hedges_expansion.entity.projectile.WaveEntity;
 import net.minecraft.world.entity.EntityType;
@@ -26,11 +26,7 @@ public class HEEntities {
 
     public static final RegistryObject<EntityType<SpottedStrikerEntity>> SPOTTED_STRIKER =
             ENTITY_TYPES.register("spotted_striker", () -> EntityType.Builder.of(SpottedStrikerEntity::new, MobCategory.WATER_CREATURE)
-                    .sized(1.3f, 1.2f).build("spotted_striker"));
-
-    public static final RegistryObject<EntityType<TransfiguredEntity>> TRANSFIGURED =
-            ENTITY_TYPES.register("transfigured", () -> EntityType.Builder.of(TransfiguredEntity::new, MobCategory.MONSTER)
-                    .sized(1.7f, 3.8f).build("transfigured"));
+                    .sized(1.6f, 1.37f).build("spotted_striker"));
 
     public static final RegistryObject<EntityType<GruinEntity>> GRUIN =
             ENTITY_TYPES.register("gruin", () -> EntityType.Builder.of(GruinEntity::new, MobCategory.CREATURE)
@@ -52,14 +48,6 @@ public class HEEntities {
             ENTITY_TYPES.register("tearacuda", () -> EntityType.Builder.of(TearacudaEntity::new, MobCategory.WATER_CREATURE)
                     .sized(1.3f, 1f).build("tearacuda"));
 
-    public static final RegistryObject<EntityType<SkartleEntity>> SKARTLE =
-            ENTITY_TYPES.register("skartle", () -> EntityType.Builder.of(SkartleEntity::new, MobCategory.CREATURE)
-                    .sized(1.7f, 2.3f).build("skartle"));
-
-    public static final RegistryObject<EntityType<CorrosiveSpit>> CORROSIVE_SPIT =
-            ENTITY_TYPES.register("corrosive_spit", () -> EntityType.Builder.of(CorrosiveSpit::new, MobCategory.MISC)
-                    .sized(0.5f, 0.5f).build("corrosive_spit"));
-
     public static final RegistryObject<EntityType<ZappetEntity>> ZAPPET =
             ENTITY_TYPES.register("zappet", () -> EntityType.Builder.of(ZappetEntity::new, MobCategory.CREATURE)
                     .sized(0.8f, 1.3f).build("zappet"));
@@ -70,8 +58,7 @@ public class HEEntities {
 
     public static final RegistryObject<EntityType<SmarmEntity>> SMARM =
             ENTITY_TYPES.register("smarm", () -> EntityType.Builder.of(SmarmEntity::new, MobCategory.WATER_CREATURE)
-                    .sized(0.6f, 0.14f).build("smarm"));
-
+                    .sized(0.6f, 0.375f).build("smarm"));
 
     public static final RegistryObject<EntityType<FerocetusEntity>> FEROCETUS =
             ENTITY_TYPES.register("ferocetus", () -> EntityType.Builder.of(FerocetusEntity::new, MobCategory.WATER_CREATURE)
@@ -84,6 +71,15 @@ public class HEEntities {
     public static final RegistryObject<EntityType<GlimEntity>> GLIM =
             ENTITY_TYPES.register("glim", () -> EntityType.Builder.of(GlimEntity::new, MobCategory.WATER_CREATURE)
                     .sized(0.625f, 0.375f).build("glim"));
+
+    public static final RegistryObject<EntityType<GraffEntity>> GRAFF =
+            ENTITY_TYPES.register("graff", () -> EntityType.Builder.of(GraffEntity::new, MobCategory.CREATURE)
+                    .sized(1.2f, 3.9f).build("graff"));
+
+    public static final RegistryObject<EntityType<SpeelEntity>> SPEEL =
+            ENTITY_TYPES.register("speel", () -> EntityType.Builder.of(SpeelEntity::new, MobCategory.WATER_CREATURE)
+                    .sized(0.8f, 0.375f).build("speel"));
+
 
     public static void register(IEventBus eventbus) {
         ENTITY_TYPES.register(eventbus);

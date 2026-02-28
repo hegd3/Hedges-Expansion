@@ -1,8 +1,7 @@
 package com.hedge.hedges_expansion.entity.AI.control;
 
-import com.hedge.hedges_expansion.entity.util.AdvancedTurningMob;
+import com.hedge.hedges_expansion.entity.types.AdvancedTurningMob;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
 
 public class ATMSwimLookControl<E extends Mob & AdvancedTurningMob> extends HESemiaquaticLookControl {
     private final E entity;

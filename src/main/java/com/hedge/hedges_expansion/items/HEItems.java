@@ -55,6 +55,10 @@ public class HEItems {
 
     public static final RegistryObject<Item> GLIM_SPAWN_EGG = createEgg("glim", HEEntities.GLIM, 0x252329, 0xBD9E73);
 
+    public static final RegistryObject<Item> GRAFF_SPAWN_EGG = createEgg("graff", HEEntities.GRAFF, 0xAB776A, 0x88A4BA);
+
+    public static final RegistryObject<Item> SPEEL_SPAWN_EGG = createEgg("speel", HEEntities.SPEEL, 0x467599, 0xB8C6D1);
+
 
     public static final RegistryObject<Item> GILD_GLIDER_BUCKET = createBucket("gild_glider", HEEntities.GILD_GLIDER);
 

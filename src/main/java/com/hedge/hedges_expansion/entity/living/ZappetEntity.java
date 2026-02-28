@@ -65,7 +65,8 @@ public class ZappetEntity extends HEAnimStateAnimal implements HESemiFlyer, HEGr
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(6, new RandomStrollGoal(this, 1.0));
-        this.goalSelector.addGoal(5, new SemiFlyerCircleWanderGoal<>(this, 20, 100, 6, 6, 12, 30));
+        //this.goalSelector.addGoal(5, new SemiFlyerCircleWanderGoal<>(this, 20, 100, 6, 6, 12, 30));
+        this.goalSelector.addGoal(5, new SemiFlyerFlyingGoal<>(this, 100, 8, 8, 20, 10));
         this.goalSelector.addGoal(4, new GroupFollowLeaderGoal<>(this) {
             @Override
             public void tick() {

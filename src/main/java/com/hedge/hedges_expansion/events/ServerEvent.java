@@ -9,6 +9,7 @@ import com.hedge.hedges_expansion.entity.living.*;
 import com.hedge.hedges_expansion.entity.living.ambientfish.GildGliderEntity;
 import com.hedge.hedges_expansion.entity.living.ambientfish.GlimEntity;
 import com.hedge.hedges_expansion.entity.living.ambientfish.SmarmEntity;
+import com.hedge.hedges_expansion.entity.living.ambientfish.SpeelEntity;
 import com.hedge.hedges_expansion.registry.HEEntities;
 import com.hedge.hedges_expansion.registry.HEParticles;
 import net.minecraft.world.entity.SpawnPlacements;
@@ -27,17 +28,17 @@ public class ServerEvent {
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(HEEntities.BURODON.get(), BurodonEntity.bakeAttributes().build());
         event.put(HEEntities.SPOTTED_STRIKER.get(), SpottedStrikerEntity.bakeAttributes().build());
-        event.put(HEEntities.TRANSFIGURED.get(), TransfiguredEntity.bakeAttributes().build());
         event.put(HEEntities.GRUIN.get(), GruinEntity.bakeAttributes().build());
         event.put(HEEntities.GURK.get(), GurkEntity.bakeAttributes().build());
         event.put(HEEntities.MURK.get(), MurkEntity.bakeAttributes().build());
         event.put(HEEntities.TEARACUDA.get(), TearacudaEntity.bakeAttributes().build());
-        event.put(HEEntities.SKARTLE.get(), SkartleEntity.bakeAttributes().build());
         event.put(HEEntities.ZAPPET.get(), ZappetEntity.bakeAttributes().build());
         event.put(HEEntities.GILD_GLIDER.get(), GildGliderEntity.bakeAttributes().build());
         event.put(HEEntities.SMARM.get(), SmarmEntity.bakeAttributes().build());
         event.put(HEEntities.FEROCETUS.get(), FerocetusEntity.bakeAttributes().build());
         event.put(HEEntities.GLIM.get(), GlimEntity.bakeAttributes().build());
+        event.put(HEEntities.GRAFF.get(), GraffEntity.bakeAttributes().build());
+        event.put(HEEntities.SPEEL.get(), SpeelEntity.bakeAttributes().build());
 
     }
 
@@ -48,6 +49,7 @@ public class ServerEvent {
         event.register(HEEntities.TEARACUDA.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, TearacudaEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.OR);
         event.register(HEEntities.FEROCETUS.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, FerocetusEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.OR);
         event.register(HEEntities.GLIM.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, GlimEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.OR);
+        event.register(HEEntities.SPEEL.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, SpeelEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.OR);
 
     }
 
@@ -56,9 +58,9 @@ public class ServerEvent {
     public static void registerParticleFactories(RegisterParticleProvidersEvent event) {
         event.registerSpriteSet(HEParticles.MURK_CHARGE.get(), MurkChargeParticle.Provider::new);
         event.registerSpriteSet(HEParticles.MURK_CHARGE_SHOOT.get(), ProjectileTrailParticle.MurkChargeShotProvider::new);
-        event.registerSpriteSet(HEParticles.SMOKE.get(), SmokeParticle.Provider::new);
-        event.registerSpriteSet(HEParticles.CORROSIVE_SPIT.get(), ProjectileTrailParticle.CorrosiveSpitProvider::new);
         event.registerSpriteSet(HEParticles.MURK_EXPLODE.get(), DynamicExplosionParticle.MurkExplosionProvider::new);
+
+        event.registerSpriteSet(HEParticles.SMOKE.get(), SmokeParticle.Provider::new);
 
     }
 }

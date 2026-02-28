@@ -32,6 +32,8 @@ public class HECreativeTab {
                         output.accept(HEItems.SMARM_SPAWN_EGG.get());
                         output.accept(HEItems.FEROCETUS_SPAWN_EGG.get());
                         output.accept(HEItems.GLIM_SPAWN_EGG.get());
+                        output.accept(HEItems.GRAFF_SPAWN_EGG.get());
+                        output.accept(HEItems.SPEEL_SPAWN_EGG.get());
 
 
 

@@ -1,6 +1,6 @@
 package com.hedge.hedges_expansion.entity.AI.control;
 
-import com.hedge.hedges_expansion.entity.util.AdvancedTurningMob;
+import com.hedge.hedges_expansion.entity.types.AdvancedTurningMob;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;

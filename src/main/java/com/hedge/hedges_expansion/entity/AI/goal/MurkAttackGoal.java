@@ -61,7 +61,8 @@ public class MurkAttackGoal extends GenericMeleeGoal<MurkEntity>{
             } else if (this.attackReach < this.dist) {
                 super.tickPath(livingentity);
             } else {
-                this.mob.getLookControl().setLookAt(livingentity);
+                this.mob.lookAt(livingentity, 30f, 30f);
+                this.mob.getLookControl().setLookAt(livingentity, 30f, 30f);
             }
         }
     }

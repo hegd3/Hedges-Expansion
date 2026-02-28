@@ -9,7 +9,7 @@ import com.hedge.hedges_expansion.entity.AI.navigation.FluidPathNavigation;
 import com.hedge.hedges_expansion.entity.types.HEBucketableSchoolingMob;
 import com.hedge.hedges_expansion.entity.types.HESchoolingMob;
 import com.hedge.hedges_expansion.entity.util.AttackHelpers;
-import com.hedge.hedges_expansion.entity.util.AttackStateMob;
+import com.hedge.hedges_expansion.entity.types.AttackStateMob;
 import com.hedge.hedges_expansion.entity.util.EntityHelpers;
 import com.hedge.hedges_expansion.registry.HEEntities;
 import net.minecraft.core.BlockPos;
@@ -46,10 +46,13 @@ public class TearacudaEntity extends HESchoolingMob implements AttackStateMob {
     private int jumpCD = 0;
     public int groundTimer = 0;
 
+    private float prevTrail;
+    private float trail = 0.0f;
+
     public TearacudaEntity(EntityType<? extends TearacudaEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        this.moveControl = new HESwimmingMoveControl(this, 999, 6, 0.02f, 0.1f);
-        this.lookControl = new SmoothSwimmingLookControl(this, 6);
+        this.moveControl = new HESwimmingMoveControl(this, 999, 10, 0.02f, 0.1f);
+        this.lookControl = new SmoothSwimmingLookControl(this, 10);
     }
 
     public static AttributeSupplier.Builder bakeAttributes(){
@@ -59,14 +62,14 @@ public class TearacudaEntity extends HESchoolingMob implements AttackStateMob {
                 .add(Attributes.ATTACK_KNOCKBACK, 0.2D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.3)
                 .add(Attributes.FOLLOW_RANGE, 35F)
-                .add(Attributes.MOVEMENT_SPEED, 2F);
+                .add(Attributes.MOVEMENT_SPEED, 1.8F);
     }
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(2, new HECustomSwimGoal(this, 1.0f, 10, 6, 5, true));
-        this.goalSelector.addGoal(4, new GroupFollowLeaderGoal<>(this));
         this.goalSelector.addGoal(0, new TearacudaAttackGoal(this));
+        this.goalSelector.addGoal(1, new HECustomSwimGoal(this, 1.0f, 10, 6, 5, true));
+        this.goalSelector.addGoal(2, new GroupFollowLeaderGoal<>(this));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, HEBucketableSchoolingMob.class, true));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
         this.targetSelector.addGoal(0, new HurtByTargetGoal(this).setAlertOthers());
@@ -80,6 +83,18 @@ public class TearacudaEntity extends HESchoolingMob implements AttackStateMob {
         } else {
             this.groundTimer = Math.max(groundTimer - 1, 0);
         }
+        this.tickTrailYaw();
+
+    }
+
+
+    private void tickTrailYaw() {
+        this.prevTrail = this.trail;
+        this.trail += (-(this.yBodyRot - this.yBodyRotO) - this.trail) * 0.15F;
+    }
+
+    public float getTrailYaw(float partialTick) {
+        return (this.prevTrail + (this.trail - this.prevTrail) * partialTick);
     }
 
     @Override
@@ -163,6 +178,14 @@ public class TearacudaEntity extends HESchoolingMob implements AttackStateMob {
             return true;
         }
         return super.isAlliedTo(pEntity);
+    }
+
+    @Override
+    public void pathToLeader() {
+        if (this.isFollower()) {
+            Vec3 pos = this.leader.position().add(0, 5 * this.getRandom().nextDouble() - 5 * this.getRandom().nextDouble(), 0);
+            this.getNavigation().moveTo(pos.x, pos.y, pos.z, 1.2f);
+        }
     }
 
     @Override

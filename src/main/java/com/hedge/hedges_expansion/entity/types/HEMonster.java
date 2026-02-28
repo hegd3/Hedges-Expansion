@@ -1,7 +1,5 @@
 package com.hedge.hedges_expansion.entity.types;
 
-import com.hedge.hedges_expansion.entity.util.AnimStateMob;
-import com.hedge.hedges_expansion.entity.util.AttackStateMob;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;

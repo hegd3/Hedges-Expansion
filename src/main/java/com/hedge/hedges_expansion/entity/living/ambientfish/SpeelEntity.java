@@ -3,9 +3,10 @@ package com.hedge.hedges_expansion.entity.living.ambientfish;
 import com.hedge.hedges_expansion.entity.AI.control.HESwimmingMoveControl;
 import com.hedge.hedges_expansion.entity.AI.goal.GroupFollowLeaderGoal;
 import com.hedge.hedges_expansion.entity.AI.goal.HECustomSwimGoal;
-import com.hedge.hedges_expansion.entity.living.FerocetusEntity;
+import com.hedge.hedges_expansion.entity.living.TearacudaEntity;
 import com.hedge.hedges_expansion.entity.types.HESchoolingMob;
 import com.hedge.hedges_expansion.entity.util.EntityHelpers;
+import com.hedge.hedges_expansion.items.HEItems;
 import com.hedge.hedges_expansion.registry.HEEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -23,6 +24,7 @@ import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -30,32 +32,49 @@ import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 
-public class GlimEntity extends HESchoolingMob {
+public class SpeelEntity extends HESchoolingMob {
 
-    public GlimEntity(EntityType<? extends GlimEntity> pEntityType, Level pLevel) {
+    private float prevTrail;
+    private float trail = 0.0f;
+
+    public SpeelEntity(EntityType<? extends SpeelEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        this.moveControl = new HESwimmingMoveControl(this, 999, 20, 0.02f, 0.1f);
+        this.moveControl = new HESwimmingMoveControl(this, 999, 15, 0.02f, 0.1f);
         this.lookControl = new SmoothSwimmingLookControl(this, 20);
     }
 
     public static AttributeSupplier.Builder bakeAttributes() {
         return Animal.createLivingAttributes()
-                .add(Attributes.MAX_HEALTH, 6.0D)
+                .add(Attributes.MAX_HEALTH, 4.0D)
                 .add(Attributes.FOLLOW_RANGE, 20)
-                .add(Attributes.MOVEMENT_SPEED, 0.95F);
+                .add(Attributes.MOVEMENT_SPEED, 0.9F);
+    }
+
+    private void tickTrailYaw() {
+        this.prevTrail = this.trail;
+        this.trail += (-(this.yBodyRot - this.yBodyRotO) - this.trail) * 0.15F;
+    }
+
+    public float getTrailYaw(float partialTick) {
+        return (this.prevTrail + (this.trail - this.prevTrail) * partialTick);
+    }
+
+    @Override
+    protected void clientTick() {
+        super.clientTick();
+        this.tickTrailYaw();
     }
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(1, new HECustomSwimGoal(this, 1.0f, 10, 6, 10, false));
-        this.goalSelector.addGoal(2, new AvoidEntityGoal<>(this, FerocetusEntity.class, 10, 1.4f, 1.4f));
-        this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, Player.class, 6, 1.4f, 1.4f));
-        this.goalSelector.addGoal(4, new GroupFollowLeaderGoal<>(this));
+        this.goalSelector.addGoal(1, new HECustomSwimGoal(this, 1.0f, 10, 6, 10, true));
+        this.goalSelector.addGoal(2, new AvoidEntityGoal<>(this, Player.class, 6, 1.4f, 1.4f));
+        this.goalSelector.addGoal(3, new GroupFollowLeaderGoal<>(this));
     }
 
     @Override
     public int getMaxGroupSize() {
-        return 25;
+        return 8;
     }
 
     @Override
@@ -64,27 +83,24 @@ public class GlimEntity extends HESchoolingMob {
         super.aiStep();
     }
 
-
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
         return new WaterBoundPathNavigation(this, pLevel);
     }
 
-    public static boolean canSpawn(EntityType<GlimEntity> entity, LevelAccessor level, MobSpawnType reason, BlockPos pos, RandomSource random) {
+
+    public static boolean canSpawn(EntityType<SpeelEntity> entity, LevelAccessor level, MobSpawnType reason, BlockPos pos, RandomSource random) {
         return WaterAnimal.checkSurfaceWaterAnimalSpawnRules(entity, level, reason, pos, random);
     }
 
-
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
-
-
         if ((pReason == MobSpawnType.CHUNK_GENERATION || pReason == MobSpawnType.NATURAL)) {
             int groupSize = (int) (this.getMaxGroupSize() * this.getRandom().nextFloat());
             if (groupSize > 0 && !this.level().isClientSide()) {
                 for (int i = 0; i < groupSize; i++) {
                     Vec3 rand = EntityHelpers.getRandomVec3(4);
-                    GlimEntity entity = new GlimEntity(HEEntities.GLIM.get(), this.level());
+                    SpeelEntity entity = new SpeelEntity(HEEntities.SPEEL.get(), this.level());
                     entity.moveTo(this.getX() + rand.x, this.getY() + rand.y, this.getZ() + rand.z);
                     entity.startFollowing(this);
                     this.level().addFreshEntity(entity);
@@ -95,7 +111,5 @@ public class GlimEntity extends HESchoolingMob {
         return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
 
     }
-
-
 
 }

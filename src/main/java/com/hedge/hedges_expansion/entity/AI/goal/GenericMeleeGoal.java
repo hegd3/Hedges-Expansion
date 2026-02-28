@@ -1,6 +1,6 @@
 package com.hedge.hedges_expansion.entity.AI.goal;
 
-import com.hedge.hedges_expansion.entity.util.AttackStateMob;
+import com.hedge.hedges_expansion.entity.types.AttackStateMob;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
@@ -98,7 +98,8 @@ public class GenericMeleeGoal<T extends PathfinderMob & AttackStateMob> extends 
             if (this.attackReach < this.dist) {
                 this.tickPath(livingentity);
             } else {
-                this.mob.getLookControl().setLookAt(livingentity);
+                this.mob.lookAt(livingentity, 30f, 30f);
+                this.mob.getLookControl().setLookAt(livingentity, 30f, 30f);
             }
         }
 
@@ -110,7 +111,8 @@ public class GenericMeleeGoal<T extends PathfinderMob & AttackStateMob> extends 
 
     protected void tickPath(LivingEntity livingentity) {
         if (this.shouldLookAt()) {
-            this.mob.getLookControl().setLookAt(livingentity);
+            this.mob.lookAt(livingentity, 30f, 30f);
+            this.mob.getLookControl().setLookAt(livingentity, 30f, 30f);
         }
         double d0 = this.mob.getPerceivedTargetDistanceSquareForMeleeAttack(livingentity);
         this.ticksUntilNextPathRecalculation = Math.max(this.ticksUntilNextPathRecalculation - 1, 0);

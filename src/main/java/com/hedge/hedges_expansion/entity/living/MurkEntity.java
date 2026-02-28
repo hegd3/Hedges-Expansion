@@ -3,19 +3,20 @@ package com.hedge.hedges_expansion.entity.living;
 import com.hedge.hedges_expansion.entity.AI.control.ATMBodyRotControl;
 import com.hedge.hedges_expansion.entity.AI.control.ATMSemiaquaticMoveControl;
 import com.hedge.hedges_expansion.entity.AI.control.ATMSwimLookControl;
-import com.hedge.hedges_expansion.entity.AI.control.ATMSwimMoveControl;
 import com.hedge.hedges_expansion.entity.AI.goal.HECustomSwimGoal;
 import com.hedge.hedges_expansion.entity.AI.goal.MurkAttackGoal;
 import com.hedge.hedges_expansion.entity.AI.navigation.HEAmphibiousPathNavigator;
 import com.hedge.hedges_expansion.entity.projectile.MurkSmoke;
 import com.hedge.hedges_expansion.entity.projectile.WaveEntity;
 import com.hedge.hedges_expansion.entity.types.HEAnimStateAnimal;
-import com.hedge.hedges_expansion.entity.util.AdvancedTurningMob;
+import com.hedge.hedges_expansion.entity.types.AdvancedTurningMob;
 import com.hedge.hedges_expansion.entity.util.AttackHelpers;
-import com.hedge.hedges_expansion.entity.util.AttackStateMob;
+import com.hedge.hedges_expansion.entity.types.AttackStateMob;
 import com.hedge.hedges_expansion.entity.util.EntityHelpers;
 import com.hedge.hedges_expansion.registry.HEEntities;
 import com.hedge.hedges_expansion.registry.HEParticles;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -31,7 +32,6 @@ import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.Level;
@@ -64,6 +64,8 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
     private int slideCD = 0;
     private int projectileRot = 0;
 
+    private float prevTrail;
+    private float trail = 0.0f;
 
 
     public MurkEntity(EntityType<? extends MurkEntity> pEntityType, Level pLevel) {
@@ -172,7 +174,27 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                 Vec3 rand = EntityHelpers.getRandomVec3(1.2);
                 this.level().addParticle(HEParticles.MURK_CHARGE.get(), this.getX() + rand.x + rand.x,
                         this.getY() + rand.y + 0.5, this.getZ() + rand.z, rand.x, rand.y + 0.2, rand.z);
+                if (this.getAnimState() == 7) {
+                    Vec3 vec3 = this.getViewVector(0.0F);
+                    float f = Mth.cos(this.getYRot() * ((float)Math.PI / 180F)) * 0.3F;
+                    float f1 = Mth.sin(this.getYRot() * ((float)Math.PI / 180F)) * 0.3F;
+                    float f2 = 4F - this.random.nextFloat() * 1.5F;
+
+                    this.level().addParticle(HEParticles.MURK_CHARGE_SHOOT.get(), this.getX() - vec3.x * (double)f2 + (double)f, this.getY() - vec3.y, this.getZ() - vec3.z * (double)f2 + (double)f1, 0.0D, 0.0D, 0.0D);
+                    this.level().addParticle(HEParticles.MURK_CHARGE_SHOOT.get(), this.getX() - vec3.x * (double)f2 - (double)f, this.getY() - vec3.y, this.getZ() - vec3.z * (double)f2 - (double)f1, 0.0D, 0.0D, 0.0D);
+                }
+            } else {
+                if (this.getAnimState() == 7) {
+                    Vec3 vec3 = this.getViewVector(0.0F);
+                    float f = Mth.cos(this.getYRot() * ((float)Math.PI / 180F)) * 0.3F;
+                    float f1 = Mth.sin(this.getYRot() * ((float)Math.PI / 180F)) * 0.3F;
+                    float f2 = 4F - this.random.nextFloat() * 1.5F;
+
+                    this.level().addParticle(ParticleTypes.BUBBLE_POP, this.getX() - vec3.x * (double)f2 + (double)f, this.getY() - vec3.y, this.getZ() - vec3.z * (double)f2 + (double)f1, 0.0D, 0.0D, 0.0D);
+                    this.level().addParticle(ParticleTypes.BUBBLE_POP, this.getX() - vec3.x * (double)f2 - (double)f, this.getY() - vec3.y, this.getZ() - vec3.z * (double)f2 - (double)f1, 0.0D, 0.0D, 0.0D);
+                }
             }
+            this.tickTrailYaw();
 
         } else {
             this.attackCD = Math.max(this.attackCD - 1, 0);
@@ -208,7 +230,9 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                             this.getNavigation().stop();
                         }
                         if (this.animTicks < 8 && target != null) {
-                            this.getLookControl().setLookAt(target.position().add(0, 0.5, 0));
+                            Vec3 v = target.position().add(0, 0.5, 0);
+                            this.lookAt(EntityAnchorArgument.Anchor.EYES, v);
+                            this.getLookControl().setLookAt(v);
                         }
                         else if (this.animTicks == 15) {
                             for (int i = -5; i <= 5; i+=5) {
@@ -229,7 +253,9 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                     case 3 -> {
                         this.getNavigation().stop();
                         if (target != null) {
-                            this.getLookControl().setLookAt(target.position().add(0, 0.5, 0));
+                            Vec3 v = target.position().add(0, 0.5, 0);
+                            this.lookAt(EntityAnchorArgument.Anchor.EYES, v);
+                            this.getLookControl().setLookAt(v);
                         }
                         if (this.animTicks == 19) {
                             List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, EntityHelpers.bodyAngle(this).scale(1.5), 2, 2, 2, 8);
@@ -242,22 +268,25 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                     }
                     case 4 -> {
                         this.getNavigation().stop();
-                        if (target != null) {
-                            this.getLookControl().setLookAt(target.position().add(0, 0.5, 0));
-                        }
                         if (this.animTicks == 23) {
                             this.setCharged(true);
                             this.chargedExplode();
                             this.chargeTicks = 600;
-                        } else if (this.animTicks >= 65) {
+                        }
+                        else if (this.animTicks >= 65) {
                             this.resetAnimState();
                             this.roarCD = 340;
+                        }
+                        if (target != null) {
+                            this.getLookControl().setLookAt(target.position().add(0, 0.5, 0));
                         }
                     }
                     case 5 -> {
                         this.getNavigation().stop();
                         if (this.animTicks < 15 && target != null) {
-                            this.getLookControl().setLookAt(target.position().add(0, 0.5, 0));
+                            Vec3 v = target.position().add(0, 0.5, 0);
+                            this.lookAt(EntityAnchorArgument.Anchor.EYES, v);
+                            this.getLookControl().setLookAt(v);
                         } else if (this.animTicks == 20) {
                             Vec3 v = EntityHelpers.bodyAngle(this);
                             this.addDeltaMovement(v.scale(0.8));
@@ -276,14 +305,17 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                     case 6 -> {
                         this.getNavigation().stop();
                         if (this.animTicks < 15 && target != null) {
-                            this.getLookControl().setLookAt(target.position().add(0, 0.5, 0));
+                            Vec3 v = target.position().add(0, 0.5, 0);
+                            this.lookAt(EntityAnchorArgument.Anchor.EYES, v);
+                            this.getLookControl().setLookAt(v);
                         } else if ((this.animTicks >= 25)) {
                             this.animTicks = 0;
                             this.setAnimState(7);
-                            for (int i = -40; i <= 40; i+= 80) {
-                                WaveEntity entity = HEEntities.WAVE.get().create(this.level());
-                                entity.shoot(this, this.getYRot() + i);
-                                this.level().addFreshEntity(entity);
+                            for (int i = -60; i < 0; i+= 20) {
+                                this.createWave(i);
+                            }
+                            for (int i = 20; i <= 60; i+= 20) {
+                                this.createWave(i);
                             }
                         } else if (this.animTicks >= 15 && this.animTicks % 5 == 0) {
                             Vec3 v = EntityHelpers.bodyAngle(this).scale(1.5);
@@ -317,7 +349,9 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                     case 8 -> {
                         this.getNavigation().stop();
                         if (this.animTicks < 10 && target != null) {
-                            this.getLookControl().setLookAt(target.position().add(0, 0.5, 0));
+                            Vec3 v = target.position().add(0, 0.5, 0);
+                            this.lookAt(EntityAnchorArgument.Anchor.EYES, v);
+                            this.getLookControl().setLookAt(v);
                         }
                         else if (this.animTicks >= 16 && this.animTicks <= 24 && this.animTicks % 2 == 0) {
                             MurkSmoke projectile = HEEntities.MURK_SMOKE.get().create(this.level());
@@ -341,10 +375,26 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
         }
     }
 
+    private void tickTrailYaw() {
+        this.prevTrail = this.trail;
+        this.trail += (-(this.yBodyRot - this.yBodyRotO) - this.trail) * 0.15F;
+    }
+
+    public float getTrailYaw(float partialTick) {
+        return (this.prevTrail + (this.trail - this.prevTrail) * partialTick);
+    }
+
+    private void createWave(int i) {
+        WaveEntity entity = HEEntities.WAVE.get().create(this.level());
+        entity.shoot(this, this.getYRot() + i);
+        this.level().addFreshEntity(entity);
+    }
+
     private void chargedExplode() {
         ((ServerLevel) this.level()).sendParticles(HEParticles.MURK_EXPLODE.get(),
                 this.getX(), this.getY(), this.getZ(), 1, 0, 0, 0, 0);
-        for (int i = -180; i <= 180; i+=60) {
+
+        for (int i = -180; i <= 180; i += 60) {
             MurkSmoke projectile = HEEntities.MURK_SMOKE.get().create(this.level());
             if (projectile != null) {
                 projectile.setCharged(true);

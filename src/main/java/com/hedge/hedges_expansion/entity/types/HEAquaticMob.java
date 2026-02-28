@@ -1,18 +1,14 @@
 package com.hedge.hedges_expansion.entity.types;
 
-import com.hedge.hedges_expansion.entity.util.AnimStateMob;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
@@ -20,7 +16,6 @@ public class HEAquaticMob extends WaterAnimal implements AnimStateMob {
 
     private static final EntityDataAccessor<Integer> ANIM_STATE = SynchedEntityData.defineId(HEAquaticMob.class, EntityDataSerializers.INT);
 
-    public final AnimationState abilityAnimationState = new AnimationState();
     public final AnimationState idleAnimationState = new AnimationState();
     protected int animTicks;
 
@@ -129,7 +124,6 @@ public class HEAquaticMob extends WaterAnimal implements AnimStateMob {
     public void setUpAnimStates() {
         this.idleAnimationState.animateWhen(this.isAlive(), this.tickCount);
 
-        this.abilityAnimationState.animateWhen(this.getAnimState() > 0, this.tickCount);
     }
 
     public void resetAnimState() {

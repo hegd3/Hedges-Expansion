@@ -36,13 +36,13 @@ public class SmarmEntity extends HEBucketableSchoolingMob {
 
     public SmarmEntity(EntityType<? extends SmarmEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        this.moveControl = new HESwimmingMoveControl(this, 999, 5, 0.02f, 0.1f);
+        this.moveControl = new HESwimmingMoveControl(this, 999, 15, 0.02f, 0.1f);
         this.lookControl = new SmoothSwimmingLookControl(this, 20);
     }
 
     public static AttributeSupplier.Builder bakeAttributes() {
         return Animal.createLivingAttributes()
-                .add(Attributes.MAX_HEALTH, 2.0D)
+                .add(Attributes.MAX_HEALTH, 4.0D)
                 .add(Attributes.FOLLOW_RANGE, 20)
                 .add(Attributes.MOVEMENT_SPEED, 1.1F);
     }

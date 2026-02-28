@@ -13,6 +13,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.util.AirAndWaterRandomPos;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
+import net.minecraft.world.entity.ai.util.HoverRandomPos;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -130,13 +131,14 @@ public class EntityHelpers {
         int maxAttempts = radius * radius * radius;
         boolean nearBoundary = blocksFromGround > targetDist;
         for (int i = 0; i < maxAttempts; i++) {
-            Vec3 candidate = DefaultRandomPos.getPos(mob, radius * radius, verticalDistance);
+            Vec3 vec3 = mob.getViewVector(0.0f);
+            Vec3 candidate = HoverRandomPos.getPos(mob, radius * radius, verticalDistance, vec3.x, vec3.z, ((float)Math.PI / 2F), verticalDistance, 0);
             if (candidate == null) continue;
 
 
             Vec3 adjusted = candidate.add(0, nearBoundary ? -1 : 1, 0);
             mutablePos.set(adjusted.x, adjusted.y, adjusted.z);
-            if (level.getBlockState(mutablePos).isPathfindable(level, mutablePos, PathComputationType.AIR)) {
+            if (level.getBlockState(mutablePos).isAir()) {
                 return adjusted;
             }
 
@@ -234,6 +236,21 @@ public class EntityHelpers {
     public static int blocksFromGround(LivingEntity entity, int maxDistance) {
         BlockPos basePos = entity.blockPosition();
         Level level = entity.level();
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+        int i = 1;
+        while (i <= maxDistance) {
+            mutablePos.set(basePos).move(Direction.DOWN, i);
+            if (!isAir(level, mutablePos)) {
+                return i;
+            }
+            i++;
+        }
+
+        return i;
+    }
+
+    public static int blocksFromGround(Level level, BlockPos basePos, int maxDistance) {
+
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
         int i = 1;
         while (i <= maxDistance) {

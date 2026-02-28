@@ -1,7 +1,10 @@
 package com.hedge.hedges_expansion.entity.projectile;
 
 import com.hedge.hedges_expansion.entity.util.AttackHelpers;
+import com.hedge.hedges_expansion.registry.HEParticles;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -43,6 +46,8 @@ public class WaveEntity extends Entity {
     private double lyd;
     private double lzd;
 
+    private float prevGrowProgress = 1.0f;
+    private float growProgress = 1.0f;
 
     public WaveEntity(EntityType<? extends WaveEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -98,8 +103,8 @@ public class WaveEntity extends Entity {
     @Override
     public void tick() {
         super.tick();
-        //this.prevGrowProgress = this.growProgress;
-        //this.growProgress += 0.005F;
+        this.prevGrowProgress = this.growProgress;
+        this.growProgress += 0.005F;
 
         if (!this.isNoGravity()) {
             {
@@ -122,6 +127,14 @@ public class WaveEntity extends Entity {
                 --this.lSteps;
                 this.setPos(d5, d6, d7);
             }
+            Vec3 vec3 = this.getViewVector(0.0F);
+            float f = Mth.cos(this.getYRot() * ((float)Math.PI / 180F)) * 0.3F;
+            float f1 = Mth.sin(this.getYRot() * ((float)Math.PI / 180F)) * 0.3F;
+            float f2 = this.growProgress * 3.2f - this.random.nextFloat() * 0.7F;
+
+            this.level().addParticle(this.getParticle(), this.getX() - vec3.x * (double)f2 + (double)f, this.getY() - vec3.y, this.getZ() - vec3.z * (double)f2 + (double)f1, 0.0D, 0.0D, 0.0D);
+            this.level().addParticle(this.getParticle(), this.getX() - vec3.x * (double)f2 - (double)f, this.getY() - vec3.y, this.getZ() - vec3.z * (double)f2 - (double)f1, 0.0D, 0.0D, 0.0D);
+
         }
 
         else {
@@ -148,6 +161,19 @@ public class WaveEntity extends Entity {
             this.lifeTicks++;
     }
 
+    protected SimpleParticleType getParticle() {
+        return ParticleTypes.BUBBLE_POP;
+    }
+
+    @Override
+    public boolean isOnFire() {
+        if (super.isOnFire()) {
+            this.discard();
+            return true;
+        }
+        return false;
+    }
+
     public float getYRot() {
         return this.entityData.get(Y_ROT);
     }
@@ -157,9 +183,11 @@ public class WaveEntity extends Entity {
     }
 
     private void aoeAttack() {
-        AABB hitZone = this.getBoundingBox().inflate(0.5f, 0.5f, 0.5f);
+        AABB hitZone = this.getBoundingBox().inflate(this.growProgress);
         for (LivingEntity entity : this.level().getEntitiesOfClass(LivingEntity.class, hitZone)) {
-            this.doHurt(entity);
+            if (!this.isAlliedTo(entity)) {
+                this.doHurt(entity);
+            }
         }
     }
 
@@ -189,6 +217,11 @@ public class WaveEntity extends Entity {
         this.lzd = lerpZ;
         this.setDeltaMovement(this.lxd, this.lyd, this.lzd);
     }
+
+    public float getGrowProgress() {
+        return Mth.lerp(this.tickCount, this.prevGrowProgress, this.growProgress);
+    }
+
 
     @Override
     protected void playStepSound(BlockPos pos, BlockState state) {

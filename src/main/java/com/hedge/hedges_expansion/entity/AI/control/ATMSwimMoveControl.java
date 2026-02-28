@@ -1,18 +1,10 @@
 package com.hedge.hedges_expansion.entity.AI.control;
 
-import com.hedge.hedges_expansion.entity.util.AdvancedTurningMob;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.FluidTags;
+import com.hedge.hedges_expansion.entity.types.AdvancedTurningMob;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.shapes.VoxelShape;
-
-import java.util.Objects;
 
 public class ATMSwimMoveControl<E extends Mob & AdvancedTurningMob> extends MoveControl {
 

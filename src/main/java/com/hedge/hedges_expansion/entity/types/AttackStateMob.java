@@ -1,4 +1,4 @@
-package com.hedge.hedges_expansion.entity.util;
+package com.hedge.hedges_expansion.entity.types;
 
 import net.minecraft.world.entity.LivingEntity;
 

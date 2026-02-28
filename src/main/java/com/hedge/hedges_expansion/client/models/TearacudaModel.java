@@ -101,6 +101,10 @@ public class TearacudaModel extends HierarchicalModel<TearacudaEntity> {
 	public void setupAnim(TearacudaEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 		headPitch = Mth.clamp(headPitch, -55.0F, 55.0F) * ((float) Math.PI / 180F);
+		float tailYaw = entity.getTrailYaw(ageInTicks - entity.tickCount);
+		this.tailrot.yRot = Mth.lerp(0.3F, this.tailrot.yRot, tailYaw * 0.2F);
+		this.tail2rot.yRot = Mth.lerp(0.3F, this.tail2rot.yRot, tailYaw * 0.15F);
+
 		if (entity.isInFluidType()) {
 			this.swimcontrol.xRot = headPitch;
 			this.animate(entity.idleAnimationState, TearacudaAnimation.idle, ageInTicks, 0.5f);

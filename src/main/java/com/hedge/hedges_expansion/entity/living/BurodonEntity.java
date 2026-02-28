@@ -6,10 +6,10 @@ import com.hedge.hedges_expansion.entity.AI.goal.BurodonAttackGoal;
 import com.hedge.hedges_expansion.entity.AI.control.ATMLookControl;
 import com.hedge.hedges_expansion.entity.AI.control.ATMMoveControl;
 import com.hedge.hedges_expansion.entity.AI.navigation.MMPathNavigatorGround;
-import com.hedge.hedges_expansion.entity.types.HEAnimStateAnimal;
 import com.hedge.hedges_expansion.entity.types.HETamableAnimal;
-import com.hedge.hedges_expansion.entity.util.AdvancedTurningMob;
-import com.hedge.hedges_expansion.entity.util.AttackStateMob;
+import com.hedge.hedges_expansion.entity.types.AdvancedTurningMob;
+import com.hedge.hedges_expansion.entity.types.AttackStateMob;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -26,8 +26,6 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Sheep;
-import net.minecraft.world.entity.animal.goat.Goat;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -152,9 +150,11 @@ public class BurodonEntity extends HETamableAnimal implements AttackStateMob, Ad
                     if (this.getAnimTicks() < 15) {
                         if (target != null) {
                             if (this.jumpAway && jumpVector != null) {
+                                this.lookAt(EntityAnchorArgument.Anchor.EYES, jumpVector);
                                 this.getLookControl().setLookAt(jumpVector);
                             } else {
-                                this.getLookControl().setLookAt(target);
+                                this.lookAt(target, 30f, 30f);
+                                this.getLookControl().setLookAt(target, 30f, 30f);
                             }
                         }
                     }

@@ -1,17 +1,12 @@
 package com.hedge.hedges_expansion.entity.types;
 
-import com.hedge.hedges_expansion.entity.living.BurodonEntity;
-import com.hedge.hedges_expansion.entity.util.AnimStateMob;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;

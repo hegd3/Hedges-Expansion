@@ -19,7 +19,8 @@ public class BurodonAttackGoal extends GenericMeleeGoal<BurodonEntity> {
             if (this.attackReach < this.dist) {
                 this.tickPath(livingentity);
             } else {
-                this.mob.getLookControl().setLookAt(livingentity);
+                this.mob.lookAt(livingentity, 30f, 30f);
+                this.mob.getLookControl().setLookAt(livingentity, 30f, 30f);
             }
 
             if (animState == 0) {

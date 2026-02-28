@@ -196,12 +196,18 @@ public class MurkModel extends HierarchicalModel<MurkEntity> {
 
 		netHeadYaw = Mth.clamp(netHeadYaw, -25.0F, 25.0F) * ((float)Math.PI / 180F);
 		headPitch = Mth.clamp(headPitch, -25.0F, 25.0F) * ((float)Math.PI / 180F);
+		float tailYaw = entity.getTrailYaw(ageInTicks - entity.tickCount);
 
-		this.swimcontrol.xRot = entity.isInFluidType() ? headPitch * 0.9f : 0;
+
+
+		this.tailrot.yRot = Mth.lerp(0.3F, this.tailrot.yRot, tailYaw * 0.2F);
+		this.tailrot2.yRot = Mth.lerp(0.3F, this.tailrot2.yRot, tailYaw * 0.15F);
+
 		this.neckrot.yRot = netHeadYaw / 2;
 		this.headrot.yRot = netHeadYaw;
 		this.headrot.xRot = headPitch;
 		if (entity.isInFluidType()) {
+			this.swimcontrol.xRot = headPitch * 0.9f;
 			this.animateWalk(MurkAnimation.swim, limbSwing, limbSwingAmount, 1.2f, 2.5f);
 			this.animate(entity.idleAnimationState, MurkAnimation.swim_idle, ageInTicks, 0.5f);
 			this.animate(entity.powerBiteAnimationState, entity.swingingLeft() ? MurkAnimation.power_bite_left : MurkAnimation.power_bite_right, ageInTicks, 1);
