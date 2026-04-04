@@ -33,7 +33,7 @@ public class HESwimmingLookControl extends LookControl {
         }
 
         float f = Mth.wrapDegrees(this.mob.yHeadRot - this.mob.yBodyRot);
-        if (this.mob.isInFluidType()) {
+        if (this.mob.isInWaterOrBubble()) {
             if (f < (float) (-this.maxYRotFromCenterWater)) {
                 this.mob.yBodyRot -= 4.0F;
             } else if (f > (float) this.maxYRotFromCenterWater) {

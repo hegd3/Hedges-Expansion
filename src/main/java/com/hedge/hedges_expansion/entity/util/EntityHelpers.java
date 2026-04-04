@@ -66,53 +66,6 @@ public class EntityHelpers {
                 0.0, 0.0, 0.0, 0.0);
     }
 
-    // positive = right, negative = left
-    public static List<LivingEntity> aoeAttack(LivingEntity entity, Vec3 offset, double pX, double pY, double pZ, float damageMultiplier, float horizontalMultiplier) {
-
-        Vec3 origin = entity.position().add(offset);
-
-        AABB aoe = new AABB(origin.subtract(pX, pY, pZ), origin.add(pX, pY, pZ));
-
-        List<LivingEntity> hit = entity.level().getEntitiesOfClass(LivingEntity.class, aoe, (target) ->
-                target != entity && target.isAlive() && entity.hasLineOfSight(target) && !entity.isAlliedTo(target));
-
-
-        for (LivingEntity target: hit) {
-            if (target.isBlocking() && target instanceof Player player) {
-                player.disableShield(true);
-            } else {
-                double hKB = (float) entity.getAttribute(Attributes.ATTACK_KNOCKBACK).getValue() * horizontalMultiplier;
-                target.hurt(target.damageSources().mobAttack(entity), (float) entity.getAttribute(Attributes.ATTACK_DAMAGE).getValue() * damageMultiplier);
-                target.knockback(0.8D + 0.5D * hKB, entity.getX() - target.getX(), entity.getZ() - target.getZ());
-            }
-        }
-        return hit;
-
-    }
-
-    public static List<LivingEntity> aoeAttack(LivingEntity entity, Vec3 offset, double sideOffset, double pX, double pY, double pZ, float damageMultiplier, float horizontalMultiplier) {
-
-        Vec3 sideVec = offset.cross(UP).normalize();
-        Vec3 origin = entity.position().add(offset).add(sideVec.scale(sideOffset));
-
-        AABB aoe = new AABB(origin.subtract(pX, pY, pZ), origin.add(pX, pY, pZ));
-
-        List<LivingEntity> hit = entity.level().getEntitiesOfClass(LivingEntity.class, aoe, (target) ->
-                target != entity && target.isAlive() && entity.hasLineOfSight(target) && !entity.isAlliedTo(target));
-
-
-        for (LivingEntity target: hit) {
-            if (target.isBlocking() && target instanceof Player player) {
-                player.disableShield(true);
-            } else {
-                double hKB = (float) entity.getAttribute(Attributes.ATTACK_KNOCKBACK).getValue() * horizontalMultiplier;
-                target.hurt(target.damageSources().mobAttack(entity), (float) entity.getAttribute(Attributes.ATTACK_DAMAGE).getValue() * damageMultiplier);
-                target.knockback(0.8D + 0.5D * hKB, entity.getX() - target.getX(), entity.getZ() - target.getZ());
-            }
-        }
-        return hit;
-
-    }
 
     public static void knockUp(LivingEntity hit, double vKB) {
         vKB = Math.max(vKB - hit.getAttribute(Attributes.KNOCKBACK_RESISTANCE).getValue(), 0);
@@ -122,6 +75,10 @@ public class EntityHelpers {
 
     public static Vec3 bodyAngle(LivingEntity entity) {
         return Vec3.directionFromRotation(0.0f, entity.yBodyRot);
+    }
+
+    public static Vec3 bodyAngle(LivingEntity entity, float xRot) {
+        return Vec3.directionFromRotation(xRot, entity.yBodyRot);
     }
 
     @Nullable

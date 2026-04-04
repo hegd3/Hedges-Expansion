@@ -12,7 +12,7 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
 
 
-public class SmarmModel extends HierarchicalModel<SmarmEntity> {
+public class SmarmModel extends HEModel<SmarmEntity> {
 	public static final ModelLayerLocation LAYER_LOCATION = EntityLayers.SMARM_LAYER;
 	private final ModelPart root;
 	private final ModelPart swimcontrol;

@@ -1,9 +1,10 @@
-package com.hedge.hedges_expansion.client.animations;// Save this class in your mod and generate all required imports
 
-import net.minecraft.client.animation.AnimationChannel;
-import net.minecraft.client.animation.AnimationDefinition;
-import net.minecraft.client.animation.Keyframe;
-import net.minecraft.client.animation.KeyframeAnimations;
+ package com.hedge.hedges_expansion.client.animations;
+
+ import net.minecraft.client.animation.AnimationChannel;
+ import net.minecraft.client.animation.AnimationDefinition;
+ import net.minecraft.client.animation.Keyframe;
+ import net.minecraft.client.animation.KeyframeAnimations;
 
 public class GurkAnimation {
 	public static final AnimationDefinition walk = AnimationDefinition.Builder.withLength(1.0F).looping()
@@ -568,6 +569,60 @@ public class GurkAnimation {
 			new Keyframe(0.9167F, KeyframeAnimations.degreeVec(-35.0F, 12.5F, -11.7378F), AnimationChannel.Interpolations.LINEAR),
 			new Keyframe(0.9583F, KeyframeAnimations.degreeVec(-35.0F, 6.4705F, -11.9836F), AnimationChannel.Interpolations.LINEAR),
 			new Keyframe(1.0F, KeyframeAnimations.degreeVec(-35.0F, 0.0F, -11.4127F), AnimationChannel.Interpolations.LINEAR)
+		))
+		.build();
+
+	public static final AnimationDefinition lay_down_left = AnimationDefinition.Builder.withLength(1.0F).looping()
+		.addAnimation("root", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, -90.0F), AnimationChannel.Interpolations.LINEAR)
+		))
+		.addAnimation("root", new AnimationChannel(AnimationChannel.Targets.POSITION, 
+			new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 2.5F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+		))
+		.addAnimation("head", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(25.0F, -25.0F, 20.0F), AnimationChannel.Interpolations.LINEAR)
+		))
+		.addAnimation("leftleg", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, -27.5F, 147.5F), AnimationChannel.Interpolations.LINEAR)
+		))
+		.addAnimation("leftleg2", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 10.0F, 147.5F), AnimationChannel.Interpolations.LINEAR)
+		))
+		.addAnimation("rightleg2", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, -22.5F, -100.0F), AnimationChannel.Interpolations.LINEAR)
+		))
+		.addAnimation("rightleg", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 17.5F, -100.0F), AnimationChannel.Interpolations.LINEAR)
+		))
+		.addAnimation("tail", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(-32.5F, -15.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+		))
+		.build();
+
+	public static final AnimationDefinition lay_down_right = AnimationDefinition.Builder.withLength(1.0F).looping()
+		.addAnimation("root", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 90.0F), AnimationChannel.Interpolations.LINEAR)
+		))
+		.addAnimation("root", new AnimationChannel(AnimationChannel.Targets.POSITION, 
+			new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 2.5F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+		))
+		.addAnimation("head", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(25.0F, 25.0F, -20.0F), AnimationChannel.Interpolations.LINEAR)
+		))
+		.addAnimation("leftleg", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, -17.5F, 100.0F), AnimationChannel.Interpolations.LINEAR)
+		))
+		.addAnimation("leftleg2", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 22.5F, 100.0F), AnimationChannel.Interpolations.LINEAR)
+		))
+		.addAnimation("rightleg2", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, -10.0F, -147.5F), AnimationChannel.Interpolations.LINEAR)
+		))
+		.addAnimation("rightleg", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 27.5F, -147.5F), AnimationChannel.Interpolations.LINEAR)
+		))
+		.addAnimation("tail", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(-32.5F, 15.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
 		))
 		.build();
 }

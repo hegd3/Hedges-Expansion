@@ -1,7 +1,7 @@
 package com.hedge.hedges_expansion.entity.living.ambientfish;
 
 import com.hedge.hedges_expansion.entity.AI.control.HESwimmingMoveControl;
-import com.hedge.hedges_expansion.entity.AI.goal.GildGliderJumpGoal;
+import com.hedge.hedges_expansion.entity.AI.goal.specific.GildGliderJumpGoal;
 import com.hedge.hedges_expansion.entity.AI.goal.GroupFollowLeaderGoal;
 import com.hedge.hedges_expansion.entity.AI.goal.HECustomSwimGoal;
 import com.hedge.hedges_expansion.entity.types.HEBucketableSchoolingMob;
@@ -14,6 +14,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -77,6 +78,23 @@ public class GildGliderEntity extends HEBucketableSchoolingMob {
     public void aiStep() {
         this.flop();
         super.aiStep();
+    }
+
+    public void travel(Vec3 pTravelVector) {
+        if (this.isEffectiveAi() && this.isInWater()) {
+            this.moveRelative(this.getSpeed(), pTravelVector);
+            this.move(MoverType.SELF, this.getDeltaMovement());
+            this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
+        } else {
+            super.travel(pTravelVector);
+        }
+
+    }
+
+
+    @Override
+    public boolean canBeFollowed() {
+        return super.canBeFollowed();
     }
 
     @Override

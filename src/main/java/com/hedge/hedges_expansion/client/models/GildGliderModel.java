@@ -13,7 +13,7 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
 
-public class GildGliderModel extends HierarchicalModel<GildGliderEntity> {
+public class GildGliderModel extends HEModel<GildGliderEntity> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = EntityLayers.GILD_GLIDER_LAYER;
 	private final ModelPart root;

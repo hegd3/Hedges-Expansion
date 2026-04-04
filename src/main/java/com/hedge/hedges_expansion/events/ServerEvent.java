@@ -39,6 +39,7 @@ public class ServerEvent {
         event.put(HEEntities.GLIM.get(), GlimEntity.bakeAttributes().build());
         event.put(HEEntities.GRAFF.get(), GraffEntity.bakeAttributes().build());
         event.put(HEEntities.SPEEL.get(), SpeelEntity.bakeAttributes().build());
+        event.put(HEEntities.BANSHEE.get(), BansheeEntity.bakeAttributes().build());
 
     }
 
@@ -49,7 +50,6 @@ public class ServerEvent {
         event.register(HEEntities.TEARACUDA.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, TearacudaEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.OR);
         event.register(HEEntities.FEROCETUS.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, FerocetusEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.OR);
         event.register(HEEntities.GLIM.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, GlimEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.OR);
-        event.register(HEEntities.SPEEL.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, SpeelEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.OR);
 
     }
 
@@ -59,6 +59,7 @@ public class ServerEvent {
         event.registerSpriteSet(HEParticles.MURK_CHARGE.get(), MurkChargeParticle.Provider::new);
         event.registerSpriteSet(HEParticles.MURK_CHARGE_SHOOT.get(), ProjectileTrailParticle.MurkChargeShotProvider::new);
         event.registerSpriteSet(HEParticles.MURK_EXPLODE.get(), DynamicExplosionParticle.MurkExplosionProvider::new);
+        event.registerSpriteSet(HEParticles.MURK_IMPACT.get(), DynamicExplosionParticle.MurkImpactProvider::new);
 
         event.registerSpriteSet(HEParticles.SMOKE.get(), SmokeParticle.Provider::new);
 

@@ -32,10 +32,6 @@ public class HESchoolingMob extends HEAquaticMob implements HEGroupMob<HESchooli
         return 1;
     }
 
-    public boolean canRandomSwim() {
-        return !this.isFollower();
-    }
-
     @Override
     public boolean isFollower() {
         return this.leader != null && this.leader.isAlive();

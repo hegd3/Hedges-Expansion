@@ -96,7 +96,7 @@ public class AttackHelpers {
 
     public static boolean blockBreak(LivingEntity entity, LivingEntity target) {
         if (target instanceof Player player && player.isBlocking()) {
-            player.disableShield(false);
+            player.disableShield(true);
             return true;
         }
         return false;

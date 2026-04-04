@@ -4,7 +4,7 @@ import com.hedge.hedges_expansion.client.particle.SmokeParticleOptions;
 import com.hedge.hedges_expansion.entity.AI.control.HESwimmingMoveControl;
 import com.hedge.hedges_expansion.entity.AI.goal.HECustomSwimGoal;
 import com.hedge.hedges_expansion.entity.AI.goal.GroupFollowLeaderGoal;
-import com.hedge.hedges_expansion.entity.AI.goal.TearacudaAttackGoal;
+import com.hedge.hedges_expansion.entity.AI.goal.specific.TearacudaAttackGoal;
 import com.hedge.hedges_expansion.entity.AI.navigation.FluidPathNavigation;
 import com.hedge.hedges_expansion.entity.types.HEBucketableSchoolingMob;
 import com.hedge.hedges_expansion.entity.types.HESchoolingMob;
@@ -153,6 +153,18 @@ public class TearacudaEntity extends HESchoolingMob implements AttackStateMob {
             }
         }
     }
+
+    public void travel(Vec3 pTravelVector) {
+        if (this.isEffectiveAi() && this.isInWater()) {
+            this.moveRelative(this.getSpeed(), pTravelVector);
+            this.move(MoverType.SELF, this.getDeltaMovement());
+            this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
+        } else {
+            super.travel(pTravelVector);
+        }
+
+    }
+
 
     @Override
     protected PathNavigation createNavigation(Level pLevel) {

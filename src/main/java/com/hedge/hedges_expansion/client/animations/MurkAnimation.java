@@ -1,6 +1,3 @@
-// Save this class in your mod and generate all required imports
-
-
 package com.hedge.hedges_expansion.client.animations;
 
 import net.minecraft.client.animation.AnimationChannel;
@@ -787,6 +784,9 @@ public class MurkAnimation {
 		.addAnimation("medium_spike", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
 			new Keyframe(0.0F, KeyframeAnimations.degreeVec(3.0F, 5.0F, 4.0F), AnimationChannel.Interpolations.LINEAR)
 		))
+		.addAnimation("big_spike", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(-3.0F, 5.0F, 4.0F), AnimationChannel.Interpolations.LINEAR)
+		))
 		.addAnimation("leftleg", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
 			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 42.5F, 0.0F), AnimationChannel.Interpolations.LINEAR)
 		))
@@ -1311,6 +1311,11 @@ public class MurkAnimation {
 			new Keyframe(1.25F, KeyframeAnimations.degreeVec(0.0F, -25.0F, 14.8153F), AnimationChannel.Interpolations.CATMULLROM),
 			new Keyframe(1.9167F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM)
 		))
+		.addAnimation("wholebody", new AnimationChannel(AnimationChannel.Targets.POSITION, 
+			new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.6667F, KeyframeAnimations.posVec(0.0F, 2.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(1.0833F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+		))
 		.addAnimation("tail2", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
 			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),
 			new Keyframe(0.75F, KeyframeAnimations.degreeVec(13.0246F, 25.0F, -10.6066F), AnimationChannel.Interpolations.CATMULLROM),
@@ -1425,6 +1430,11 @@ public class MurkAnimation {
 			new Keyframe(0.75F, KeyframeAnimations.degreeVec(0.0F, -25.0F, -2.3465F), AnimationChannel.Interpolations.CATMULLROM),
 			new Keyframe(1.25F, KeyframeAnimations.degreeVec(0.0F, 25.0F, -14.8153F), AnimationChannel.Interpolations.CATMULLROM),
 			new Keyframe(1.9167F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM)
+		))
+		.addAnimation("wholebody", new AnimationChannel(AnimationChannel.Targets.POSITION, 
+			new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.6667F, KeyframeAnimations.posVec(0.0F, 2.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(1.0833F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
 		))
 		.addAnimation("tail2", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
 			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),
@@ -1590,7 +1600,8 @@ public class MurkAnimation {
 			new Keyframe(1.875F, KeyframeAnimations.scaleVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.LINEAR),
 			new Keyframe(1.9167F, KeyframeAnimations.scaleVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.LINEAR),
 			new Keyframe(1.9583F, KeyframeAnimations.scaleVec(1.0F, 1.1F, 1.0F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(1.9167F, KeyframeAnimations.scaleVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.LINEAR)))
+			new Keyframe(2.0F, KeyframeAnimations.scaleVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.LINEAR)
+		))
 		.addAnimation("jaw", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
 			new Keyframe(0.7083F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
 			new Keyframe(1.0F, KeyframeAnimations.degreeVec(54.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),

@@ -14,7 +14,7 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
 
-public class MurkModel extends HierarchicalModel<MurkEntity> {
+public class MurkModel extends HEModel<MurkEntity> {
 	public static final ModelLayerLocation LAYER_LOCATION = EntityLayers.MURK_LAYER;
 	private final ModelPart root;
 	private final ModelPart swimcontrol;
@@ -211,24 +211,26 @@ public class MurkModel extends HierarchicalModel<MurkEntity> {
 			this.animateWalk(MurkAnimation.swim, limbSwing, limbSwingAmount, 1.2f, 2.5f);
 			this.animate(entity.idleAnimationState, MurkAnimation.swim_idle, ageInTicks, 0.5f);
 			this.animate(entity.powerBiteAnimationState, entity.swingingLeft() ? MurkAnimation.power_bite_left : MurkAnimation.power_bite_right, ageInTicks, 1);
+			this.animate(entity.multiBiteAnimationState, entity.swingingLeft() ? MurkAnimation2.multi_bite_left : MurkAnimation2.multi_bite_right, ageInTicks, 1);
+
 			this.animate(entity.roarAnimationState, MurkAnimation.roar, ageInTicks, 1f);
 
 
 		} else {
-			if (entity.getAnimState() != 7) {
-				this.animateWalk(MurkAnimation.walk, limbSwing, limbSwingAmount, 1.7f, 2.5f);
-			} else {
-				this.animate(entity.slideAnimationState, MurkAnimation2.slide, ageInTicks, 2.2f);
-			}
-			this.animate(entity.slideStartAnimationState, MurkAnimation2.slide_startup, ageInTicks, 1);
+			this.animateWalk(MurkAnimation.walk, limbSwing, limbSwingAmount, 1.7f, 2.5f);
 			this.animate(entity.idleAnimationState, MurkAnimation.idle, ageInTicks, 0.5f);
 			this.animate(entity.powerBiteAnimationState, entity.swingingLeft() ? MurkAnimation.power_bite_left_land: MurkAnimation.power_bite_right_land, ageInTicks, 1);
 			this.animate(entity.roarAnimationState, MurkAnimation2.roar_land, ageInTicks, 1f);
+
+			this.animate(entity.multiBiteAnimationState, entity.swingingLeft() ? MurkAnimation2.multi_bite_left_land : MurkAnimation2.multi_bite_right_land, ageInTicks, 1);
+
 
 		}
 		this.animate(entity.biteAnimationState, MurkAnimation.bite, ageInTicks, 1f);
 		this.animate(entity.shootAnimationState, MurkAnimation.shoot, ageInTicks, 1f);
 		this.animate(entity.breathAnimationState, entity.swingingLeft() ? MurkAnimation2.breath_left : MurkAnimation2.breath_right, ageInTicks, 1f);
 		this.animate(entity.sideSlamAnimationState, entity.swingingLeft() ? MurkAnimation2.side_slam_left : MurkAnimation2.side_slam_right, ageInTicks, 1f);
+		this.animateSmooth(entity.clicksAnimationState, MurkAnimation2.clicks, ageInTicks, 1f);
+		this.animateSmooth(entity.sitAnimationState, MurkAnimation2.sit, ageInTicks, 1f);
 	}
 }

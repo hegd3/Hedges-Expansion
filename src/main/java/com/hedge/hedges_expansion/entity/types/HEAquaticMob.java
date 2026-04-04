@@ -1,5 +1,6 @@
 package com.hedge.hedges_expansion.entity.types;
 
+import com.hedge.hedges_expansion.util.SmoothAnimationState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -16,7 +17,7 @@ public class HEAquaticMob extends WaterAnimal implements AnimStateMob {
 
     private static final EntityDataAccessor<Integer> ANIM_STATE = SynchedEntityData.defineId(HEAquaticMob.class, EntityDataSerializers.INT);
 
-    public final AnimationState idleAnimationState = new AnimationState();
+    public final SmoothAnimationState idleAnimationState = new SmoothAnimationState();
     protected int animTicks;
 
     public HEAquaticMob(EntityType<? extends HEAquaticMob> pEntityType, Level pLevel) {
@@ -85,16 +86,6 @@ public class HEAquaticMob extends WaterAnimal implements AnimStateMob {
     }
 
 
-    public void travel(Vec3 pTravelVector) {
-        if (this.isEffectiveAi() && this.isInWater()) {
-            this.moveRelative(this.getSpeed(), pTravelVector);
-            this.move(MoverType.SELF, this.getDeltaMovement());
-            this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
-        } else {
-            super.travel(pTravelVector);
-        }
-
-    }
 
     @Override
     public void onAboveBubbleCol(boolean pDownwards) {
@@ -123,7 +114,6 @@ public class HEAquaticMob extends WaterAnimal implements AnimStateMob {
     @Override
     public void setUpAnimStates() {
         this.idleAnimationState.animateWhen(this.isAlive(), this.tickCount);
-
     }
 
     public void resetAnimState() {

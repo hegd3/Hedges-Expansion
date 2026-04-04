@@ -6,4 +6,12 @@ public interface HESemiFlyer {
 
     void setFlying(boolean b);
 
+    boolean isLandNav();
+
+    boolean isLanding();
+
+    void setLanding(boolean b);
+
+    int getGroundTicks();
+
 }

@@ -3,12 +3,16 @@ package com.hedge.hedges_expansion.entity.living;
 import com.hedge.hedges_expansion.entity.AI.control.ATMBodyRotControl;
 import com.hedge.hedges_expansion.entity.AI.control.ATMLookControl;
 import com.hedge.hedges_expansion.entity.AI.control.ATMMoveControl;
-import com.hedge.hedges_expansion.entity.AI.goal.AvoidTargetWhenLowGoal;
-import com.hedge.hedges_expansion.entity.AI.goal.GenericMeleeGoal;
+import com.hedge.hedges_expansion.entity.AI.goal.*;
+import com.hedge.hedges_expansion.entity.AI.goal.specific.GruinAttackGoal;
 import com.hedge.hedges_expansion.entity.AI.navigation.MMPathNavigatorGround;
+import com.hedge.hedges_expansion.entity.types.HEAnimStateAnimal;
 import com.hedge.hedges_expansion.entity.types.HETamableAnimal;
 import com.hedge.hedges_expansion.entity.types.AdvancedTurningMob;
 import com.hedge.hedges_expansion.entity.types.AttackStateMob;
+import com.hedge.hedges_expansion.entity.util.AttackHelpers;
+import com.hedge.hedges_expansion.entity.util.EntityHelpers;
+import com.hedge.hedges_expansion.util.SmoothAnimationState;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -22,12 +26,18 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class GruinEntity extends HETamableAnimal implements AttackStateMob, AdvancedTurningMob {
 
@@ -36,11 +46,13 @@ public class GruinEntity extends HETamableAnimal implements AttackStateMob, Adva
 
     public final AnimationState biteAnimationState = new AnimationState();
     public final AnimationState swipeAnimationState = new AnimationState();
-    public final AnimationState sniffAnimationState = new AnimationState();
-    public final AnimationState roarAnimationState = new AnimationState();
+    public final AnimationState multiAttackAnimationState = new AnimationState();
+    public final SmoothAnimationState sniffAnimationState = new SmoothAnimationState();
+    public final SmoothAnimationState yawnAnimationState = new SmoothAnimationState();
 
-    public final AnimationState idleAnimationState = new AnimationState();
     private int attackCD = 0;
+    private int multiAttackCD = 0;
+
 
     public GruinEntity(EntityType<? extends GruinEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -55,13 +67,24 @@ public class GruinEntity extends HETamableAnimal implements AttackStateMob, Adva
 
     public static AttributeSupplier.Builder bakeAttributes(){
         return Animal.createLivingAttributes()
-                .add(Attributes.MAX_HEALTH, 120.0D)
-                .add(Attributes.ATTACK_DAMAGE, 12.0D)
+                .add(Attributes.MAX_HEALTH, 60.0D)
+                .add(Attributes.ATTACK_DAMAGE, 8.0D)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.8D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.89)
                 .add(Attributes.FOLLOW_RANGE, 35F)
                 .add(Attributes.MOVEMENT_SPEED, 0.22F);
     }
+
+    @Override
+    protected boolean canOwnerMount(Player player) {
+        return false;
+    }
+
+    @Override
+    protected boolean canOwnerCommand(Player player) {
+        return player.isShiftKeyDown();
+    }
+
 
     @Override
     protected void defineSynchedData() {
@@ -71,22 +94,22 @@ public class GruinEntity extends HETamableAnimal implements AttackStateMob, Adva
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(5, new RandomStrollGoal(this, 1));
-        this.goalSelector.addGoal(3, new LookAtPlayerGoal(this, LivingEntity.class, 8));
-        this.goalSelector.addGoal(2, new GenericMeleeGoal<>(this, 1.5) {
-            @Override
-            protected double getSpeedModifier() {
-                return switch (this.mob.getAnimState()) {
-                    case 1, 2 -> 1;
-                    default -> super.getSpeedModifier();
-                };
-            }
-        });
-        this.goalSelector.addGoal(1, new AvoidTargetWhenLowGoal(this, 1.6f, 20, 30, 20, 3));
         this.goalSelector.addGoal(0, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new HESitWhenOrderedGoal(this));
+        this.goalSelector.addGoal(2, new AvoidTargetWhenLowGoal(this, 1.3f, 20, 30, 20, 3));
+        this.goalSelector.addGoal(3, new GruinAttackGoal(this));
+        this.goalSelector.addGoal(4, new HEFollowOwnerGoal(this, 1.2D, 1.3D, 7.0f, 4.0f));
+
+        this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, LivingEntity.class, 8));
+
+        this.goalSelector.addGoal(6, new RandomStrollGoal(this, 1));
+
+        this.goalSelector.addGoal(7, new IdleAnimationGoal<>(this));
+
         this.targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Monster.class, true));
     }
 
     @Override
@@ -97,16 +120,13 @@ public class GruinEntity extends HETamableAnimal implements AttackStateMob, Adva
     @Override
     public void tick() {
         super.tick();
-        this.yBodyRot = Mth.approachDegrees(yBodyRotO, this.yBodyRot, 10);
         if (this.level().isClientSide()) {
             this.setUpAnimStates();
         } else {
             if (this.tickCount % 200 == 0) {
                 this.heal(20);
-                if (!this.isAggressive() && this.getAnimState() == 0 && this.getRandom().nextInt(3) == 0) {
-                    this.setAnimState(4);
-                }
             }
+            this.multiAttackCD = Math.max(this.multiAttackCD - 1, 0);
             this.attackCD = Math.max(this.attackCD - 1, 0);
             this.tickAnimState();
         }
@@ -118,21 +138,39 @@ public class GruinEntity extends HETamableAnimal implements AttackStateMob, Adva
             LivingEntity target = this.getTarget();
             switch (this.getAnimState()) {
                 case 1 -> {
-                    if (this.animTicks == 12 && target != null && this.canHurtTarget(target)) {
+                    if (this.animTicks == 8 && target != null && this.canHurtTarget(target, this.getAttackReachSqr(target), this.distanceToSqr(target))) {
                         this.doHurtTarget(target);
                     } else if (this.animTicks >= 17) {
                         this.resetAnimState();
                     }
                 }
                 case 2 -> {
-                    if (this.animTicks == 13 && target != null && this.canHurtTarget(target)) {
+                    if (this.animTicks == 11 && target != null && this.canHurtTarget(target, this.getAttackReachSqr(target), this.distanceToSqr(target))) {
                         this.doHurtTarget(target);
-                    } else if (this.animTicks >= 21) {
+                    } else if (this.animTicks >= 19) {
                         this.resetAnimState();
                     }
                 }
-                case 4 -> {
-                    if (this.getTarget() != null || this.getAnimTicks() >= 49) {
+                case 3 -> {
+                    this.getNavigation().stop();
+                    if (this.animTicks < 10 && target != null) {
+                        this.lookAt(target, 15f, 30f);
+                        this.getLookControl().setLookAt(target, 15f, 30f);
+                    } else if (this.animTicks == 10 || this.animTicks == 24) {
+                        this.addDeltaMovement(EntityHelpers.bodyAngle(this).scale(0.4));
+                    }
+                    else if (this.animTicks == 16 || this.animTicks == 30) {
+                        List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, EntityHelpers.bodyAngle(this).scale(1.6), 2.5, 2, 2.5, 8);
+                        for (LivingEntity entity : hit) {
+                            AttackHelpers.betterHurt(this, entity, 1.8f, 0.8f);
+                        }
+                    } else if (this.animTicks >= 45) {
+                        this.resetAnimState();
+                        this.multiAttackCD = 100;
+                    }
+                }
+                case 4, 5 -> {
+                    if (this.getTarget() != null || this.getAnimTicks() >= 41) {
                         this.resetAnimState();
                     }
                 }
@@ -142,24 +180,18 @@ public class GruinEntity extends HETamableAnimal implements AttackStateMob, Adva
     }
 
     @Override
-    public boolean isPushable() {
-        return false;
-    }
-
-    @Override
     public @Nullable AgeableMob getBreedOffspring(ServerLevel pLevel, AgeableMob pOtherParent) {
         return null;
     }
 
     @Override
     public void setUpAnimStates() {
+        super.setUpAnimStates();
         this.biteAnimationState.animateWhen(this.getAnimState() == 1, this.tickCount);
         this.swipeAnimationState.animateWhen(this.getAnimState() == 2, this.tickCount);
-        this.roarAnimationState.animateWhen(this.getAnimState() == 3, this.tickCount);
+        this.multiAttackAnimationState.animateWhen(this.getAnimState() == 3, this.tickCount);
         this.sniffAnimationState.animateWhen(this.getAnimState() == 4, this.tickCount);
-
-        this.idleAnimationState.animateWhen(this.getPose() == Pose.STANDING, this.tickCount);
-
+        this.yawnAnimationState.animateWhen(this.getAnimState() == 5, this.tickCount);
     }
 
 
@@ -168,11 +200,15 @@ public class GruinEntity extends HETamableAnimal implements AttackStateMob, Adva
     public void resetAnimState() {
         super.resetAnimState();
         this.attackCD = 5;
+        this.multiAttackCD += 5;
     }
 
     @Override
     public boolean shouldTurnWholeBody() {
-        return this.getAnimState() == 2;
+        return switch(this.getAnimState()) {
+            case 2, 3 -> true;
+            default -> false;
+        };
     }
 
     @Override
@@ -183,16 +219,6 @@ public class GruinEntity extends HETamableAnimal implements AttackStateMob, Adva
     @Override
     public boolean shouldInstantTurn() {
         return false;
-    }
-
-    @Override
-    public int getMaxHeadXRot() {
-        return 25;
-    }
-
-    @Override
-    public int getMaxHeadYRot() {
-        return 25;
     }
 
     @Override
@@ -209,9 +235,13 @@ public class GruinEntity extends HETamableAnimal implements AttackStateMob, Adva
         this.setAnimState(i);
     }
 
+    public boolean canUseMultiAttack(double attackReach, double dist) {
+        return this.multiAttackCD == 0 && attackReach * 1.3 >= dist;
+    }
+
     @Override
     public boolean canUseAttack(LivingEntity entity, double attackReach, double dist) {
-        return this.attackCD == 0 && this.getAnimState() == 0 && this.canHurtTarget(entity);
+        return this.attackCD == 0 && this.canHurtTarget(entity, attackReach, dist);
     }
 
     @Override
@@ -219,8 +249,8 @@ public class GruinEntity extends HETamableAnimal implements AttackStateMob, Adva
         return this.getBbWidth() * 1.8 * this.getBbWidth() * 1.8 + entity.getBbWidth();
     }
 
-    private boolean canHurtTarget(LivingEntity entity) {
-        return this.getAttackReachSqr(entity) >= this.distanceToSqr(entity);
+    private boolean canHurtTarget(LivingEntity entity, double attackreach, double dist) {
+        return this.hasLineOfSight(entity) && attackreach >= dist;
     }
 
     public boolean swingingLeft() {
@@ -236,4 +266,8 @@ public class GruinEntity extends HETamableAnimal implements AttackStateMob, Adva
         return new ATMBodyRotControl<>(this);
     }
 
+    @Override
+    public void playIdle() {
+        this.setAnimState(this.getRandom().nextInt(2) + 4);
+    }
 }

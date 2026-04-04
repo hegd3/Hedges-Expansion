@@ -1,6 +1,7 @@
 package com.hedge.hedges_expansion.client.renderer;
 
 import com.hedge.hedges_expansion.HedgesExpansion;
+import com.hedge.hedges_expansion.client.ClientHelpers;
 import com.hedge.hedges_expansion.client.layer.EntityLayers;
 import com.hedge.hedges_expansion.client.models.WaveModel;
 import com.hedge.hedges_expansion.entity.projectile.WaveEntity;
@@ -16,7 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 public class WaveRenderer extends EntityRenderer<WaveEntity> {
-    private static final ResourceLocation texture = new ResourceLocation(HedgesExpansion.MODID, "textures/entity/projectile/wave.png");
+    private static final ResourceLocation[] textures = ClientHelpers.generateVariants("projectile/wave/wave", 3);
 
     private final WaveModel model;
 
@@ -45,6 +46,14 @@ public class WaveRenderer extends EntityRenderer<WaveEntity> {
 
     @Override
     public ResourceLocation getTextureLocation(WaveEntity pEntity) {
-        return texture;
+        return getWaveTexture(pEntity.tickCount);
+    }
+
+    private ResourceLocation getWaveTexture(int tickCount) {
+        int j = tickCount % 12 / 4;
+        return switch (j) {
+            case 0, 1 -> textures[j];
+            default -> textures[2];
+        };
     }
 }

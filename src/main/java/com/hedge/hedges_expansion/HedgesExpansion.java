@@ -1,19 +1,17 @@
 package com.hedge.hedges_expansion;
 
+import com.hedge.hedges_expansion.client.HESounds;
 import com.hedge.hedges_expansion.client.renderer.*;
 import com.hedge.hedges_expansion.items.HECreativeTab;
 import com.hedge.hedges_expansion.items.HEItems;
 import com.hedge.hedges_expansion.registry.HEEntities;
 import com.hedge.hedges_expansion.registry.HEParticles;
 import com.mojang.logging.LogUtils;
-import net.minecraft.client.renderer.entity.EntityRenderers;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
@@ -37,6 +35,7 @@ public class HedgesExpansion
         HECreativeTab.register(modEventBus);
         HEItems.register(modEventBus);
         HEParticles.register(modEventBus);
+        HESounds.register(modEventBus);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)

@@ -13,7 +13,7 @@ public class GruinRenderer extends MobRenderer<GruinEntity, GruinModel> {
     private static final ResourceLocation texture = new ResourceLocation(HedgesExpansion.MODID, "textures/entity/gruin.png");
 
     public GruinRenderer(EntityRendererProvider.Context pContext) {
-        super(pContext, new GruinModel(pContext.bakeLayer(EntityLayers.GRUIN_LAYER)), 2);
+        super(pContext, new GruinModel(pContext.bakeLayer(EntityLayers.GRUIN_LAYER)), 1.5f);
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.hedge.hedges_expansion.entity.types.AttackStateMob;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.Path;
@@ -102,7 +103,6 @@ public class GenericMeleeGoal<T extends PathfinderMob & AttackStateMob> extends 
                 this.mob.getLookControl().setLookAt(livingentity, 30f, 30f);
             }
         }
-
         if (this.mob.canUseAttack(livingentity, this.attackReach, this.dist)) {
             this.mob.setAttacking();
         }

@@ -18,7 +18,7 @@ public class JumpFromWaterGoal extends JumpGoal {
     private boolean breached;
     protected int jumpCD = 1;
 
-    public  JumpFromWaterGoal(PathfinderMob mob, int pInterval, double jumpStrength) {
+    public JumpFromWaterGoal(PathfinderMob mob, int pInterval, double jumpStrength) {
         this.mob = mob;
         this.interval = reducedTickDelay(pInterval);
         this.jumpStrength = jumpStrength;

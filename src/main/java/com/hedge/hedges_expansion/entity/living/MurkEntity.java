@@ -1,21 +1,25 @@
 package com.hedge.hedges_expansion.entity.living;
 
+import com.hedge.hedges_expansion.client.HESounds;
 import com.hedge.hedges_expansion.entity.AI.control.ATMBodyRotControl;
 import com.hedge.hedges_expansion.entity.AI.control.ATMSemiaquaticMoveControl;
 import com.hedge.hedges_expansion.entity.AI.control.ATMSwimLookControl;
 import com.hedge.hedges_expansion.entity.AI.goal.HECustomSwimGoal;
-import com.hedge.hedges_expansion.entity.AI.goal.MurkAttackGoal;
+import com.hedge.hedges_expansion.entity.AI.goal.HEFollowOwnerGoal;
+import com.hedge.hedges_expansion.entity.AI.goal.HESitWhenOrderedGoal;
+import com.hedge.hedges_expansion.entity.AI.goal.IdleAnimationGoal;
+import com.hedge.hedges_expansion.entity.AI.goal.specific.MurkAttackGoal;
 import com.hedge.hedges_expansion.entity.AI.navigation.HEAmphibiousPathNavigator;
 import com.hedge.hedges_expansion.entity.projectile.MurkSmoke;
-import com.hedge.hedges_expansion.entity.projectile.WaveEntity;
 import com.hedge.hedges_expansion.entity.types.HEAnimStateAnimal;
 import com.hedge.hedges_expansion.entity.types.AdvancedTurningMob;
+import com.hedge.hedges_expansion.entity.types.HETamableAnimal;
 import com.hedge.hedges_expansion.entity.util.AttackHelpers;
 import com.hedge.hedges_expansion.entity.types.AttackStateMob;
 import com.hedge.hedges_expansion.entity.util.EntityHelpers;
 import com.hedge.hedges_expansion.registry.HEEntities;
 import com.hedge.hedges_expansion.registry.HEParticles;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
+import com.hedge.hedges_expansion.util.SmoothAnimationState;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -28,12 +32,16 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
@@ -41,7 +49,7 @@ import net.minecraftforge.fluids.FluidType;
 
 import java.util.List;
 
-public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, AdvancedTurningMob {
+public class MurkEntity extends HETamableAnimal implements AttackStateMob, AdvancedTurningMob {
     private static final EntityDataAccessor<Boolean> CHARGED = SynchedEntityData.defineId(MurkEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> LEFT = SynchedEntityData.defineId(MurkEntity.class, EntityDataSerializers.BOOLEAN);
 
@@ -51,17 +59,18 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
     public final AnimationState powerBiteAnimationState = new AnimationState();
     public final AnimationState roarAnimationState = new AnimationState();
     public final AnimationState sideSlamAnimationState = new AnimationState();
-    public final AnimationState slideStartAnimationState = new AnimationState();
-    public final AnimationState slideAnimationState = new AnimationState();
     public final AnimationState breathAnimationState = new AnimationState();
+    public final AnimationState multiBiteAnimationState = new AnimationState();
+
+    public final SmoothAnimationState clicksAnimationState = new SmoothAnimationState();
+    public final SmoothAnimationState sitAnimationState = new SmoothAnimationState();
 
     private int attackCD = 0;
+    private int powerBiteCD = 0;
     private int roarCD = 0;
     private int projCD = 0;
     private int chargeTicks = 0;
-    private int slideCount = 0;
     private int shotCount = 0;
-    private int slideCD = 0;
     private int projectileRot = 0;
 
     private float prevTrail;
@@ -92,6 +101,16 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
     }
 
     @Override
+    protected boolean canOwnerMount(Player player) {
+        return true;
+    }
+
+    @Override
+    protected boolean canOwnerCommand(Player player) {
+        return player.isShiftKeyDown();
+    }
+
+    @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(CHARGED, false);
@@ -112,24 +131,27 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(4, new RandomStrollGoal(this, 1.0) {
+        this.goalSelector.addGoal(0, new HESitWhenOrderedGoal(this, false));
+        this.goalSelector.addGoal(1, new MurkAttackGoal(this));
+        this.goalSelector.addGoal(2, new LookAtPlayerGoal(this, LivingEntity.class, 5));
+        this.goalSelector.addGoal(3, new HEFollowOwnerGoal(this, 1.2, 1.6, 7.0f, 4.0f));
+        this.goalSelector.addGoal(4, new HECustomSwimGoal(this, 1.0, 10, 4, 7, false));
+        this.goalSelector.addGoal(5, new RandomStrollGoal(this, 1.0) {
             @Override
             public boolean canUse() {
-                return !this.mob.isInFluidType() && super.canUse();
+                return !this.mob.isInWaterOrBubble() && super.canUse();
             }
 
             @Override
             public boolean canContinueToUse() {
-                return !this.mob.isInFluidType() && super.canContinueToUse();
+                return !this.mob.isInWaterOrBubble() && super.canContinueToUse();
             }
         });
-        this.goalSelector.addGoal(3, new HECustomSwimGoal(this, 1.0, 10, 4, 7, false));
-        this.goalSelector.addGoal(2, new LookAtPlayerGoal(this, LivingEntity.class, 5));
-        this.goalSelector.addGoal(1, new MurkAttackGoal(this));
+        this.goalSelector.addGoal(6, new IdleAnimationGoal<>(this));
 
-
-        this.targetSelector.addGoal(0, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, LivingEntity.class, true));
+        this.targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
+        this.targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
+        this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
 
     }
 
@@ -174,32 +196,12 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                 Vec3 rand = EntityHelpers.getRandomVec3(1.2);
                 this.level().addParticle(HEParticles.MURK_CHARGE.get(), this.getX() + rand.x + rand.x,
                         this.getY() + rand.y + 0.5, this.getZ() + rand.z, rand.x, rand.y + 0.2, rand.z);
-                if (this.getAnimState() == 7) {
-                    Vec3 vec3 = this.getViewVector(0.0F);
-                    float f = Mth.cos(this.getYRot() * ((float)Math.PI / 180F)) * 0.3F;
-                    float f1 = Mth.sin(this.getYRot() * ((float)Math.PI / 180F)) * 0.3F;
-                    float f2 = 4F - this.random.nextFloat() * 1.5F;
-
-                    this.level().addParticle(HEParticles.MURK_CHARGE_SHOOT.get(), this.getX() - vec3.x * (double)f2 + (double)f, this.getY() - vec3.y, this.getZ() - vec3.z * (double)f2 + (double)f1, 0.0D, 0.0D, 0.0D);
-                    this.level().addParticle(HEParticles.MURK_CHARGE_SHOOT.get(), this.getX() - vec3.x * (double)f2 - (double)f, this.getY() - vec3.y, this.getZ() - vec3.z * (double)f2 - (double)f1, 0.0D, 0.0D, 0.0D);
-                }
-            } else {
-                if (this.getAnimState() == 7) {
-                    Vec3 vec3 = this.getViewVector(0.0F);
-                    float f = Mth.cos(this.getYRot() * ((float)Math.PI / 180F)) * 0.3F;
-                    float f1 = Mth.sin(this.getYRot() * ((float)Math.PI / 180F)) * 0.3F;
-                    float f2 = 4F - this.random.nextFloat() * 1.5F;
-
-                    this.level().addParticle(ParticleTypes.BUBBLE_POP, this.getX() - vec3.x * (double)f2 + (double)f, this.getY() - vec3.y, this.getZ() - vec3.z * (double)f2 + (double)f1, 0.0D, 0.0D, 0.0D);
-                    this.level().addParticle(ParticleTypes.BUBBLE_POP, this.getX() - vec3.x * (double)f2 - (double)f, this.getY() - vec3.y, this.getZ() - vec3.z * (double)f2 - (double)f1, 0.0D, 0.0D, 0.0D);
-                }
             }
             this.tickTrailYaw();
-
         } else {
             this.attackCD = Math.max(this.attackCD - 1, 0);
             this.projCD = Math.max(this.projCD - 1, 0);
-            this.slideCD = Math.max(this.slideCD - 1, 0);
+            this.powerBiteCD = Math.max(this.powerBiteCD - 1, 0);
             if (this.isCharged()) {
                 this.chargeTicks = Math.max(this.chargeTicks - 1, 0);
                 if (this.chargeTicks == 0) {
@@ -217,7 +219,7 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                 switch (this.getAnimState()) {
                     case 1 -> {
                         if (this.animTicks == 10) {
-                            List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, this.getLookAngle().scale(1.5), 1.5, 1.5, 1.5, 3);
+                            List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, this.getLookAngle().scale(2.2), 1.8, 1.5, 1.8, 3);
                             for (LivingEntity entity : hit) {
                                 this.doHurtTarget(entity);
                             }
@@ -230,9 +232,8 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                             this.getNavigation().stop();
                         }
                         if (this.animTicks < 8 && target != null) {
-                            Vec3 v = target.position().add(0, 0.5, 0);
-                            this.lookAt(EntityAnchorArgument.Anchor.EYES, v);
-                            this.getLookControl().setLookAt(v);
+                            this.lookAt(target, 30f, 30f);
+                            this.getLookControl().setLookAt(target, 30f, 30f);
                         }
                         else if (this.animTicks == 15) {
                             for (int i = -5; i <= 5; i+=5) {
@@ -252,18 +253,18 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                     }
                     case 3 -> {
                         this.getNavigation().stop();
-                        if (target != null) {
-                            Vec3 v = target.position().add(0, 0.5, 0);
-                            this.lookAt(EntityAnchorArgument.Anchor.EYES, v);
-                            this.getLookControl().setLookAt(v);
-                        }
-                        if (this.animTicks == 19) {
-                            List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, EntityHelpers.bodyAngle(this).scale(1.5), 2, 2, 2, 8);
-                            for (LivingEntity entity : hit) {
-                                AttackHelpers.betterHurt(this, entity, 1.5f, 1.4f);
+                        if (this.animTicks % 5 == 0 && this.animTicks < 18) {
+                            if (target != null) {
+                                this.lookAt(target, 15f, 30f);
+                                this.getLookControl().setLookAt(target, 15f, 30f);
                             }
+                            this.addDeltaMovement(EntityHelpers.bodyAngle(this).scale(this.isInFluidType() ? 0.1 : 0.25));
+                        }
+                        else if (this.animTicks == 19) {
+                            this.powerBite();
                         } else if (this.animTicks >= 39){
                             this.resetAnimState();
+                            this.powerBiteCD = 200;
                         }
                     }
                     case 4 -> {
@@ -284,9 +285,9 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                     case 5 -> {
                         this.getNavigation().stop();
                         if (this.animTicks < 15 && target != null) {
-                            Vec3 v = target.position().add(0, 0.5, 0);
-                            this.lookAt(EntityAnchorArgument.Anchor.EYES, v);
-                            this.getLookControl().setLookAt(v);
+                            this.lookAt(target, 30f, 30f);
+                            this.getLookControl().setLookAt(target, 30f, 30f);
+
                         } else if (this.animTicks == 20) {
                             Vec3 v = EntityHelpers.bodyAngle(this);
                             this.addDeltaMovement(v.scale(0.8));
@@ -304,54 +305,9 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                     }
                     case 6 -> {
                         this.getNavigation().stop();
-                        if (this.animTicks < 15 && target != null) {
-                            Vec3 v = target.position().add(0, 0.5, 0);
-                            this.lookAt(EntityAnchorArgument.Anchor.EYES, v);
-                            this.getLookControl().setLookAt(v);
-                        } else if ((this.animTicks >= 25)) {
-                            this.animTicks = 0;
-                            this.setAnimState(7);
-                            for (int i = -60; i < 0; i+= 20) {
-                                this.createWave(i);
-                            }
-                            for (int i = 20; i <= 60; i+= 20) {
-                                this.createWave(i);
-                            }
-                        } else if (this.animTicks >= 15 && this.animTicks % 5 == 0) {
-                            Vec3 v = EntityHelpers.bodyAngle(this).scale(1.5);
-                            this.addDeltaMovement(v);
-                        }
-                    }
-                    case 7 -> {
-                        this.getNavigation().stop();
-                        if (this.getAnimTicks() >= 40) {
-                            this.resetAnimState();
-                            this.slideCount--;
-                            if (this.slideCount <= 0) {
-                                this.slideCD = 200;
-                            }
-                        } else if (this.isInFluidType()) {
-                            this.resetAnimState();
-                            this.slideCount = 0;
-                            this.slideCD = 200;
-                        } else if (this.animTicks % 5 == 0) {
-                            if (this.onGround()) {
-                                Vec3 v = EntityHelpers.bodyAngle(this).scale(1.3);
-                                this.setDeltaMovement(v);
-                                List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, v, 2, 2, 2, 5);
-                                for (LivingEntity entity : hit) {
-                                        AttackHelpers.betterHurt(this, entity, 0.8f, 1.4f);
-                                }
-
-                            }
-                        }
-                    }
-                    case 8 -> {
-                        this.getNavigation().stop();
                         if (this.animTicks < 10 && target != null) {
-                            Vec3 v = target.position().add(0, 0.5, 0);
-                            this.lookAt(EntityAnchorArgument.Anchor.EYES, v);
-                            this.getLookControl().setLookAt(v);
+                            this.lookAt(target, 30f, 30f);
+                            this.getLookControl().setLookAt(target, 30f, 30f);
                         }
                         else if (this.animTicks >= 16 && this.animTicks <= 24 && this.animTicks % 2 == 0) {
                             MurkSmoke projectile = HEEntities.MURK_SMOKE.get().create(this.level());
@@ -370,6 +326,31 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
                             this.projCD = 100;
                         }
                     }
+                    case 7 -> {
+                        this.getNavigation().stop();
+                        if (this.animTicks % 5 == 0 && this.animTicks < 18) {
+                            if (target != null) {
+                                this.lookAt(target, 15f, 30f);
+                                this.getLookControl().setLookAt(target, 15f, 30f);
+                            }
+                            this.addDeltaMovement(EntityHelpers.bodyAngle(this).scale(this.isInFluidType() ? 0.1 : 0.25));
+                        } else if (this.animTicks >= 75){
+                            this.resetAnimState();
+                            this.powerBiteCD = 120;
+                        } else {
+                            switch (this.animTicks) {
+                                case 19, 36, 54 -> {
+                                    this.powerBite();
+                                    this.addDeltaMovement(EntityHelpers.bodyAngle(this).scale(0.4));
+                                }
+                            }
+                        }
+                    }
+                    case 8 -> {
+                        if (this.animTicks > 20) {
+                            this.resetAnimState();
+                        }
+                    }
                 }
             }
         }
@@ -384,10 +365,26 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
         return (this.prevTrail + (this.trail - this.prevTrail) * partialTick);
     }
 
-    private void createWave(int i) {
-        WaveEntity entity = HEEntities.WAVE.get().create(this.level());
-        entity.shoot(this, this.getYRot() + i);
-        this.level().addFreshEntity(entity);
+    private void powerBite() {
+        Vec3 v = EntityHelpers.bodyAngle(this).scale(1.5);
+        List<LivingEntity> hit;
+        if (this.isCharged()) {
+            this.spawnImpactParticle(v.x * 2, 0.5, v.z * 2);
+            hit = AttackHelpers.zoneHitbox(this, v, 2, 2, 2, 8);
+            for (LivingEntity entity : hit) {
+                AttackHelpers.betterHurt(this, entity, 1.8f, 1.5f);
+            }
+        } else {
+            hit = AttackHelpers.zoneHitbox(this, v, 2, 2, 2, 8);
+        }
+        for (LivingEntity entity : hit) {
+            AttackHelpers.betterHurt(this, entity, 1.5f, 1.4f);
+        }
+    }
+
+    private void spawnImpactParticle(double x, double y, double z) {
+        ((ServerLevel) this.level()).sendParticles(HEParticles.MURK_IMPACT.get(),
+                this.getX() + x, this.getY() + y, this.getZ() + z, 1, 0, 0, 0, 0);
     }
 
     private void chargedExplode() {
@@ -411,7 +408,7 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
         this.attackCD += 5;
         this.roarCD+=5;
         this.projCD+=5;
-        this.slideCD+=5;
+        this.powerBiteCD+=5;
     }
 
     @Override
@@ -424,9 +421,11 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
         this.roarAnimationState.animateWhen(this.getAnimState() == 4, this.tickCount);
         this.sideSlamAnimationState.animateWhen(this.getAnimState() == 5, this.tickCount);
 
-        this.slideStartAnimationState.animateWhen(this.getAnimState() == 6, this.tickCount);
-        this.slideAnimationState.animateWhen(this.getAnimState() == 7, this.tickCount);
-        this.breathAnimationState.animateWhen(this.getAnimState() == 8, this.tickCount);
+        this.breathAnimationState.animateWhen(this.getAnimState() == 6, this.tickCount);
+        this.multiBiteAnimationState.animateWhen(this.getAnimState() == 7, this.tickCount);
+
+        this.clicksAnimationState.animateWhen(this.getAnimState() == 8, this.tickCount);
+        this.sitAnimationState.animateWhen(this.isSitting(), this.tickCount);
     }
 
     public boolean isCharged() {
@@ -441,13 +440,8 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
         return this.roarCD == 0 && !this.isCharged() && attackReach * 20 >= dist;
     }
 
-    public boolean canSlide(double attackReach, double dist) {
-        return this.slideCD == 0 && this.onGround() && attackReach * 15 >= dist;
-    }
-
-    @Override
-    public int getMaxHeadYRot() {
-        return 45;
+    public boolean canPowerBite(double attackReach, double dist) {
+        return this.powerBiteCD == 0 && attackReach * 1.4 >= dist;
     }
 
     public void setSlam() {
@@ -457,40 +451,18 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
 
     @Override
     public void setAttacking() {
-        if (this.getRandom().nextInt(5) == 0) {
-            this.setLeft(!this.swingingLeft());
-            this.setAnimState(3);
-        } else {
-            this.setAnimState(1);
-        }
+        this.setAnimState(1);
     }
 
     public void setShooting() {
         if (this.isCharged()) {
             this.setLeft(!this.swingingLeft());
             this.projectileRot = this.swingingLeft() ? -10 : 10;
-            this.setAnimState(8);
+            this.setAnimState(6);
         } else {
             this.shotCount = this.getRandom().nextInt(3) + 1;
             this.setAnimState(2);
         }
-    }
-
-    public void setSliding() {
-        if (this.isCharged()) {
-            this.slideCount = 3;
-        } else {
-            this.slideCount = 1;
-        }
-        this.setAnimState(6);
-    }
-
-    public int getSlideCount() {
-        return this.slideCount;
-    }
-
-    public void setSlideCount(int i) {
-        this.slideCount = i;
     }
 
     public int getShotCount() {
@@ -509,7 +481,6 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
         this.entityData.set(LEFT, b);
     }
 
-
     @Override
     public boolean canUseAttack(LivingEntity entity, double attackReach, double dist) {
         return this.attackCD == 0 && attackReach >= dist;
@@ -523,9 +494,6 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
         return this.projCD;
     }
 
-    public int getSlideCD() {
-        return this.slideCD;
-    }
 
     @Override
     public double getAttackReachSqr(LivingEntity entity) {
@@ -535,18 +503,13 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
 
     @Override
     public boolean shouldTurnWholeBody() {
-        return switch (this.getAnimState()) {
-            case 1 -> this.animTicks < 2;
-            case 5 -> true;
-            default -> false;
-        };
+        return this.getAnimState() == 5;
     }
 
     @Override
     public boolean shouldLockAngle() {
         return switch(this.getAnimState()) {
             case 5, 6 -> this.animTicks > 15;
-            case 7 -> true;
             default -> false;
         };
     }
@@ -554,22 +517,25 @@ public class MurkEntity extends HEAnimStateAnimal implements AttackStateMob, Adv
     @Override
     public boolean shouldInstantTurn() {
         return switch (this.getAnimState()) {
-            case 2, 4, 6, 8 -> true;
+            case 2, 4, 6 -> true;
             default -> false;
         };
     }
 
     @Override
     public float getTurnSpeed() {
-        return switch (this.getAnimState()) {
-            case 1, 2, 5, 6 -> 45;
-            default -> this.isInFluidType() ? 5 : 10;
-        };
+        return 9;
     }
 
     @Override
     protected BodyRotationControl createBodyControl() {
         return new ATMBodyRotControl<>(this);
+    }
+
+    @Override
+    public void playIdle() {
+        this.setAnimState(8);
+        this.playSound(HESounds.MURK_CLICKS.get(), 1 - (this.getRandom().nextFloat() / 2), 1);
     }
 }
 

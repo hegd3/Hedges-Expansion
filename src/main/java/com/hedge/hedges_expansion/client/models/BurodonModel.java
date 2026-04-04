@@ -4,6 +4,7 @@ package com.hedge.hedges_expansion.client.models;
 import com.hedge.hedges_expansion.client.animations.BurodonAnimation;
 import com.hedge.hedges_expansion.client.layer.EntityLayers;
 import com.hedge.hedges_expansion.entity.living.BurodonEntity;
+import com.hedge.hedges_expansion.util.SmoothAnimationState;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.animation.AnimationDefinition;
@@ -13,8 +14,9 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.NotNull;
 
-public class BurodonModel extends HierarchicalModel<BurodonEntity> {
+public class BurodonModel extends HEModel<BurodonEntity> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = EntityLayers.BURODON_LAYER;
 	private final ModelPart root;
@@ -137,19 +139,19 @@ public class BurodonModel extends HierarchicalModel<BurodonEntity> {
 
 		if (entity.inAirTimer < 5) {
 			if (entity.getDeltaMovement().horizontalDistanceSqr() > 0.01) {
-				this.animateWalk(BurodonAnimation.run, limbSwing, limbSwingAmount, 1.4f, 2.5f);
+				this.animateWalk(BurodonAnimation.run, limbSwing, limbSwingAmount, 1.2f, 2.2f);
 			} else {
-				this.animateWalk(BurodonAnimation.walk_body, limbSwing, limbSwingAmount, 1.5f, 2.5f);
-				this.animateWalk(BurodonAnimation.walk_legs, limbSwing, limbSwingAmount, 1.5f, 2.5f);
+				this.animateWalk(BurodonAnimation.walk, limbSwing, limbSwingAmount, 1.5f, 2.5f);
 			}
-			this.animate(entity.idleAnimationState, BurodonAnimation.idle, ageInTicks, 1f);
 		}
-		this.animate(entity.airAnimationState, BurodonAnimation.air, ageInTicks, 1f);
+		this.animateSmooth(entity.idleAnimationState, BurodonAnimation.idle, ageInTicks, 1f);
+		this.animateSmooth(entity.sitAnimationState, BurodonAnimation.sit, ageInTicks, 1f);
+		this.animateSmooth(entity.airAnimationState, BurodonAnimation.air, ageInTicks, 1f);
 		if (entity.getAnimState() > 0) {
-			this.animate(entity.biteAnimationState, BurodonAnimation.bite, ageInTicks, 1f);
-			this.animate(entity.jumpAnimationState, BurodonAnimation.jump, ageInTicks, 1f);
-			this.animate(entity.roarAnimationState, BurodonAnimation.roar, ageInTicks, 1f);
-			this.animate(entity.yawnAnimationState, BurodonAnimation.yawn, ageInTicks, 1f);
+			this.animateSmooth(entity.biteAnimationState, BurodonAnimation.bite, ageInTicks, 1f);
+			this.animateSmooth(entity.jumpAnimationState, BurodonAnimation.jump, ageInTicks, 1f);
+			this.animateSmooth(entity.roarAnimationState, BurodonAnimation.roar, ageInTicks, 1f);
+			this.animateSmooth(entity.yawnAnimationState, BurodonAnimation.yawn, ageInTicks, 1f);
 		}
 	}
 

@@ -53,7 +53,7 @@ public class HEFlyingMoveControl extends MoveControl {
             this.mob.setXxa(0.0F);
             this.mob.setYya(0.0F);
             this.mob.setZza(0.0F);
-            this.mob.addDeltaMovement(new Vec3(0, -0.01, 0));
+            //this.mob.addDeltaMovement(new Vec3(0, -0.01, 0));
         }
     }
 

@@ -1,4 +1,5 @@
-package com.hedge.hedges_expansion.client.animations;
+package com.hedge.hedges_expansion.client.animations;// Save this class in your mod and generate all required imports
+
 
 import net.minecraft.client.animation.AnimationChannel;
 import net.minecraft.client.animation.AnimationDefinition;
@@ -67,13 +68,6 @@ public class TearacudaAnimation {
 			new Keyframe(0.9583F, KeyframeAnimations.degreeVec(-5.0F, 3.8637F, 0.1047F), AnimationChannel.Interpolations.LINEAR),
 			new Keyframe(1.0F, KeyframeAnimations.degreeVec(-5.0F, 4.0F, 0.618F), AnimationChannel.Interpolations.LINEAR)
 		))
-		.addAnimation("lefteye", new AnimationChannel(AnimationChannel.Targets.SCALE, 
-			new Keyframe(0.0F, KeyframeAnimations.scaleVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.25F, KeyframeAnimations.scaleVec(1.1F, 1.1F, 1.1F), AnimationChannel.Interpolations.CATMULLROM),
-			new Keyframe(0.5F, KeyframeAnimations.scaleVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.CATMULLROM),
-			new Keyframe(0.75F, KeyframeAnimations.scaleVec(1.1F, 1.1F, 1.1F), AnimationChannel.Interpolations.CATMULLROM),
-			new Keyframe(1.0F, KeyframeAnimations.scaleVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.CATMULLROM)
-		))
 		.addAnimation("leftfin", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
 			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 1.618F, -33.0902F), AnimationChannel.Interpolations.LINEAR),
 			new Keyframe(0.0417F, KeyframeAnimations.degreeVec(0.0F, 0.8135F, -29.0674F), AnimationChannel.Interpolations.LINEAR),
@@ -125,31 +119,31 @@ public class TearacudaAnimation {
 			new Keyframe(1.0F, KeyframeAnimations.degreeVec(0.0F, -19.4164F, -9.7082F), AnimationChannel.Interpolations.LINEAR)
 		))
 		.addAnimation("tail2", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
-			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, -26.6976F, 4.9443F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.0417F, KeyframeAnimations.degreeVec(0.0F, -30.8082F, 0.8374F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.0833F, KeyframeAnimations.degreeVec(0.0F, -32.8192F, -3.3266F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, -32.5937F, -7.2638F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.1667F, KeyframeAnimations.degreeVec(0.0F, -30.147F, -10.7061F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.2083F, KeyframeAnimations.degreeVec(0.0F, -25.6458F, -13.4187F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.25F, KeyframeAnimations.degreeVec(0.0F, -19.3969F, -15.2169F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.2917F, KeyframeAnimations.degreeVec(0.0F, -11.8261F, -15.9781F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.3333F, KeyframeAnimations.degreeVec(0.0F, -3.4494F, -15.6504F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.375F, KeyframeAnimations.degreeVec(0.0F, 5.1623F, -14.2561F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.4167F, KeyframeAnimations.degreeVec(0.0F, 13.4223F, -11.8903F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.4583F, KeyframeAnimations.degreeVec(0.0F, 20.7676F, -8.7142F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.5F, KeyframeAnimations.degreeVec(0.0F, 26.6976F, -4.9443F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.5417F, KeyframeAnimations.degreeVec(0.0F, 30.8082F, -0.8374F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.5833F, KeyframeAnimations.degreeVec(0.0F, 32.8192F, 3.3266F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.625F, KeyframeAnimations.degreeVec(0.0F, 32.5937F, 7.2638F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.6667F, KeyframeAnimations.degreeVec(0.0F, 30.147F, 10.7061F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.7083F, KeyframeAnimations.degreeVec(0.0F, 25.6458F, 13.4187F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.75F, KeyframeAnimations.degreeVec(0.0F, 19.3969F, 15.2169F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.7917F, KeyframeAnimations.degreeVec(0.0F, 11.8261F, 15.9781F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.8333F, KeyframeAnimations.degreeVec(0.0F, 3.4494F, 15.6504F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.875F, KeyframeAnimations.degreeVec(0.0F, -5.1623F, 14.2561F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.9167F, KeyframeAnimations.degreeVec(0.0F, -13.4223F, 11.8903F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.9583F, KeyframeAnimations.degreeVec(0.0F, -20.7676F, 8.7142F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(1.0F, KeyframeAnimations.degreeVec(0.0F, -26.6976F, 4.9443F), AnimationChannel.Interpolations.LINEAR)
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, -44.0F, 4.3262F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.0417F, KeyframeAnimations.degreeVec(0.0F, -42.5007F, 0.7327F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.0833F, KeyframeAnimations.degreeVec(0.0F, -38.1051F, -2.9108F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.125F, KeyframeAnimations.degreeVec(0.0F, -31.1127F, -6.3559F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.1667F, KeyframeAnimations.degreeVec(0.0F, -22.0F, -9.3678F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.2083F, KeyframeAnimations.degreeVec(0.0F, -11.388F, -11.7414F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.25F, KeyframeAnimations.degreeVec(0.0F, 0.0F, -13.3148F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.2917F, KeyframeAnimations.degreeVec(0.0F, 11.388F, -13.9808F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.3333F, KeyframeAnimations.degreeVec(0.0F, 22.0F, -13.6941F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.375F, KeyframeAnimations.degreeVec(0.0F, 31.1127F, -12.4741F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.4167F, KeyframeAnimations.degreeVec(0.0F, 38.1051F, -10.404F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.4583F, KeyframeAnimations.degreeVec(0.0F, 42.5007F, -7.6249F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.5F, KeyframeAnimations.degreeVec(0.0F, 44.0F, -4.3262F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.5417F, KeyframeAnimations.degreeVec(0.0F, 42.5007F, -0.7327F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.5833F, KeyframeAnimations.degreeVec(0.0F, 38.1051F, 2.9108F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.625F, KeyframeAnimations.degreeVec(0.0F, 31.1127F, 6.3559F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.6667F, KeyframeAnimations.degreeVec(0.0F, 22.0F, 9.3678F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.7083F, KeyframeAnimations.degreeVec(0.0F, 11.388F, 11.7414F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.75F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 13.3148F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.7917F, KeyframeAnimations.degreeVec(0.0F, -11.388F, 13.9808F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.8333F, KeyframeAnimations.degreeVec(0.0F, -22.0F, 13.6941F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.875F, KeyframeAnimations.degreeVec(0.0F, -31.1127F, 12.4741F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.9167F, KeyframeAnimations.degreeVec(0.0F, -38.1051F, 10.404F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(0.9583F, KeyframeAnimations.degreeVec(0.0F, -42.5007F, 7.6249F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(1.0F, KeyframeAnimations.degreeVec(0.0F, -44.0F, 4.3262F), AnimationChannel.Interpolations.LINEAR)
 		))
 		.addAnimation("rightfin", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
 			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, -1.618F, 33.0902F), AnimationChannel.Interpolations.LINEAR),
@@ -173,13 +167,6 @@ public class TearacudaAnimation {
 			new Keyframe(0.9167F, KeyframeAnimations.degreeVec(0.0F, -1.8271F, 34.1355F), AnimationChannel.Interpolations.LINEAR),
 			new Keyframe(0.9583F, KeyframeAnimations.degreeVec(0.0F, -1.989F, 34.9452F), AnimationChannel.Interpolations.LINEAR),
 			new Keyframe(1.0F, KeyframeAnimations.degreeVec(0.0F, -1.618F, 33.0902F), AnimationChannel.Interpolations.LINEAR)
-		))
-		.addAnimation("righteye", new AnimationChannel(AnimationChannel.Targets.SCALE, 
-			new Keyframe(0.0F, KeyframeAnimations.scaleVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.25F, KeyframeAnimations.scaleVec(1.1F, 1.1F, 1.1F), AnimationChannel.Interpolations.CATMULLROM),
-			new Keyframe(0.5F, KeyframeAnimations.scaleVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.CATMULLROM),
-			new Keyframe(0.75F, KeyframeAnimations.scaleVec(1.1F, 1.1F, 1.1F), AnimationChannel.Interpolations.CATMULLROM),
-			new Keyframe(1.0F, KeyframeAnimations.scaleVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.CATMULLROM)
 		))
 		.build();
 
@@ -274,13 +261,6 @@ public class TearacudaAnimation {
 			new Keyframe(0.4583F, KeyframeAnimations.degreeVec(51.2335F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
 			new Keyframe(0.4792F, KeyframeAnimations.degreeVec(53.8247F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
 			new Keyframe(0.5F, KeyframeAnimations.degreeVec(47.8885F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
-		))
-		.addAnimation("lefteye", new AnimationChannel(AnimationChannel.Targets.SCALE, 
-			new Keyframe(0.0F, KeyframeAnimations.scaleVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.125F, KeyframeAnimations.scaleVec(1.3F, 1.3F, 1.3F), AnimationChannel.Interpolations.CATMULLROM),
-			new Keyframe(0.25F, KeyframeAnimations.scaleVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.CATMULLROM),
-			new Keyframe(0.375F, KeyframeAnimations.scaleVec(1.3F, 1.3F, 1.3F), AnimationChannel.Interpolations.CATMULLROM),
-			new Keyframe(0.5F, KeyframeAnimations.scaleVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.CATMULLROM)
 		))
 		.addAnimation("leftfin", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
 			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 1.618F, -45.2254F), AnimationChannel.Interpolations.LINEAR),
@@ -390,13 +370,6 @@ public class TearacudaAnimation {
 			new Keyframe(0.4792F, KeyframeAnimations.degreeVec(0.0F, -1.989F, 49.863F), AnimationChannel.Interpolations.LINEAR),
 			new Keyframe(0.5F, KeyframeAnimations.degreeVec(0.0F, -1.618F, 45.2254F), AnimationChannel.Interpolations.LINEAR)
 		))
-		.addAnimation("righteye", new AnimationChannel(AnimationChannel.Targets.SCALE, 
-			new Keyframe(0.0F, KeyframeAnimations.scaleVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.LINEAR),
-			new Keyframe(0.125F, KeyframeAnimations.scaleVec(1.3F, 1.3F, 1.3F), AnimationChannel.Interpolations.CATMULLROM),
-			new Keyframe(0.25F, KeyframeAnimations.scaleVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.CATMULLROM),
-			new Keyframe(0.375F, KeyframeAnimations.scaleVec(1.3F, 1.3F, 1.3F), AnimationChannel.Interpolations.CATMULLROM),
-			new Keyframe(0.5F, KeyframeAnimations.scaleVec(1.0F, 1.0F, 1.0F), AnimationChannel.Interpolations.CATMULLROM)
-		))
 		.build();
 
 	public static final AnimationDefinition idle = AnimationDefinition.Builder.withLength(1.0F).looping()
@@ -439,7 +412,7 @@ public class TearacudaAnimation {
 			new Keyframe(1.0F, KeyframeAnimations.degreeVec(0.0F, -2.4271F, -0.809F), AnimationChannel.Interpolations.LINEAR)
 		))
 		.addAnimation("leftfin2", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
-			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.9876F, -36.9592F), AnimationChannel.Interpolations.LINEAR)
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, -2.0F, -34.382F), AnimationChannel.Interpolations.LINEAR)
 		))
 		.addAnimation("tail2", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
 			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, -2.4271F, 0.309F), AnimationChannel.Interpolations.LINEAR),
@@ -465,7 +438,7 @@ public class TearacudaAnimation {
 			new Keyframe(1.0F, KeyframeAnimations.degreeVec(0.0F, 1.1756F, 26.618F), AnimationChannel.Interpolations.LINEAR)
 		))
 		.addAnimation("rightfin2", new AnimationChannel(AnimationChannel.Targets.ROTATION, 
-			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, -0.9876F, 36.9592F), AnimationChannel.Interpolations.LINEAR)
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 2.0F, 34.382F), AnimationChannel.Interpolations.LINEAR)
 		))
 		.build();
 

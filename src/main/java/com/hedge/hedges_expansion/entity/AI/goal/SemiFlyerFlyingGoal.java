@@ -2,12 +2,15 @@ package com.hedge.hedges_expansion.entity.AI.goal;
 
 import com.hedge.hedges_expansion.entity.types.HESemiFlyer;
 import com.hedge.hedges_expansion.entity.util.EntityHelpers;
-import com.hedge.hedges_expansion.entity.util.WorldHelpers;
+import com.hedge.hedges_expansion.util.WorldHelpers;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
@@ -16,115 +19,111 @@ import java.util.EnumSet;
 public class SemiFlyerFlyingGoal<E extends PathfinderMob & HESemiFlyer> extends Goal {
 
     private final E mob;
-    private final int maxTicksFlying;
+    protected final float speedModifier;
+    private final int flightRange;
+    private final int flightHeight;
     private final int interval;
-    private final int yRange;
-    private final int radius;
-    private final int targetY;
-    private int ticksFlying ;
-    private Vec3 pos;
+    private int flyTicks = 0;
+    protected final int maxTimeFlying;
+    protected double x;
+    protected double y;
+    protected double z;
 
-    public SemiFlyerFlyingGoal(E mob, int maxTicksFlying, int radius, int yRange, int targetY, int interval) {
-        this.mob = mob;
-        this.maxTicksFlying = maxTicksFlying;
-        this.yRange = yRange;
-        this.radius = radius;
-        this.targetY = targetY;
-        this.interval = interval;
+    public SemiFlyerFlyingGoal(E mob, float speedModifier, int flightRange, int flightHeight, int interval, int maxTimeFlying) {
         this.setFlags(EnumSet.of(Flag.MOVE));
+        this.flightRange = flightRange;
+        this.flightHeight = flightHeight;
+        this.maxTimeFlying = maxTimeFlying;
+        this.speedModifier = speedModifier;
+        this.interval = interval;
+        this.mob = mob;
     }
 
     @Override
     public boolean canUse() {
-        if (this.mob.isInFluidType()) {
-            if (!EntityHelpers.closeToSurface(this.mob, 2)) {
-                return false;
-            }
-        }
-        if (!this.mob.getNavigation().isDone() || this.mob.getRandom().nextInt(interval) != 0) {
+        if (mob.isVehicle() || (mob.getTarget() != null && mob.getTarget().isAlive()) || mob.isPassenger()) {
             return false;
         }
-
-        this.pos = this.findPos();
-        if (this.pos != null) {
-            this.mob.setFlying(true);
-            this.mob.getNavigation().moveTo(this.mob.getNavigation().createPath(BlockPos.containing(this.pos), 1), 1.0D);
-            this.ticksFlying = 0;
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean canContinueToUse() {
-        if (this.mob.isInFluidType()) {
-            if (!EntityHelpers.closeToSurface(this.mob, 2)) {
-                return false;
-            }
-        }
-        else if (this.ticksFlying > 10 && this.mob.onGround()) {
+        if (!mob.isFlying() && mob.getRandom().nextInt(interval) != 0) {
             return false;
         }
+        Vec3 target = this.findFlightPos();
+        this.x = target.x;
+        this.y = target.y;
+        this.z = target.z;
         return true;
     }
 
+    @Override
+    public void start() {
+        this.mob.setFlying(true);
+        this.mob.getNavigation().moveTo(this.x, this.y, this.z, speedModifier);
+        if (mob.onGround()) {
+            this.mob.setDeltaMovement(mob.getDeltaMovement().add(0.0D, 0.5D, 0.0D));
+        }
+    }
 
     @Override
     public void stop() {
-        super.stop();
-        this.mob.setFlying(false);
+        this.mob.getNavigation().stop();
+        this.mob.setLanding(false);
+        this.x = 0;
+        this.y = 0;
+        this.z = 0;
     }
 
     @Override
     public void tick() {
-        super.tick();
-        this.ticksFlying++;
-        this.mob.lookAt(EntityAnchorArgument.Anchor.EYES, pos);
-
-        if (this.ticksFlying > this.maxTicksFlying || this.mob.getNavigation().isDone()) {
-
-            System.out.println("attempting to find pos");
-
-            Vec3 vec3 = this.findGroundPos();
-            if (vec3 != null) {
-                System.out.println("found ground pos");
-
-                this.pos = vec3;
-                this.mob.getNavigation().moveTo(this.pos.x, this.pos.y, this.pos.z, 1.0f);
-
-            } else {
-                vec3 = this.findPos();
-                if (vec3 != null) {
-                    System.out.println("found new pos");
-                    this.pos = vec3;
-                    this.ticksFlying = 0;
-                    this.mob.getNavigation().moveTo(this.pos.x, this.pos.y, this.pos.z, 1.0f);
-                }
+        if (this.mob.isFlying()) {
+            this.flyTicks++;
+            if (this.mob.onGround() && this.flyTicks > 40) {
+                this.mob.setFlying(false);
+            }
+            if (this.flyTicks % maxTimeFlying == 0 && !this.isOverWaterOrVoid()) {
+                this.mob.setLanding(true);
             }
         }
-        if (this.ticksFlying % 10 == 0) {
-            if (this.ticksFlying < this.maxTicksFlying) {
-                BlockPos blockPos = WorldHelpers.fromVec3(this.pos);
-                int blocksFromBoundary = EntityHelpers.blocksFromGround(this.mob.level(), blockPos, this.targetY * 2);
-                if (blocksFromBoundary < this.targetY) {
-                    this.pos = this.pos.add(0, 4, 0);
-                    this.mob.getNavigation().moveTo(this.pos.x, this.pos.y, this.pos.z, 1.0f);
-                }
-
-            } else {
-                this.pos = this.pos.add(0, -1, 0);
-                this.mob.getNavigation().moveTo(this.pos.x, this.pos.y, this.pos.z, 1.0f);
-            }
+        if (this.isOverWaterOrVoid() || this.mob.isInFluidType()) {
+            this.mob.setFlying(true);
+            this.mob.setLanding(false);
         }
     }
 
-    @Nullable
-    private Vec3 findPos() {
-        return EntityHelpers.getSmartFlyingTarget(this.mob, this.radius, yRange, targetY, targetY * 2);
+    @Override
+    public boolean canContinueToUse() {
+        if (this.mob.isLanding()) {
+            return !this.mob.getNavigation().isDone() && !this.mob.onGround() && this.mob.getGroundTicks() <= 0;
+        } else {
+            return this.mob.isFlying() && !this.mob.getNavigation().isDone() && this.mob.getGroundTicks() <= 0;
+        }
     }
 
-    @Nullable
-    private Vec3 findGroundPos() {
-        return EntityHelpers.getSmartFlyingTarget(this.mob, this.radius, yRange, 0, targetY * 2);
+    protected Vec3 findFlightPos() {
+        Vec3 heightAdjusted = mob.position().add(mob.getRandom().nextInt(flightRange * 2) - flightRange, 0, mob.getRandom().nextInt(flightRange * 2) - flightRange);
+        Vec3 ground = groundPosition(heightAdjusted);
+        heightAdjusted = new Vec3(heightAdjusted.x, ground.y + flightHeight + mob.getRandom().nextInt(6), heightAdjusted.z);
+        BlockHitResult result = mob.level().clip(new ClipContext(mob.getEyePosition(), heightAdjusted, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mob));
+        if (result.getType() == HitResult.Type.MISS) {
+            return heightAdjusted;
+        } else {
+            return result.getLocation();
+        }
+    }
+
+    public Vec3 groundPosition(Vec3 airPosition) {
+        BlockPos.MutableBlockPos ground = new BlockPos.MutableBlockPos();
+        ground.set(airPosition.x, airPosition.y, airPosition.z);
+        while (ground.getY() > mob.level().getMinBuildHeight() && !mob.level().getBlockState(ground).isSolid() && mob.level().getFluidState(ground).isEmpty()) {
+            ground.move(0, -1, 0);
+        }
+        return Vec3.atCenterOf(ground.below());
+    }
+
+    protected boolean isOverWaterOrVoid() {
+        BlockPos position = mob.blockPosition();
+        while (position.getY() > mob.level().getMinBuildHeight() && mob.level().isEmptyBlock(position) && mob.level().getFluidState(position).isEmpty()) {
+            position = position.below();
+        }
+        return !mob.level().getFluidState(position).isEmpty() || mob.level().getBlockState(position).is(Blocks.VINE) || position.getY() <= mob.level().getMinBuildHeight();
     }
 }

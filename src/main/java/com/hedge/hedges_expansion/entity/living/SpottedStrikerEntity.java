@@ -13,6 +13,7 @@ import com.hedge.hedges_expansion.entity.util.EntityHelpers;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
@@ -84,10 +85,10 @@ public class SpottedStrikerEntity extends HEAquaticMob implements AttackStateMob
             switch (animState) {
                 case 1 -> {
                     if (this.animTicks == 8 && target != null) {
-                        if (AttackHelpers.singleTargetHitbox(this, target, this.getLookAngle(), 1, 1, 1)) {
+                        if (AttackHelpers.singleTargetHitbox(this, target, this.getLookAngle().scale(1.4), 1.4, 1.4, 1.4)) {
                             this.doHurtTarget(target);
                         }
-                    } else if (this.animTicks >= 14) {
+                    } else if (this.animTicks >= 17) {
                         this.attackCD = 5;
                         this.resetAnimState();
                     }
@@ -96,7 +97,7 @@ public class SpottedStrikerEntity extends HEAquaticMob implements AttackStateMob
                     if (this.animTicks == 22) {
                         Vec3 v = EntityHelpers.bodyAngle(this);
                         this.addDeltaMovement(v.scale(0.6));
-                        List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, v, 2, 2, 2, 5);
+                        List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, v.scale(1.5), 2, 2, 2, 5);
                         for (LivingEntity entity : hit) {
                             if (!AttackHelpers.blockBreak(this, entity)) {
                                 AttackHelpers.betterHurt(this, entity, 2f, 1.4f);
@@ -110,6 +111,18 @@ public class SpottedStrikerEntity extends HEAquaticMob implements AttackStateMob
             }
         }
     }
+
+    public void travel(Vec3 pTravelVector) {
+        if (this.isEffectiveAi() && this.isInWater()) {
+            this.moveRelative(this.getSpeed(), pTravelVector);
+            this.move(MoverType.SELF, this.getDeltaMovement());
+            this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
+        } else {
+            super.travel(pTravelVector);
+        }
+
+    }
+
 
     @Override
     protected void clientTick() {

@@ -12,7 +12,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 
-public class WaveModel extends HierarchicalModel<WaveEntity> {
+public class WaveModel extends HEModel<WaveEntity> {
 	public static final ModelLayerLocation LAYER_LOCATION = EntityLayers.WAVE_LAYER;
 	private final ModelPart root;
 

@@ -2,12 +2,13 @@ package com.hedge.hedges_expansion.entity.living;
 
 import com.hedge.hedges_expansion.entity.AI.control.HESemiaquaticLookControl;
 import com.hedge.hedges_expansion.entity.AI.control.HESemiaquaticMoveControl;
-import com.hedge.hedges_expansion.entity.AI.control.HESwimmingLookControl;
-import com.hedge.hedges_expansion.entity.AI.goal.GroupFollowLeaderGoal;
 import com.hedge.hedges_expansion.entity.AI.goal.HECustomSwimGoal;
+import com.hedge.hedges_expansion.entity.AI.goal.HERandomlySitGoal;
+import com.hedge.hedges_expansion.entity.AI.goal.IdleInPlaceGoal;
 import com.hedge.hedges_expansion.entity.AI.navigation.HEAmphibiousPathNavigator;
-import com.hedge.hedges_expansion.entity.types.HEGroupMob;
-import com.hedge.hedges_expansion.entity.util.EntityHelpers;
+import com.hedge.hedges_expansion.entity.types.HETamableAnimal;
+import com.hedge.hedges_expansion.entity.types.HEVariantMob;
+import com.hedge.hedges_expansion.util.SmoothAnimationState;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -22,6 +23,7 @@ import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
@@ -29,19 +31,10 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.fluids.FluidType;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.stream.Stream;
+public class GurkEntity extends HETamableAnimal implements HEVariantMob {
 
-public class GurkEntity extends Animal implements HEGroupMob<GurkEntity> {
-
-    @Nullable
-    private GurkEntity leader;
-
-    private int groupSize = 1;
-
-    public final AnimationState idleAnimationState = new AnimationState();
     private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(GurkEntity.class, EntityDataSerializers.INT);
-
+    private static final EntityDataAccessor<Boolean> LEFT = SynchedEntityData.defineId(GurkEntity.class, EntityDataSerializers.BOOLEAN);
 
     public GurkEntity(EntityType<? extends GurkEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -58,9 +51,20 @@ public class GurkEntity extends Animal implements HEGroupMob<GurkEntity> {
     }
 
     @Override
+    protected boolean canOwnerMount(Player player) {
+        return false;
+    }
+
+    @Override
+    protected boolean canOwnerCommand(Player player) {
+        return true;
+    }
+
+    @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(VARIANT, 0);
+        this.entityData.define(LEFT, false);
     }
 
     @Override
@@ -76,12 +80,6 @@ public class GurkEntity extends Animal implements HEGroupMob<GurkEntity> {
     }
 
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
-        this.setVariant(this.getRandom().nextInt(3));
-        return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
-    }
-
-    @Override
     protected PathNavigation createNavigation(Level pLevel) {
         return new HEAmphibiousPathNavigator(this, pLevel);
     }
@@ -93,49 +91,33 @@ public class GurkEntity extends Animal implements HEGroupMob<GurkEntity> {
                 .add(Attributes.MOVEMENT_SPEED, 0.25F);
     }
 
+
+
     @Override
     protected void registerGoals() {
+        this.goalSelector.addGoal(0, new PanicGoal(this, 1.2));
+        this.goalSelector.addGoal(1, new HERandomlySitGoal(this));
+        this.goalSelector.addGoal(2, new LookAtPlayerGoal(this, LivingEntity.class, 5));
         this.goalSelector.addGoal(4, new RandomStrollGoal(this, 1.0) {
             @Override
             public boolean canUse() {
-                return !this.mob.isInFluidType() && super.canUse();
+                return !this.mob.isInWaterOrBubble() && super.canUse();
             }
 
             @Override
             public boolean canContinueToUse() {
-                return !this.mob.isInFluidType() && super.canContinueToUse();
+                return !this.mob.isInWaterOrBubble() && super.canContinueToUse();
             }
         });
-        this.goalSelector.addGoal(5, new GroupFollowLeaderGoal<>(this));
-        this.goalSelector.addGoal(3, new HECustomSwimGoal(this, 1.0, 10, 4, 4, true));
-        this.goalSelector.addGoal(2, new LookAtPlayerGoal(this, LivingEntity.class, 5));
-        this.goalSelector.addGoal(1, new PanicGoal(this, 1.2));
+        this.goalSelector.addGoal(4, new HECustomSwimGoal(this, 1.0, 10, 4, 4, true));
     }
 
     @Override
     public void tick() {
         super.tick();
         if (this.level().isClientSide()) {
-            this.idleAnimationState.animateWhen(this.isAlive(), this.tickCount);
+            this.setUpAnimStates();
         }
-        if (this.hasFollowers() && this.level().random.nextInt(200) == 1) {
-            List<? extends GurkEntity> list = this.level().getEntitiesOfClass(this.getClass(), this.getBoundingBox().inflate(10.0D, 10.0D, 10.0D));
-            if (list.size() <= 1) {
-                this.groupSize = 1;
-            }
-        }
-    }
-
-    @Override
-    protected void updateWalkAnimation(float pPartialTick) {
-        float f;
-        if (this.getPose() == Pose.STANDING) {
-            f = Math.min(pPartialTick * 6f, 1f);
-        } else {
-            f = 0;
-        }
-
-        this.walkAnimation.update(f, 0.2f);
     }
 
     @Override
@@ -145,7 +127,7 @@ public class GurkEntity extends Animal implements HEGroupMob<GurkEntity> {
 
     @Override
     public void travel(Vec3 pTravelVector) {
-        if (this.isEffectiveAi() && this.isInWater()) {
+        if (this.isEffectiveAi() && this.isInWaterOrBubble()) {
             this.moveRelative(this.getSpeed(), pTravelVector);
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
@@ -155,12 +137,15 @@ public class GurkEntity extends Animal implements HEGroupMob<GurkEntity> {
 
     }
 
-    public void setVariant(int i) {
-        this.entityData.set(VARIANT, i);
-    }
+    @Override
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
 
-    public int getVariant() {
-        return this.entityData.get(VARIANT);
+        if (this.getRandom().nextInt(20) == 0) {
+            this.setVariant(3);
+        } else {
+            this.setVariant(this.getRandom().nextInt(3));
+        }
+        return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
     }
 
     @Override
@@ -169,55 +154,26 @@ public class GurkEntity extends Animal implements HEGroupMob<GurkEntity> {
     }
 
     @Override
-    public GurkEntity getLeader() {
-        return this.leader;
+    public void setVariant(int i) {
+        this.entityData.set(VARIANT, i);
     }
 
     @Override
-    public void setLeader(GurkEntity leader) {
-        this.leader = leader;
+    public int getVariant() {
+        return this.entityData.get(VARIANT);
     }
 
     @Override
-    public void pathToLeader() {
-        if (this.isFollower()) {
-            this.getNavigation().moveTo(this.leader, 1.2f);
-        }
+    public void playIdle() {
     }
 
     @Override
-    public boolean inRangeOfLeader() {
-        return this.distanceToSqr(this.leader) <= 200.0D;
+    public void setSitting(boolean b) {
+        this.entityData.set(LEFT, this.getRandom().nextBoolean());
+        super.setSitting(b);
     }
 
-    @Override
-    public int getGroupSize() {
-        return this.groupSize;
-    }
-
-    @Override
-    public int getMaxGroupSize() {
-        return 10;
-    }
-
-    @Override
-    public void addFollower() {
-        this.groupSize++;
-    }
-
-    @Override
-    public void removeFollower() {
-        this.groupSize--;
-    }
-
-    @Override
-    public void addFollowers(Stream<GurkEntity> pFollowers) {
-        pFollowers.limit((long)(this.getMaxGroupSize() - this.groupSize)).filter((p_27538_) -> {
-            return p_27538_ != this;
-        }).forEach((p_27536_) -> {
-            if (p_27536_.getVariant() == this.getVariant()) {
-                p_27536_.startFollowing(this);
-            }
-        });
+    public boolean left() {
+        return this.entityData.get(LEFT);
     }
 }

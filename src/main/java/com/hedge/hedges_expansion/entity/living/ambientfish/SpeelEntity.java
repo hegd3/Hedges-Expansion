@@ -1,12 +1,10 @@
 package com.hedge.hedges_expansion.entity.living.ambientfish;
 
-import com.hedge.hedges_expansion.entity.AI.control.HESwimmingMoveControl;
+import com.hedge.hedges_expansion.entity.AI.control.HEFlyingMoveControl;
+import com.hedge.hedges_expansion.entity.AI.goal.FlyingWanderGoal;
 import com.hedge.hedges_expansion.entity.AI.goal.GroupFollowLeaderGoal;
-import com.hedge.hedges_expansion.entity.AI.goal.HECustomSwimGoal;
-import com.hedge.hedges_expansion.entity.living.TearacudaEntity;
 import com.hedge.hedges_expansion.entity.types.HESchoolingMob;
 import com.hedge.hedges_expansion.entity.util.EntityHelpers;
-import com.hedge.hedges_expansion.items.HEItems;
 import com.hedge.hedges_expansion.registry.HEEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -14,20 +12,20 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
@@ -39,7 +37,7 @@ public class SpeelEntity extends HESchoolingMob {
 
     public SpeelEntity(EntityType<? extends SpeelEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        this.moveControl = new HESwimmingMoveControl(this, 999, 15, 0.02f, 0.1f);
+        this.moveControl = new HEFlyingMoveControl(this, 999, 20, 1.0f);
         this.lookControl = new SmoothSwimmingLookControl(this, 20);
     }
 
@@ -47,7 +45,13 @@ public class SpeelEntity extends HESchoolingMob {
         return Animal.createLivingAttributes()
                 .add(Attributes.MAX_HEALTH, 4.0D)
                 .add(Attributes.FOLLOW_RANGE, 20)
-                .add(Attributes.MOVEMENT_SPEED, 0.9F);
+                .add(Attributes.MOVEMENT_SPEED, 0.12F);
+    }
+
+
+
+    @Override
+    protected void checkFallDamage(double pY, boolean pOnGround, BlockState pState, BlockPos pPos) {
     }
 
     private void tickTrailYaw() {
@@ -65,9 +69,24 @@ public class SpeelEntity extends HESchoolingMob {
         this.tickTrailYaw();
     }
 
+    protected void handleAirSupply(int pAirSupply) {
+
+    }
+
+    public void travel(Vec3 pTravelVector) {
+        if (this.isEffectiveAi()) {
+            this.moveRelative(this.getSpeed(), pTravelVector);
+            this.move(MoverType.SELF, this.getDeltaMovement());
+            this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
+        } else {
+            super.travel(pTravelVector);
+        }
+
+    }
+
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(1, new HECustomSwimGoal(this, 1.0f, 10, 6, 10, true));
+        this.goalSelector.addGoal(1, new FlyingWanderGoal(this, 1.0f, 25, 10));
         this.goalSelector.addGoal(2, new AvoidEntityGoal<>(this, Player.class, 6, 1.4f, 1.4f));
         this.goalSelector.addGoal(3, new GroupFollowLeaderGoal<>(this));
     }
@@ -78,20 +97,14 @@ public class SpeelEntity extends HESchoolingMob {
     }
 
     @Override
-    public void aiStep() {
-        this.flop();
-        super.aiStep();
-    }
-
-    @Override
     protected PathNavigation createNavigation(Level pLevel) {
-        return new WaterBoundPathNavigation(this, pLevel);
+        return new FlyingPathNavigation(this, pLevel);
     }
 
-
-    public static boolean canSpawn(EntityType<SpeelEntity> entity, LevelAccessor level, MobSpawnType reason, BlockPos pos, RandomSource random) {
-        return WaterAnimal.checkSurfaceWaterAnimalSpawnRules(entity, level, reason, pos, random);
+    public static boolean canSpawn(EntityType<? extends SpeelEntity> entity, LevelAccessor worldIn, MobSpawnType reason, BlockPos pos, RandomSource random) {
+        return pos.getY() > 25 && pos.getY() < 70;
     }
+
 
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {

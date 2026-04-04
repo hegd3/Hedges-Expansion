@@ -244,7 +244,7 @@ public class SpottedStrikerAnimation {
 		))
 		.build();
 
-	public static final AnimationDefinition bite = AnimationDefinition.Builder.withLength(0.75F).looping()
+	public static final AnimationDefinition bite = AnimationDefinition.Builder.withLength(1F).looping()
 		.addAnimation("root", new AnimationChannel(AnimationChannel.Targets.POSITION, 
 			new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
 			new Keyframe(0.2083F, KeyframeAnimations.posVec(0.0F, 0.0F, 3.0F), AnimationChannel.Interpolations.CATMULLROM),

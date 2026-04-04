@@ -14,7 +14,7 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
-public class ZappetModel extends HierarchicalModel<ZappetEntity> {
+public class ZappetModel extends HEModel<ZappetEntity> {
 	public static final ModelLayerLocation LAYER_LOCATION = EntityLayers.ZAPPET_LAYER;
 	private final ModelPart root;
 	private final ModelPart flycontrol;
@@ -63,20 +63,20 @@ public class ZappetModel extends HierarchicalModel<ZappetEntity> {
 		PartDefinition body = flycontrol.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-4.5F, -7.0F, -8.0F, 9.0F, 7.0F, 12.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
 		PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(42, 9).addBox(-2.5F, -2.0F, 0.0F, 5.0F, 4.0F, 6.0F, new CubeDeformation(0.0F))
-		.texOffs(34, 57).addBox(0.0F, -4.0F, 1.0F, 0.0F, 2.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -4.0F, 4.0F));
+				.texOffs(37, 63).addBox(0.0F, -8.0F, 1.0F, 0.0F, 6.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -4.0F, 4.0F));
 
-		PartDefinition tail2 = tail.addOrReplaceChild("tail2", CubeListBuilder.create().texOffs(0, 43).addBox(0.0F, -2.0F, 0.0F, 0.0F, 3.0F, 9.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 6.0F));
+		PartDefinition tail2 = tail.addOrReplaceChild("tail2", CubeListBuilder.create().texOffs(1, 43).addBox(0.0F, -1.0F, 0.0F, 0.0F, 4.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -1.0F, 6.0F));
 
 		PartDefinition headrot = body.addOrReplaceChild("headrot", CubeListBuilder.create(), PartPose.offset(0.0F, -7.0F, -3.5F));
 
 		PartDefinition head = headrot.addOrReplaceChild("head", CubeListBuilder.create().texOffs(34, 19).addBox(-3.5F, -6.0F, -4.5F, 7.0F, 6.0F, 9.0F, new CubeDeformation(0.0F))
-		.texOffs(0, 19).addBox(-3.5F, -6.0F, -14.5F, 7.0F, 6.0F, 10.0F, new CubeDeformation(0.0F))
-		.texOffs(18, 46).addBox(-3.5F, -10.0F, 0.5F, 7.0F, 4.0F, 4.0F, new CubeDeformation(0.0F))
-		.texOffs(0, 35).addBox(-3.5F, -7.0F, -14.5F, 7.0F, 1.0F, 7.0F, new CubeDeformation(0.02F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+				.texOffs(0, 19).addBox(-3.5F, -6.0F, -14.5F, 7.0F, 6.0F, 10.0F, new CubeDeformation(0.0F))
+				.texOffs(18, 46).addBox(-3.5F, -10.0F, 0.5F, 7.0F, 4.0F, 4.0F, new CubeDeformation(0.0F))
+				.texOffs(0, 35).addBox(-3.5F, -7.0F, -14.5F, 7.0F, 1.0F, 7.0F, new CubeDeformation(0.02F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
 		PartDefinition jaw = head.addOrReplaceChild("jaw", CubeListBuilder.create().texOffs(42, 0).addBox(-3.5F, -4.0F, -5.0F, 7.0F, 4.0F, 5.0F, new CubeDeformation(0.01F))
-		.texOffs(34, 34).addBox(-3.5F, -2.0F, -15.0F, 7.0F, 2.0F, 10.0F, new CubeDeformation(0.01F))
-		.texOffs(18, 54).addBox(0.0F, -4.0F, -15.0F, 0.0F, 2.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -6.0F, 0.5F));
+				.texOffs(34, 34).addBox(-3.5F, -2.0F, -15.0F, 7.0F, 2.0F, 10.0F, new CubeDeformation(0.01F))
+				.texOffs(23, 56).addBox(0.0F, -7.0F, -10.0F, 0.0F, 5.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -6.0F, 0.5F));
 
 		PartDefinition leftleg = flycontrol.addOrReplaceChild("leftleg", CubeListBuilder.create(), PartPose.offset(2.0F, 0.0F, 1.0F));
 
@@ -113,15 +113,23 @@ public class ZappetModel extends HierarchicalModel<ZappetEntity> {
 		this.headrot.yRot = netHeadYaw;
 		this.headrot.xRot = headPitch;
 
+		this.animateSmooth(entity.callAnimationState, ZappetAnimation.call, ageInTicks, 1f);
+		this.animateSmooth(entity.shootAnimationState, ZappetAnimation.shoot, ageInTicks, 1f);
+
 		if (entity.onGround()) {
 			this.animate(entity.idleAnimationState, ZappetAnimation.idle, ageInTicks, 0.5f);
 		} else {
 			this.animate(entity.idleAnimationState, ZappetAnimation.glide, ageInTicks, 1 + limbSwingAmount);
 		}
 		if (entity.isFlying()) {
-			this.flycontrol.xRot = headPitch * 1.5f;
-			this.flycontrol.zRot = -netHeadYaw;
+			float partialTicks = ageInTicks - entity.tickCount;
+			float flyProgress = entity.getFlyProgress(partialTicks);
+
 			this.animateWalk(ZappetAnimation.fly, limbSwing, limbSwingAmount, 2f, 2.5f);
+
+			this.flycontrol.xRot = entity.getFlightPitch(partialTicks) / 57.295776F * flyProgress / 2;
+			this.flycontrol.zRot = entity.getFlightRoll(partialTicks) / 57.295776F * flyProgress / 2;
+
 		} else {
 			this.animateWalk(ZappetAnimation.walk, limbSwing, limbSwingAmount, 1.8f, 2.5f);
 		}

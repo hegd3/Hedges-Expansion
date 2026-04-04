@@ -34,6 +34,7 @@ public class ClientEvent {
         event.registerLayerDefinition(EntityLayers.GLIM_LAYER, GlimModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.GRAFF_LAYER, GraffModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.SPEEL_LAYER, SpeelModel::createBodyLayer);
+        event.registerLayerDefinition(EntityLayers.BANSHEE_LAYER, BansheeModel::createBodyLayer);
 
     }
 
@@ -55,6 +56,7 @@ public class ClientEvent {
         EntityRenderers.register(HEEntities.GLIM.get(), GlimRenderer::new);
         EntityRenderers.register(HEEntities.GRAFF.get(), GraffRenderer::new);
         EntityRenderers.register(HEEntities.SPEEL.get(), SpeelRenderer::new);
+        EntityRenderers.register(HEEntities.BANSHEE.get(), BansheeRenderer::new);
 
     }
 }

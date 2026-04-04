@@ -12,7 +12,7 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
 
-public class SpottedStrikerModel extends HierarchicalModel<SpottedStrikerEntity> {
+public class SpottedStrikerModel extends HEModel<SpottedStrikerEntity> {
 	public static final ModelLayerLocation LAYER_LOCATION = EntityLayers.SPOTTED_STRIKER_LAYER;
 	private final ModelPart root;
 	private final ModelPart swimcontrol;

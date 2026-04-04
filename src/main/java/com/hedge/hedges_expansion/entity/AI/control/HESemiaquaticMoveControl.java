@@ -26,7 +26,7 @@ public class HESemiaquaticMoveControl extends MoveControl {
 
     @Override
     public void tick() {
-        if (this.mob.isInFluidType()) {
+        if (this.mob.isInWaterOrBubble()) {
             if (this.operation == MoveControl.Operation.MOVE_TO && !this.mob.getNavigation().isDone()) {
                 double d0 = this.wantedX - this.mob.getX();
                 double d1 = this.wantedY - this.mob.getY();
@@ -41,7 +41,7 @@ public class HESemiaquaticMoveControl extends MoveControl {
                     this.mob.yHeadRot = this.mob.getYRot();
                     float f1 = (float) (this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED));
                     if (this.mob.horizontalCollision) {
-                        final float outWater = this.mob.getYRot();
+                        final float outWater = this.mob.getYRot() * Mth.DEG_TO_RAD;
                         this.mob.setDeltaMovement(this.mob.getDeltaMovement().add(-Mth.sin(outWater) * 0.2f, 0.1, Mth.cos(outWater) * 0.2f));
                     }
                     this.mob.setSpeed(f1 * this.inWaterSpeedModifier);
@@ -72,7 +72,4 @@ public class HESemiaquaticMoveControl extends MoveControl {
     }
 
 
-    private static float getTurningSpeedFactor(float p_249853_) {
-        return 1.0F - Mth.clamp((p_249853_ - 10.0F) / 50.0F, 0.0F, 1.0F);
-    }
 }

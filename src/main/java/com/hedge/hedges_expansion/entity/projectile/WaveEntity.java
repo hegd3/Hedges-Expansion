@@ -132,8 +132,8 @@ public class WaveEntity extends Entity {
             float f1 = Mth.sin(this.getYRot() * ((float)Math.PI / 180F)) * 0.3F;
             float f2 = this.growProgress * 3.2f - this.random.nextFloat() * 0.7F;
 
-            this.level().addParticle(this.getParticle(), this.getX() - vec3.x * (double)f2 + (double)f, this.getY() - vec3.y, this.getZ() - vec3.z * (double)f2 + (double)f1, 0.0D, 0.0D, 0.0D);
-            this.level().addParticle(this.getParticle(), this.getX() - vec3.x * (double)f2 - (double)f, this.getY() - vec3.y, this.getZ() - vec3.z * (double)f2 - (double)f1, 0.0D, 0.0D, 0.0D);
+            this.level().addParticle(this.getParticle(), this.getX() - vec3.x * (double)f2 + (double)f, this.getY() + 0.02, this.getZ() - vec3.z * (double)f2 + (double)f1, 0.0D, 0.0D, 0.0D);
+            this.level().addParticle(this.getParticle(), this.getX() - vec3.x * (double)f2 - (double)f, this.getY() + 0.02, this.getZ() - vec3.z * (double)f2 - (double)f1, 0.0D, 0.0D, 0.0D);
 
         }
 

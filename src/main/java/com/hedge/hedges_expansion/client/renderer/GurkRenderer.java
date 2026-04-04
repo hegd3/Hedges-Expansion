@@ -11,7 +11,10 @@ import net.minecraft.resources.ResourceLocation;
 
 public class GurkRenderer extends MobRenderer<GurkEntity, GurkModel> {
 
-    private static final ResourceLocation[] texture = ClientHelpers.generateVariants("gurk/gurk", 3);
+    private static final ResourceLocation gurk_river = new ResourceLocation(HedgesExpansion.MODID, "textures/entity/gurk/gurk_river.png");
+    private static final ResourceLocation gurk_swamp = new ResourceLocation(HedgesExpansion.MODID, "textures/entity/gurk/gurk_swamp.png");
+    private static final ResourceLocation gurk_tropical = new ResourceLocation(HedgesExpansion.MODID, "textures/entity/gurk/gurk_tropical.png");
+    private static final ResourceLocation gurk_shiny = new ResourceLocation(HedgesExpansion.MODID, "textures/entity/gurk/gurk_shiny.png");
 
     public GurkRenderer(EntityRendererProvider.Context pContext) {
         super(pContext, new GurkModel(pContext.bakeLayer(EntityLayers.GURK_LAYER)), 0.8f);
@@ -19,6 +22,11 @@ public class GurkRenderer extends MobRenderer<GurkEntity, GurkModel> {
 
     @Override
     public ResourceLocation getTextureLocation(GurkEntity pEntity) {
-        return texture[pEntity.getVariant()];
+        return switch (pEntity.getVariant()) {
+            case 1 -> gurk_swamp;
+            case 2 -> gurk_tropical;
+            case 3 -> gurk_shiny;
+            default -> gurk_river;
+        };
     }
 }

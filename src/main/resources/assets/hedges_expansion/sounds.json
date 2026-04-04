@@ -1,0 +1,11 @@
+{
+  "murk_clicks": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "hedges_expansion:murk_clicks"
+      }
+    ],
+    "subtitle": "hedgesbestiary.sound.subtitle.murk_clicks"
+  }
+}

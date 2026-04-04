@@ -13,7 +13,7 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
 
-public class GurkModel extends HierarchicalModel<GurkEntity> {
+public class GurkModel extends HEModel<GurkEntity> {
 	public static final ModelLayerLocation LAYER_LOCATION = EntityLayers.GURK_LAYER;
 	private final ModelPart root;
 	private final ModelPart swimcontrol;
@@ -48,27 +48,27 @@ public class GurkModel extends HierarchicalModel<GurkEntity> {
 		PartDefinition swimcontrol = root.addOrReplaceChild("swimcontrol", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
 
 		PartDefinition leftleg = swimcontrol.addOrReplaceChild("leftleg", CubeListBuilder.create().texOffs(58, 0).addBox(0.0F, -0.5F, -3.0F, 7.0F, 1.0F, 6.0F, new CubeDeformation(0.01F))
-		.texOffs(58, 7).addBox(5.0F, -0.5F, -4.0F, 3.0F, 1.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(7.5F, 4.5F, -5.0F));
+				.texOffs(58, 7).addBox(5.0F, -0.5F, -4.0F, 3.0F, 1.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(7.5F, 4.5F, -5.0F));
 
 		PartDefinition rightleg = swimcontrol.addOrReplaceChild("rightleg", CubeListBuilder.create().texOffs(58, 0).mirror().addBox(-7.0F, -0.5F, -3.0F, 7.0F, 1.0F, 6.0F, new CubeDeformation(0.01F)).mirror(false)
-		.texOffs(58, 7).mirror().addBox(-8.0F, -0.5F, -4.0F, 3.0F, 1.0F, 5.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-7.5F, 4.5F, -5.0F));
+				.texOffs(58, 7).mirror().addBox(-8.0F, -0.5F, -4.0F, 3.0F, 1.0F, 5.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-7.5F, 4.5F, -5.0F));
 
 		PartDefinition body = swimcontrol.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-7.5F, -5.0F, -7.0F, 15.0F, 10.0F, 14.0F, new CubeDeformation(0.0F))
-		.texOffs(0, 53).addBox(0.0F, -10.0F, -6.0F, 0.0F, 5.0F, 13.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, -1.0F));
+				.texOffs(0, 53).addBox(0.0F, -14.0F, -6.0F, 0.0F, 9.0F, 13.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, -1.0F));
 
 		PartDefinition headrot = swimcontrol.addOrReplaceChild("headrot", CubeListBuilder.create(), PartPose.offset(0.0F, -1.0F, -8.0F));
 
 		PartDefinition head = headrot.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 24).addBox(-5.5F, -4.0F, -10.0F, 11.0F, 7.0F, 10.0F, new CubeDeformation(0.01F))
-		.texOffs(0, 41).addBox(-6.5F, 0.0F, -16.0F, 13.0F, 3.0F, 9.0F, new CubeDeformation(0.02F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+				.texOffs(0, 41).addBox(-6.5F, 0.0F, -16.0F, 13.0F, 3.0F, 9.0F, new CubeDeformation(0.02F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
 		PartDefinition tail = swimcontrol.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(42, 24).addBox(-3.5F, -3.0F, 0.0F, 7.0F, 7.0F, 10.0F, new CubeDeformation(0.0F))
-		.texOffs(44, 41).addBox(0.0F, -7.0F, 1.0F, 0.0F, 11.0F, 13.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 1.0F, 6.0F));
+				.texOffs(37, 42).addBox(0.0F, -9.0F, 1.0F, 0.0F, 13.0F, 20.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 1.0F, 6.0F));
 
 		PartDefinition leftleg2 = swimcontrol.addOrReplaceChild("leftleg2", CubeListBuilder.create().texOffs(26, 53).addBox(0.0F, -0.5F, -2.0F, 5.0F, 1.0F, 4.0F, new CubeDeformation(0.01F))
-		.texOffs(58, 13).addBox(3.0F, -0.5F, -2.0F, 3.0F, 1.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(7.5F, 4.5F, 5.0F));
+				.texOffs(58, 13).addBox(3.0F, -0.5F, -2.0F, 3.0F, 1.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(7.5F, 4.5F, 5.0F));
 
 		PartDefinition rightleg2 = swimcontrol.addOrReplaceChild("rightleg2", CubeListBuilder.create().texOffs(26, 53).mirror().addBox(-5.0F, -0.5F, -2.0F, 5.0F, 1.0F, 4.0F, new CubeDeformation(0.01F)).mirror(false)
-		.texOffs(58, 13).mirror().addBox(-6.0F, -0.5F, -2.0F, 3.0F, 1.0F, 5.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-7.5F, 4.5F, 5.0F));
+				.texOffs(58, 13).mirror().addBox(-6.0F, -0.5F, -2.0F, 3.0F, 1.0F, 5.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-7.5F, 4.5F, 5.0F));
 
 		return LayerDefinition.create(meshdefinition, 128, 128);
 	}
@@ -96,5 +96,6 @@ public class GurkModel extends HierarchicalModel<GurkEntity> {
 			this.animateWalk(GurkAnimation.walk, limbSwing, limbSwingAmount, 2f, 2.5f);
 			this.animate(entity.idleAnimationState, GurkAnimation.idle, ageInTicks, 0.5f);
 		}
+		this.animateSmooth(entity.sitAnimationState, entity.left() ? GurkAnimation.lay_down_left : GurkAnimation.lay_down_right, ageInTicks, 1f);
 	}
 }

@@ -1,16 +1,21 @@
 package com.hedge.hedges_expansion.entity.living;
 
 import com.hedge.hedges_expansion.entity.AI.control.ATMBodyRotControl;
-import com.hedge.hedges_expansion.entity.AI.goal.AvoidTargetWhenLowGoal;
-import com.hedge.hedges_expansion.entity.AI.goal.BurodonAttackGoal;
+import com.hedge.hedges_expansion.entity.AI.goal.*;
+import com.hedge.hedges_expansion.entity.AI.goal.specific.BurodonAttackGoal;
 import com.hedge.hedges_expansion.entity.AI.control.ATMLookControl;
 import com.hedge.hedges_expansion.entity.AI.control.ATMMoveControl;
 import com.hedge.hedges_expansion.entity.AI.navigation.MMPathNavigatorGround;
 import com.hedge.hedges_expansion.entity.types.HETamableAnimal;
 import com.hedge.hedges_expansion.entity.types.AdvancedTurningMob;
 import com.hedge.hedges_expansion.entity.types.AttackStateMob;
+import com.hedge.hedges_expansion.util.SmoothAnimationState;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -26,20 +31,24 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class BurodonEntity extends HETamableAnimal implements AttackStateMob, AdvancedTurningMob {
 
-    public final AnimationState biteAnimationState = new AnimationState();
-    public final AnimationState jumpAnimationState = new AnimationState();
-    public final AnimationState roarAnimationState = new AnimationState();
-    public final AnimationState yawnAnimationState = new AnimationState();
+    public final SmoothAnimationState biteAnimationState = new SmoothAnimationState();
+    public final SmoothAnimationState jumpAnimationState = new SmoothAnimationState();
+    public final SmoothAnimationState roarAnimationState = new SmoothAnimationState();
+    public final SmoothAnimationState yawnAnimationState = new SmoothAnimationState();
+    public final SmoothAnimationState airAnimationState = new SmoothAnimationState();
 
 
-    public final AnimationState idleAnimationState = new AnimationState();
-    public final AnimationState airAnimationState = new AnimationState();
 
     private boolean jumpAway = false;
     private Vec3 jumpVector;
@@ -75,25 +84,48 @@ public class BurodonEntity extends HETamableAnimal implements AttackStateMob, Ad
                 .add(Attributes.MOVEMENT_SPEED, 0.25F);
     }
 
-
+    @Override
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        ItemStack itemStack = player.getItemInHand(hand);
+        InteractionResult type = super.mobInteract(player, hand);
+        if (!this.isTame() && itemStack.is(Items.BEEF) && this.getAnimState() == ROAR_ANIM) {
+            if (!this.level().isClientSide) {
+                if (!player.getAbilities().instabuild) {
+                    itemStack.shrink(1);
+                }
+                this.level().broadcastEntityEvent(this, (byte) 7);
+                this.tame(player);
+                this.heal(this.getMaxHealth());
+            }
+            this.playSound(SoundEvents.GENERIC_EAT);
+            return InteractionResult.sidedSuccess(this.level().isClientSide);
+        }
+        return type;
+    }
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, LivingEntity.class, 7));
-        this.goalSelector.addGoal(5, new RandomStrollGoal(this, 1.0, 20));
-        this.goalSelector.addGoal(2, new BurodonAttackGoal(this));
-        this.goalSelector.addGoal(1, new AvoidTargetWhenLowGoal(this, 1.6, 20, 15, 16, 7));
         this.goalSelector.addGoal(0, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new HESitWhenOrderedGoal(this));
+        this.goalSelector.addGoal(2, new AvoidTargetWhenLowGoal(this, 1.6D, 20, 15, 16, 7));
+        this.goalSelector.addGoal(3, new BurodonAttackGoal(this));
+        this.goalSelector.addGoal(4, new HEFollowOwnerGoal(this, 1.2D, 1.6D, 7.0f, 4.0f));
+        this.goalSelector.addGoal(5, new HERandomlySitGoal(this));
+        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, LivingEntity.class, 7));
+        this.goalSelector.addGoal(7, new RandomStrollGoal(this, 1.0, 20));
+        this.goalSelector.addGoal(8, new IdleAnimationGoal<>(this, 500));
+
 
         this.targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(2, new HurtByTargetGoal(this).setAlertOthers());
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Sheep.class, true));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, GraffEntity.class, true));
     }
+
 
     @Override
     public boolean isAlliedTo(Entity pEntity) {
-        if (pEntity instanceof BurodonEntity && pEntity.getTeam() == this.getTeam()) {
+        if (pEntity instanceof BurodonEntity burodon && burodon.getOwner() == this.getOwner()) {
             return true;
         }
         return super.isAlliedTo(pEntity);
@@ -112,9 +144,6 @@ public class BurodonEntity extends HETamableAnimal implements AttackStateMob, Ad
         } else {
             if (this.tickCount % 200 == 0) {
                 this.heal(10);
-                if (!this.isAggressive() && this.getAnimState() == 0 && this.getRandom().nextInt(3) == 0) {
-                    this.setAnimState(YAWN_ANIM);
-                }
             }
             this.tickCooldowns();
             this.tickAnimState();
@@ -187,6 +216,21 @@ public class BurodonEntity extends HETamableAnimal implements AttackStateMob, Ad
     }
 
     @Override
+    public void playIdle() {
+        this.setAnimState(YAWN_ANIM);
+    }
+
+    @Override
+    protected boolean canOwnerMount(Player player) {
+        return false;
+    }
+
+    @Override
+    protected boolean canOwnerCommand(Player player) {
+        return player.isShiftKeyDown();
+    }
+
+    @Override
     protected float getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions) {
         return 1.3f;
     }
@@ -203,7 +247,8 @@ public class BurodonEntity extends HETamableAnimal implements AttackStateMob, Ad
 
     @Override
     public void setUpAnimStates() {
-        this.idleAnimationState.animateWhen(this.getPose() == Pose.STANDING && keepsIdle(), this.tickCount);
+        this.idleAnimationState.animateWhen(inAirTimer < 5 && keepsIdle(), this.tickCount);
+        this.sitAnimationState.animateWhen(this.isSitting(), this.tickCount);
         this.airAnimationState.animateWhen(inAirTimer > 5 && keepsIdle(), this.tickCount);
         this.biteAnimationState.animateWhen(this.getAnimState() == 1, this.tickCount);
         this.jumpAnimationState.animateWhen(this.getAnimState() == 2, this.tickCount);
@@ -212,6 +257,7 @@ public class BurodonEntity extends HETamableAnimal implements AttackStateMob, Ad
     }
 
     private boolean keepsIdle() {
+        if (this.isSitting()) return false;
         return switch (this.getAnimState()) {
             case JUMP_ANIM, ROAR_ANIM -> false;
             default -> true;

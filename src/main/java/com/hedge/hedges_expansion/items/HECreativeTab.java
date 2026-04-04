@@ -15,18 +15,30 @@ public class HECreativeTab {
 
 
     public static final RegistryObject<CreativeModeTab> CREATIVE_TAB = CREATIVE_MODE_TABS.register("hedges_expansion_tab",
-            () -> CreativeModeTab.builder().icon(() -> new ItemStack(HEItems.HYDROVSLER_CLAW.get()))
+            () -> CreativeModeTab.builder().icon(() -> new ItemStack(HEItems.MURK_CLAW.get()))
                     .title(Component.translatable("creativetab.hedges_expansion_tab"))
                     .displayItems((itemDisplayParameters, output) -> {
-                        output.accept(HEItems.HYDROVSLER_CLAW.get());
+
+                        // crafting items
+                        output.accept(HEItems.MURK_CLAW.get());
+                        output.accept(HEItems.MURK_SPIKE.get());
+                        output.accept(HEItems.TEARACUDA_TOOTH.get());
+
+                        // foods
+                        output.accept(HEItems.RAW_URKMEAT.get());
+                        output.accept(HEItems.COOKED_URKMEAT.get());
+
+                        // buckets
+                        output.accept(HEItems.GILD_GLIDER_BUCKET.get());
+                        output.accept(HEItems.SMARM_BUCKET.get());
+
+                        // spawn eggs
                         output.accept(HEItems.BURODON_SPAWN_EGG.get());
                         output.accept(HEItems.SPOTTED_STRIKER_SPAWN_EGG.get());
-                        output.accept(HEItems.TRANSFIGURED_SPAWN_EGG.get());
                         output.accept(HEItems.GRUIN_SPAWN_EGG.get());
                         output.accept(HEItems.GURK_SPAWN_EGG.get());
                         output.accept(HEItems.MURK_SPAWN_EGG.get());
                         output.accept(HEItems.TEARACUDA_SPAWN_EGG.get());
-                        output.accept(HEItems.SKARTLE_SPAWN_EGG.get());
                         output.accept(HEItems.ZAPPET_SPAWN_EGG.get());
                         output.accept(HEItems.GILD_GLIDER_SPAWN_EGG.get());
                         output.accept(HEItems.SMARM_SPAWN_EGG.get());
@@ -34,11 +46,9 @@ public class HECreativeTab {
                         output.accept(HEItems.GLIM_SPAWN_EGG.get());
                         output.accept(HEItems.GRAFF_SPAWN_EGG.get());
                         output.accept(HEItems.SPEEL_SPAWN_EGG.get());
+                        output.accept(HEItems.BANSHEE_SPAWN_EGG.get());
 
 
-
-                        output.accept(HEItems.GILD_GLIDER_BUCKET.get());
-                        output.accept(HEItems.SMARM_BUCKET.get());
 
                     }).build());
 

@@ -1,15 +1,16 @@
 package com.hedge.hedges_expansion.entity.AI.goal;
 
 import com.hedge.hedges_expansion.entity.util.EntityHelpers;
-import com.hedge.hedges_expansion.entity.util.WorldHelpers;
+import com.hedge.hedges_expansion.util.WorldHelpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.EnumSet;
 
 public class HECustomSwimGoal extends RandomStrollGoal {
 
@@ -36,13 +37,13 @@ public class HECustomSwimGoal extends RandomStrollGoal {
 
     @Override
     public boolean canUse() {
-        return this.mob.isInFluidType() && super.canUse();
+        return this.mob.isInWaterOrBubble() && super.canUse();
     }
 
 
     @Override
     public boolean canContinueToUse() {
-        return this.mob.isInFluidType() && super.canContinueToUse();
+        return this.mob.isInWaterOrBubble() && super.canContinueToUse();
     }
 
     @Override

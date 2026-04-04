@@ -1,5 +1,6 @@
 package com.hedge.hedges_expansion.entity.types;
 
+import com.hedge.hedges_expansion.util.SmoothAnimationState;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -13,8 +14,8 @@ import net.minecraft.world.level.Level;
 public class HEMonster extends Monster implements AnimStateMob, AttackStateMob {
     protected static final EntityDataAccessor<Integer> ANIM_STATE = SynchedEntityData.defineId(HEMonster.class, EntityDataSerializers.INT);
 
-    public final AnimationState attackAnimationState = new AnimationState();
-    public final AnimationState idleAnimationState = new AnimationState();
+    public final SmoothAnimationState attackAnimationState = new SmoothAnimationState();
+    public final SmoothAnimationState idleAnimationState = new SmoothAnimationState();
 
     protected int animTicks = 0;
 

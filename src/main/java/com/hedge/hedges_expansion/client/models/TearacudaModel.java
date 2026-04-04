@@ -13,7 +13,7 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
 
-public class TearacudaModel extends HierarchicalModel<TearacudaEntity> {
+public class TearacudaModel extends HEModel<TearacudaEntity> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = EntityLayers.TEARACUDA_LAYER;
 	private final ModelPart root;
@@ -22,8 +22,6 @@ public class TearacudaModel extends HierarchicalModel<TearacudaEntity> {
 	private final ModelPart leftfin;
 	private final ModelPart rightfin;
 	private final ModelPart head;
-	private final ModelPart lefteye;
-	private final ModelPart righteye;
 	private final ModelPart jaw;
 	private final ModelPart tailrot;
 	private final ModelPart tail;
@@ -39,8 +37,6 @@ public class TearacudaModel extends HierarchicalModel<TearacudaEntity> {
 		this.leftfin = this.body.getChild("leftfin");
 		this.rightfin = this.body.getChild("rightfin");
 		this.head = this.swimcontrol.getChild("head");
-		this.lefteye = this.head.getChild("lefteye");
-		this.righteye = this.head.getChild("righteye");
 		this.jaw = this.head.getChild("jaw");
 		this.tailrot = this.swimcontrol.getChild("tailrot");
 		this.tail = this.tailrot.getChild("tail");
@@ -58,23 +54,21 @@ public class TearacudaModel extends HierarchicalModel<TearacudaEntity> {
 
 		PartDefinition swimcontrol = root.addOrReplaceChild("swimcontrol", CubeListBuilder.create(), PartPose.offset(0.0F, 6.0F, 0.0F));
 
-		PartDefinition body = swimcontrol.addOrReplaceChild("body", CubeListBuilder.create().texOffs(44, 76).addBox(0.0F, -15.0F, -6.0F, 0.0F, 7.0F, 20.0F, new CubeDeformation(0.0F))
-		.texOffs(0, 0).addBox(-4.5F, -8.0F, -12.0F, 9.0F, 17.0F, 25.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -9.0F, 0.0F));
+		PartDefinition body = swimcontrol.addOrReplaceChild("body", CubeListBuilder.create().texOffs(43, 82).addBox(0.0F, -15.0F, -8.0F, 0.0F, 7.0F, 21.0F, new CubeDeformation(0.0F))
+				.texOffs(0, 0).addBox(-4.5F, -8.0F, -12.0F, 9.0F, 17.0F, 25.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -9.0F, 0.0F));
 
 		PartDefinition leftfin = body.addOrReplaceChild("leftfin", CubeListBuilder.create().texOffs(44, 42).addBox(0.0F, 0.0F, -13.0F, 0.0F, 8.0F, 26.0F, new CubeDeformation(0.0F)), PartPose.offset(4.5F, 9.0F, 0.0F));
 
 		PartDefinition rightfin = body.addOrReplaceChild("rightfin", CubeListBuilder.create().texOffs(44, 42).addBox(0.0F, 0.0F, -13.0F, 0.0F, 8.0F, 26.0F, new CubeDeformation(0.0F)), PartPose.offset(-4.5F, 9.0F, 0.0F));
 
 		PartDefinition head = swimcontrol.addOrReplaceChild("head", CubeListBuilder.create().texOffs(68, 0).addBox(-5.5F, 1.0F, -13.0F, 11.0F, 15.0F, 13.0F, new CubeDeformation(0.01F))
-		.texOffs(0, 85).addBox(-3.5F, 1.0F, -16.0F, 7.0F, 15.0F, 3.0F, new CubeDeformation(0.01F))
-		.texOffs(68, 28).addBox(-3.5F, 1.0F, -18.0F, 7.0F, 9.0F, 2.0F, new CubeDeformation(0.01F)), PartPose.offset(0.0F, -18.0F, 0.0F));
-
-		PartDefinition lefteye = head.addOrReplaceChild("lefteye", CubeListBuilder.create().texOffs(96, 50).addBox(0.0F, -1.5F, -1.5F, 1.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(5.5F, 6.5F, -9.5F));
-
-		PartDefinition righteye = head.addOrReplaceChild("righteye", CubeListBuilder.create().texOffs(96, 50).mirror().addBox(-1.0F, -1.5F, -1.5F, 1.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-5.5F, 6.5F, -9.5F));
+				.texOffs(96, 50).addBox(5.5F, 6.0F, -13.0F, 1.0F, 3.0F, 3.0F, new CubeDeformation(0.01F))
+				.texOffs(96, 50).mirror().addBox(-6.5F, 6.0F, -13.0F, 1.0F, 3.0F, 3.0F, new CubeDeformation(0.01F)).mirror(false)
+				.texOffs(0, 85).addBox(-3.5F, 1.0F, -16.0F, 7.0F, 15.0F, 3.0F, new CubeDeformation(0.01F))
+				.texOffs(68, 28).addBox(-3.5F, 1.0F, -18.0F, 7.0F, 9.0F, 2.0F, new CubeDeformation(0.01F)), PartPose.offset(0.0F, -18.0F, 0.0F));
 
 		PartDefinition jaw = head.addOrReplaceChild("jaw", CubeListBuilder.create().texOffs(20, 85).addBox(-3.5F, -14.0F, -3.0F, 7.0F, 14.0F, 3.0F, new CubeDeformation(0.02F))
-		.texOffs(96, 39).addBox(-1.5F, -12.0F, 0.0F, 3.0F, 9.0F, 2.0F, new CubeDeformation(0.01F)), PartPose.offset(0.0F, 15.0F, -16.0F));
+				.texOffs(96, 39).addBox(-1.5F, -12.0F, 0.0F, 3.0F, 9.0F, 2.0F, new CubeDeformation(0.01F)), PartPose.offset(0.0F, 15.0F, -16.0F));
 
 		PartDefinition tailrot = swimcontrol.addOrReplaceChild("tailrot", CubeListBuilder.create(), PartPose.offset(0.0F, -8.5F, 13.0F));
 
@@ -84,9 +78,9 @@ public class TearacudaModel extends HierarchicalModel<TearacudaEntity> {
 
 		PartDefinition rightfin2 = tail.addOrReplaceChild("rightfin2", CubeListBuilder.create().texOffs(86, 28).mirror().addBox(0.0F, 0.0F, -3.5F, 0.0F, 4.0F, 7.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-3.5F, 4.5F, 3.5F));
 
-		PartDefinition tail2rot = tail.addOrReplaceChild("tail2rot", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 10.0F));
+		PartDefinition tail2rot = tail.addOrReplaceChild("tail2rot", CubeListBuilder.create(), PartPose.offset(0.0F, -1.0F, 9.0F));
 
-		PartDefinition tail2 = tail2rot.addOrReplaceChild("tail2", CubeListBuilder.create().texOffs(0, 42).addBox(0.0F, -17.5F, -7.0F, 0.0F, 21.0F, 22.0F, new CubeDeformation(0.01F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+		PartDefinition tail2 = tail2rot.addOrReplaceChild("tail2", CubeListBuilder.create().texOffs(0, 42).addBox(0.0F, -13.5F, 0.0F, 0.0F, 21.0F, 22.0F, new CubeDeformation(0.01F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
 		return LayerDefinition.create(meshdefinition, 128, 128);
 	}

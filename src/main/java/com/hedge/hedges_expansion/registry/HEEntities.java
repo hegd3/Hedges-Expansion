@@ -30,7 +30,7 @@ public class HEEntities {
 
     public static final RegistryObject<EntityType<GruinEntity>> GRUIN =
             ENTITY_TYPES.register("gruin", () -> EntityType.Builder.of(GruinEntity::new, MobCategory.CREATURE)
-                    .sized(2.25f, 2.5f).build("gruin"));
+                    .sized(1.8f, 2.2f).build("gruin"));
 
     public static final RegistryObject<EntityType<GurkEntity>> GURK =
             ENTITY_TYPES.register("gurk", () -> EntityType.Builder.of(GurkEntity::new, MobCategory.CREATURE)
@@ -62,7 +62,7 @@ public class HEEntities {
 
     public static final RegistryObject<EntityType<FerocetusEntity>> FEROCETUS =
             ENTITY_TYPES.register("ferocetus", () -> EntityType.Builder.of(FerocetusEntity::new, MobCategory.WATER_CREATURE)
-                    .sized(2.5f, 1.75f).build("ferocetus"));
+                    .sized(2.7f, 2.1f).build("ferocetus"));
 
     public static final RegistryObject<EntityType<WaveEntity>> WAVE =
             ENTITY_TYPES.register("wave", () -> EntityType.Builder.of(WaveEntity::new, MobCategory.MISC)
@@ -79,6 +79,10 @@ public class HEEntities {
     public static final RegistryObject<EntityType<SpeelEntity>> SPEEL =
             ENTITY_TYPES.register("speel", () -> EntityType.Builder.of(SpeelEntity::new, MobCategory.WATER_CREATURE)
                     .sized(0.8f, 0.375f).build("speel"));
+
+    public static final RegistryObject<EntityType<BansheeEntity>> BANSHEE =
+            ENTITY_TYPES.register("banshee", () -> EntityType.Builder.of(BansheeEntity::new, MobCategory.MONSTER)
+                    .sized(1.9f, 1.05f).build("banshee"));
 
 
     public static void register(IEventBus eventbus) {

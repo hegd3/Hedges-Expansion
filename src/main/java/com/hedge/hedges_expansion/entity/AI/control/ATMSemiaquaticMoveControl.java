@@ -21,7 +21,7 @@ public class ATMSemiaquaticMoveControl<E extends Mob & AdvancedTurningMob> exten
 
     @Override
     public void tick() {
-        if (this.mob.isInFluidType()) {
+        if (this.mob.isInWaterOrBubble()) {
             if (this.operation == Operation.MOVE_TO && !this.mob.getNavigation().isDone()) {
                 double d0 = this.wantedX - this.mob.getX();
                 double d1 = this.wantedY - this.mob.getY();

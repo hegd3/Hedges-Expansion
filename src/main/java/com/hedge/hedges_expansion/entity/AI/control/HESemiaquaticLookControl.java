@@ -14,7 +14,7 @@ public class HESemiaquaticLookControl extends LookControl {
     }
 
     public void tick() {
-        if (this.mob.isInFluidType()) {
+        if (this.mob.isInWaterOrBubble()) {
             if (this.lookAtCooldown > 0) {
                 --this.lookAtCooldown;
                 this.getYRotD().ifPresent((p_287449_) -> {
