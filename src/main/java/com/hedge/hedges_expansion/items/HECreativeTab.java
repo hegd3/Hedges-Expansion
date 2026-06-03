@@ -22,7 +22,13 @@ public class HECreativeTab {
                         // crafting items
                         output.accept(HEItems.MURK_CLAW.get());
                         output.accept(HEItems.MURK_SPIKE.get());
+                        output.accept(HEItems.SCREAMER_SAC.get());
                         output.accept(HEItems.TEARACUDA_TOOTH.get());
+
+                        //crafted items
+
+                        output.accept(HEItems.BURODON_TREAT.get());
+
 
                         // foods
                         output.accept(HEItems.RAW_URKMEAT.get());
@@ -44,10 +50,8 @@ public class HECreativeTab {
                         output.accept(HEItems.SMARM_SPAWN_EGG.get());
                         output.accept(HEItems.FEROCETUS_SPAWN_EGG.get());
                         output.accept(HEItems.GLIM_SPAWN_EGG.get());
-                        output.accept(HEItems.GRAFF_SPAWN_EGG.get());
-                        output.accept(HEItems.SPEEL_SPAWN_EGG.get());
                         output.accept(HEItems.BANSHEE_SPAWN_EGG.get());
-
+                        output.accept(HEItems.DAWN_DOVE_SPAWN_EGG.get());
 
 
                     }).build());

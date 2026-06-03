@@ -56,6 +56,10 @@ public class HESemiaquaticMoveControl extends MoveControl {
                     float f4 = Mth.sin(this.mob.getXRot() * ((float) Math.PI / 180F));
                     this.mob.zza = f6 * f1;
                     this.mob.yya = -f4 * f1;
+
+                    double y = Mth.clamp(f1 * d1 * 0.01D, f1 * -0.1D, f1 * 0.1D);
+                    this.mob.setDeltaMovement(this.mob.getDeltaMovement().add(0.0D, y, 0.0D));
+
                 }
             }
             else {

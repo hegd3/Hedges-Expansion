@@ -4,6 +4,9 @@ package com.hedge.hedges_expansion.client.models;
 import com.hedge.hedges_expansion.client.animations.SpottedStrikerAnimation;
 import com.hedge.hedges_expansion.client.layer.EntityLayers;
 import com.hedge.hedges_expansion.entity.living.SpottedStrikerEntity;
+import com.hedge.hedges_expansion.util.HEColorUtils;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -11,8 +14,12 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.NotNull;
 
 public class SpottedStrikerModel extends HEModel<SpottedStrikerEntity> {
+
+	private float alpha = 1.0F;
+
 	public static final ModelLayerLocation LAYER_LOCATION = EntityLayers.SPOTTED_STRIKER_LAYER;
 	private final ModelPart root;
 	private final ModelPart swimcontrol;
@@ -85,7 +92,10 @@ public class SpottedStrikerModel extends HEModel<SpottedStrikerEntity> {
 		return LayerDefinition.create(meshdefinition, 256, 256);
 	}
 
-
+	@Override
+	public void renderToBuffer(PoseStack pPoseStack, VertexConsumer pBuffer, int pPackedLight, int pPackedOverlay, float pRed, float pGreen, float pBlue, float pAlpha) {
+		super.renderToBuffer(pPoseStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha * this.alpha);
+	}
 
 	@Override
 	public ModelPart root() {
@@ -96,7 +106,7 @@ public class SpottedStrikerModel extends HEModel<SpottedStrikerEntity> {
 	public void setupAnim(SpottedStrikerEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		headPitch = Mth.clamp(headPitch, -25.0F, 25.0F) * ((float) Math.PI / 180F);
+		headPitch = Mth.clamp(headPitch, -15.0F, 15.0F) * ((float) Math.PI / 180F);
 		netHeadYaw = Mth.clamp(netHeadYaw, -15.0F, 15.0F) * ((float)Math.PI / 180F);
 
 
@@ -118,5 +128,11 @@ public class SpottedStrikerModel extends HEModel<SpottedStrikerEntity> {
 		this.headrot.yRot = netHeadYaw;
 
 	}
+
+	public void setAlpha(float alpha) {
+		this.alpha = alpha;
+	}
+
+
 
 }

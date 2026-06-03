@@ -26,6 +26,14 @@ public class HEItems {
     public static final RegistryObject<Item> TEARACUDA_TOOTH = ITEMS.register("tearacuda_tooth",
             () -> new Item(new Item.Properties()));
 
+    public static final RegistryObject<Item> SCREAMER_SAC = ITEMS.register("screamer_sac",
+            () -> new Item(new Item.Properties()));
+
+
+    // CRAFTED ITEMS
+
+    public static final RegistryObject<Item> BURODON_TREAT = ITEMS.register("burodon_treat",
+            () -> new Item(new Item.Properties()));
 
     // FOODS
 
@@ -39,7 +47,7 @@ public class HEItems {
     // BUCKETS
     public static final RegistryObject<Item> GILD_GLIDER_BUCKET = createBucket("gild_glider", HEEntities.GILD_GLIDER);
 
-    public static final RegistryObject<Item> SMARM_BUCKET = createBucket("smarm", HEEntities.SMARM);
+    public static final RegistryObject<Item> SMARM_BUCKET = createBucket("chub", HEEntities.CHUB);
 
     // SPAWN EGGS
     public static final RegistryObject<Item> BURODON_SPAWN_EGG = ITEMS.register("burodon_spawn_egg",
@@ -64,18 +72,15 @@ public class HEItems {
 
     public static final RegistryObject<Item> GILD_GLIDER_SPAWN_EGG = createEgg("gild_glider", HEEntities.GILD_GLIDER, 0xE3D188, 0xDED0B1);
 
-    public static final RegistryObject<Item> SMARM_SPAWN_EGG = createEgg("smarm", HEEntities.SMARM, 0x53A6C9, 0xC9536B);
+    public static final RegistryObject<Item> SMARM_SPAWN_EGG = createEgg("chub", HEEntities.CHUB, 0x53A6C9, 0xC9536B);
 
     public static final RegistryObject<Item> FEROCETUS_SPAWN_EGG = createEgg("ferocetus", HEEntities.FEROCETUS, 0x75604C, 0xC7A169);
 
     public static final RegistryObject<Item> GLIM_SPAWN_EGG = createEgg("glim", HEEntities.GLIM, 0x252329, 0xBD9E73);
 
-    public static final RegistryObject<Item> GRAFF_SPAWN_EGG = createEgg("graff", HEEntities.GRAFF, 0xAB776A, 0x88A4BA);
-
-    public static final RegistryObject<Item> SPEEL_SPAWN_EGG = createEgg("speel", HEEntities.SPEEL, 0x467599, 0xB8C6D1);
-
     public static final RegistryObject<Item> BANSHEE_SPAWN_EGG = createEgg("banshee", HEEntities.BANSHEE, 0xC484C4, 0x8EE695);
 
+    public static final RegistryObject<Item> DAWN_DOVE_SPAWN_EGG = createEgg("dawn_dove", HEEntities.DAWN_DOVE, 0x61523d, 0x2c261c);
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

@@ -524,7 +524,7 @@ public class MurkEntity extends HETamableAnimal implements AttackStateMob, Advan
 
     @Override
     public float getTurnSpeed() {
-        return 9;
+        return 22.25f;
     }
 
     @Override
@@ -535,7 +535,7 @@ public class MurkEntity extends HETamableAnimal implements AttackStateMob, Advan
     @Override
     public void playIdle() {
         this.setAnimState(8);
-        this.playSound(HESounds.MURK_CLICKS.get(), 1 - (this.getRandom().nextFloat() / 2), 1);
+        this.playSound(HESounds.MURK_CLICKS.get(), 1 - (this.getRandom().nextFloat() / 2), 1 - (this.getRandom().nextFloat() / 4));
     }
 }
 

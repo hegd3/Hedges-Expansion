@@ -11,7 +11,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
-public class HEAnimStateAnimal extends Animal implements AnimStateMob {
+public abstract class HEAnimStateAnimal extends Animal implements AnimStateMob, IdleAnimMob {
 
     protected static final EntityDataAccessor<Integer> ANIM_STATE = SynchedEntityData.defineId(HEAnimStateAnimal.class, EntityDataSerializers.INT);
     protected int animTicks = 0;
@@ -69,5 +69,10 @@ public class HEAnimStateAnimal extends Animal implements AnimStateMob {
     @Override
     public @Nullable AgeableMob getBreedOffspring(ServerLevel pLevel, AgeableMob pOtherParent) {
         return null;
+    }
+
+    @Override
+    public boolean canPlayIdle() {
+        return this.tickCount % 20 == 0 && this.getTarget() == null && this.getAnimState() == 0;
     }
 }

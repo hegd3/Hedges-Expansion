@@ -25,6 +25,7 @@ import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.animal.AbstractSchoolingFish;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
@@ -40,7 +41,6 @@ public class TearacudaEntity extends HESchoolingMob implements AttackStateMob {
 
     public final AnimationState biteAnimationState = new AnimationState();
     public final AnimationState frenzyAnimationState = new AnimationState();
-
     private int frenzyCD = 0;
     private int attackCD = 0;
     private int jumpCD = 0;
@@ -70,9 +70,12 @@ public class TearacudaEntity extends HESchoolingMob implements AttackStateMob {
         this.goalSelector.addGoal(0, new TearacudaAttackGoal(this));
         this.goalSelector.addGoal(1, new HECustomSwimGoal(this, 1.0f, 10, 6, 5, true));
         this.goalSelector.addGoal(2, new GroupFollowLeaderGoal<>(this));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, HEBucketableSchoolingMob.class, true));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
+
         this.targetSelector.addGoal(0, new HurtByTargetGoal(this).setAlertOthers());
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, AbstractSchoolingFish.class, true));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, HEBucketableSchoolingMob.class, true));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+
     }
 
     @Override

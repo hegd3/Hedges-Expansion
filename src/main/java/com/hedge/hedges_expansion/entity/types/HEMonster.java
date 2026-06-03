@@ -14,7 +14,6 @@ import net.minecraft.world.level.Level;
 public class HEMonster extends Monster implements AnimStateMob, AttackStateMob {
     protected static final EntityDataAccessor<Integer> ANIM_STATE = SynchedEntityData.defineId(HEMonster.class, EntityDataSerializers.INT);
 
-    public final SmoothAnimationState attackAnimationState = new SmoothAnimationState();
     public final SmoothAnimationState idleAnimationState = new SmoothAnimationState();
 
     protected int animTicks = 0;
@@ -91,9 +90,8 @@ public class HEMonster extends Monster implements AnimStateMob, AttackStateMob {
 
     @Override
     public void setUpAnimStates() {
-        this.idleAnimationState.animateWhen(this.getPose() == Pose.STANDING && keepsIdle(), this.tickCount);
+        this.idleAnimationState.animateWhen(this.isAlive() && keepsIdle(), this.tickCount);
 
-        this.attackAnimationState.animateWhen(this.getAnimState() == 1, this.tickCount);
     }
 
     public boolean keepsIdle() {

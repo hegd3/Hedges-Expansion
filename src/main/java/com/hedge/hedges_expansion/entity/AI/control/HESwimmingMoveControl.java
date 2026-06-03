@@ -52,6 +52,9 @@ public class HESwimmingMoveControl extends MoveControl {
                     this.mob.zza = f6 * f1;
                     this.mob.yya = -f4 * f1;
 
+                    double y = Mth.clamp(f1 * d1 * 0.01D, f1 * -0.1D, f1 * 0.1D);
+                    this.mob.setDeltaMovement(this.mob.getDeltaMovement().add(0.0D, y, 0.0D));
+
                 } else {
                     float f5 = Math.abs(Mth.wrapDegrees(this.mob.getYRot() - f));
                     float f2 = getTurningSpeedFactor(f5);

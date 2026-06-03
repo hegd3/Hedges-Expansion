@@ -9,6 +9,7 @@ import com.hedge.hedges_expansion.entity.AI.navigation.MMPathNavigatorGround;
 import com.hedge.hedges_expansion.entity.types.HETamableAnimal;
 import com.hedge.hedges_expansion.entity.types.AdvancedTurningMob;
 import com.hedge.hedges_expansion.entity.types.AttackStateMob;
+import com.hedge.hedges_expansion.items.HEItems;
 import com.hedge.hedges_expansion.util.SmoothAnimationState;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.server.level.ServerLevel;
@@ -88,7 +89,7 @@ public class BurodonEntity extends HETamableAnimal implements AttackStateMob, Ad
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
         InteractionResult type = super.mobInteract(player, hand);
-        if (!this.isTame() && itemStack.is(Items.BEEF) && this.getAnimState() == ROAR_ANIM) {
+        if (!this.isTame() && itemStack.is(HEItems.BURODON_TREAT.get()) && this.getAnimState() == ROAR_ANIM) {
             if (!this.level().isClientSide) {
                 if (!player.getAbilities().instabuild) {
                     itemStack.shrink(1);
@@ -119,7 +120,6 @@ public class BurodonEntity extends HETamableAnimal implements AttackStateMob, Ad
         this.targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(2, new HurtByTargetGoal(this).setAlertOthers());
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, GraffEntity.class, true));
     }
 
 

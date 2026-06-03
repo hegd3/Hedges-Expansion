@@ -7,6 +7,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -15,6 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,7 +31,7 @@ public abstract class HETamableAnimal extends TamableAnimal implements AnimState
 
     protected int animTicks = 0;
 
-    public HETamableAnimal(EntityType<? extends TamableAnimal> pEntityType, Level pLevel) {
+    public HETamableAnimal(EntityType<? extends HETamableAnimal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
     }
 
@@ -167,7 +169,9 @@ public abstract class HETamableAnimal extends TamableAnimal implements AnimState
         return this.entityData.get(TAME_COMMAND);
     }
 
-
+    protected Vec2 getRiddenRotation(LivingEntity pEntity) {
+        return new Vec2(pEntity.getXRot() * 0.5F, pEntity.getYRot());
+    }
 
     public void setSitting(boolean b) {
         this.entityData.set(IS_SITTING, b);

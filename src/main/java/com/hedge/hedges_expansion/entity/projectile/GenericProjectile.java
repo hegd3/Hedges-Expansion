@@ -1,6 +1,9 @@
 package com.hedge.hedges_expansion.entity.projectile;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -20,7 +23,6 @@ import java.util.Objects;
 public abstract class GenericProjectile extends Projectile {
 
     Vec3 deltaMovementOld = Vec3.ZERO;
-    protected static final int LIFESPAN = 15 * 20;
     private float damage;
 
     protected GenericProjectile(EntityType<? extends Projectile> pEntityType, Level pLevel) {
@@ -68,7 +70,7 @@ public abstract class GenericProjectile extends Projectile {
         if (tickCount == 1) {
             deltaMovementOld = getDeltaMovement();
         }
-        if (tickCount > LIFESPAN) {
+        if (tickCount > this.getLifespan()) {
             discard();
             return;
         }
@@ -150,6 +152,8 @@ public abstract class GenericProjectile extends Projectile {
         this.tickCount = tag.getInt("age");
     }
 
+
+
     public void setDamage(float damage) {
         this.damage = damage;
     }
@@ -170,6 +174,10 @@ public abstract class GenericProjectile extends Projectile {
     @Override
     public boolean hurt(DamageSource pSource, float pAmount) {
         return false;
+    }
+
+    public int getLifespan() {
+        return 300;
     }
 
 

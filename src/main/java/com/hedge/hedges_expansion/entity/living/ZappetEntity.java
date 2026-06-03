@@ -2,12 +2,14 @@ package com.hedge.hedges_expansion.entity.living;
 
 import com.hedge.hedges_expansion.entity.AI.control.HEFlyingMoveControl;
 import com.hedge.hedges_expansion.entity.AI.goal.GroupFollowLeaderGoal;
+import com.hedge.hedges_expansion.entity.AI.goal.IdleAnimationGoal;
 import com.hedge.hedges_expansion.entity.AI.goal.SemiFlyerCircleWanderGoal;
 import com.hedge.hedges_expansion.entity.AI.goal.SemiFlyerFlyingGoal;
 import com.hedge.hedges_expansion.entity.AI.navigation.MMPathNavigatorGround;
 import com.hedge.hedges_expansion.entity.types.HEAnimStateAnimal;
 import com.hedge.hedges_expansion.entity.types.HEGroupMob;
 import com.hedge.hedges_expansion.entity.types.HESemiFlyer;
+import com.hedge.hedges_expansion.entity.types.IdleAnimMob;
 import com.hedge.hedges_expansion.util.SmoothAnimationState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -99,6 +101,7 @@ public class ZappetEntity extends HEAnimStateAnimal implements HESemiFlyer, HEGr
         this.goalSelector.addGoal(4, new RandomStrollGoal(this, 1.0));
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, LivingEntity.class, 10));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(8, new IdleAnimationGoal<>(this));
     }
 
     @Override
@@ -126,12 +129,12 @@ public class ZappetEntity extends HEAnimStateAnimal implements HESemiFlyer, HEGr
                 this.animTicks++;
                 switch (this.getAnimState()) {
                     case 1 -> {
-                        if (this.animTicks > 15) {
+                        if (this.animTicks > 20) {
                             this.resetAnimState();
                         }
                     }
                     case 2 -> {
-                        if (this.animTicks > 20) {
+                        if (this.animTicks > 15) {
                             this.resetAnimState();
                         }
                     }
@@ -198,8 +201,8 @@ public class ZappetEntity extends HEAnimStateAnimal implements HESemiFlyer, HEGr
     @Override
     public void setUpAnimStates() {
         this.idleAnimationState.animateWhen(this.isAlive(), this.tickCount);
-        this.shootAnimationState.animateWhen(this.getAnimState() == 1, this.tickCount);
-        this.callAnimationState.animateWhen(this.getAnimState() == 2, this.tickCount);
+        this.callAnimationState.animateWhen(this.getAnimState() == 1, this.tickCount);
+        this.shootAnimationState.animateWhen(this.getAnimState() == 2, this.tickCount);
     }
 
     @Override
@@ -356,4 +359,11 @@ public class ZappetEntity extends HEAnimStateAnimal implements HESemiFlyer, HEGr
             p_27536_.startFollowing(this);
         });
     }
+
+    @Override
+    public void playIdle() {
+        this.setAnimState(1);
+    }
+
+
 }

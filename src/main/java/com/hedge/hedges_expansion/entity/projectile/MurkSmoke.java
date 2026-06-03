@@ -19,7 +19,7 @@ public class MurkSmoke extends GenericProjectile {
 
     private static final EntityDataAccessor<Boolean> CHARGED = SynchedEntityData.defineId(MurkSmoke.class, EntityDataSerializers.BOOLEAN);
 
-    public MurkSmoke(EntityType<? extends Projectile> pEntityType, Level pLevel) {
+    public MurkSmoke(EntityType<? extends MurkSmoke> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.setNoGravity(true);
     }

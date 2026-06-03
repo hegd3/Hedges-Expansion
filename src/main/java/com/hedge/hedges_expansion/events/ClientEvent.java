@@ -28,13 +28,12 @@ public class ClientEvent {
         event.registerLayerDefinition(EntityLayers.TEARACUDA_LAYER, TearacudaModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.ZAPPET_LAYER, ZappetModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.GILD_GLIDER_LAYER, GildGliderModel::createBodyLayer);
-        event.registerLayerDefinition(EntityLayers.SMARM_LAYER, SmarmModel::createBodyLayer);
+        event.registerLayerDefinition(EntityLayers.CHUB_LAYER, ChubModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.FEROCETUS_LAYER, FerocetusModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.WAVE_LAYER, WaveModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.GLIM_LAYER, GlimModel::createBodyLayer);
-        event.registerLayerDefinition(EntityLayers.GRAFF_LAYER, GraffModel::createBodyLayer);
-        event.registerLayerDefinition(EntityLayers.SPEEL_LAYER, SpeelModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.BANSHEE_LAYER, BansheeModel::createBodyLayer);
+        event.registerLayerDefinition(EntityLayers.DAWN_DOVE_LAYER, DawnDoveModel::createBodyLayer);
 
     }
 
@@ -50,13 +49,13 @@ public class ClientEvent {
         EntityRenderers.register(HEEntities.TEARACUDA.get(), TearacudaRenderer::new);
         EntityRenderers.register(HEEntities.ZAPPET.get(), ZappetRenderer::new);
         EntityRenderers.register(HEEntities.GILD_GLIDER.get(), GildGliderRenderer::new);
-        EntityRenderers.register(HEEntities.SMARM.get(), SmarmRenderer::new);
+        EntityRenderers.register(HEEntities.CHUB.get(), ChubRenderer::new);
         EntityRenderers.register(HEEntities.FEROCETUS.get(), FerocetusRenderer::new);
         EntityRenderers.register(HEEntities.WAVE.get(), WaveRenderer::new);
         EntityRenderers.register(HEEntities.GLIM.get(), GlimRenderer::new);
-        EntityRenderers.register(HEEntities.GRAFF.get(), GraffRenderer::new);
-        EntityRenderers.register(HEEntities.SPEEL.get(), SpeelRenderer::new);
         EntityRenderers.register(HEEntities.BANSHEE.get(), BansheeRenderer::new);
+        EntityRenderers.register(HEEntities.BANSHEE_SCREAM.get(), ModellessProjectileRenderer::new);
+        EntityRenderers.register(HEEntities.DAWN_DOVE.get(), DawnDoveRenderer::new);
 
     }
 }

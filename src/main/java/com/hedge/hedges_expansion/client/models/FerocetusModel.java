@@ -74,7 +74,7 @@ public class FerocetusModel extends HEModel<FerocetusEntity> {
 	@Override
 	public void setupAnim(FerocetusEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		headPitch = Mth.clamp(headPitch, -45.0F, 45.0F) * ((float) Math.PI / 180F);
+		headPitch = (entity.getAnimState() == 2 ? headPitch : Mth.clamp(headPitch, -45.0F, 45.0F)) * ((float) Math.PI / 180F);
 		float tailYaw = entity.getTrailYaw(ageInTicks - entity.tickCount);
 		this.tail.yRot = Mth.lerp(0.3F, this.tail.yRot, tailYaw * 0.3F);
 		this.tail.yRot = Mth.lerp(0.3F, this.tail.yRot, tailYaw * 0.25F);

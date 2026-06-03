@@ -12,6 +12,7 @@ import java.util.List;
 
 public class AttackHelpers {
 
+
     public static List<LivingEntity> zoneHitbox(LivingEntity entity, Vec3 offset, double pX, double pY, double pZ, int limit) {
 
         Vec3 origin = entity.position().add(offset);
