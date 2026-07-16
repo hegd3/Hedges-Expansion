@@ -40,10 +40,6 @@ public class HESemiaquaticMoveControl extends MoveControl {
                     this.mob.yBodyRot = this.mob.getYRot();
                     this.mob.yHeadRot = this.mob.getYRot();
                     float f1 = (float) (this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED));
-                    if (this.mob.horizontalCollision) {
-                        final float outWater = this.mob.getYRot() * Mth.DEG_TO_RAD;
-                        this.mob.setDeltaMovement(this.mob.getDeltaMovement().add(-Mth.sin(outWater) * 0.2f, 0.1, Mth.cos(outWater) * 0.2f));
-                    }
                     this.mob.setSpeed(f1 * this.inWaterSpeedModifier);
                     double d4 = Math.sqrt(d0 * d0 + d2 * d2);
                     if (Math.abs(d1) > (double) 1.0E-5F || Math.abs(d4) > (double) 1.0E-5F) {

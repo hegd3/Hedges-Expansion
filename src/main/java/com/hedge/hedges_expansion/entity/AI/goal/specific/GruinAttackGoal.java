@@ -10,6 +10,11 @@ public class GruinAttackGoal extends GenericMeleeGoal<GruinEntity> {
     }
 
     @Override
+    public boolean canUse() {
+        return !this.mob.isBaby() && super.canUse();
+    }
+
+    @Override
     protected double getSpeedModifier() {
         return switch (this.mob.getAnimState()) {
             case 1, 2 -> 1;

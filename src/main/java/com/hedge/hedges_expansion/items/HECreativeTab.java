@@ -1,6 +1,7 @@
 package com.hedge.hedges_expansion.items;
 
 import com.hedge.hedges_expansion.HedgesExpansion;
+import com.hedge.hedges_expansion.blocks.HEBlocks;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -18,6 +19,10 @@ public class HECreativeTab {
             () -> CreativeModeTab.builder().icon(() -> new ItemStack(HEItems.MURK_CLAW.get()))
                     .title(Component.translatable("creativetab.hedges_expansion_tab"))
                     .displayItems((itemDisplayParameters, output) -> {
+                        // blocks
+
+                        output.accept(HEBlocks.DAWN_DOVE_EGG.get());
+                        output.accept(HEBlocks.MURK_EGG.get());
 
                         // crafting items
                         output.accept(HEItems.MURK_CLAW.get());
@@ -27,7 +32,9 @@ public class HECreativeTab {
 
                         //crafted items
 
-                        output.accept(HEItems.BURODON_TREAT.get());
+                        output.accept(HEItems.PLAIN_TREAT.get());
+                        output.accept(HEItems.SEASONED_TREAT.get());
+                        output.accept(HEItems.HEARTY_TREAT.get());
 
 
                         // foods

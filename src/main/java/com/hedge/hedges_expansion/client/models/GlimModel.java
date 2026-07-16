@@ -87,7 +87,7 @@ public class GlimModel extends HEModel<GlimEntity> {
 
 		if (entity.isInFluidType()) {
 			this.swimcontrol.xRot = Mth.clamp(headPitch, -45.0F, 45.0F) * ((float) Math.PI / 180F);
-			this.swimcontrol.zRot = -Mth.clamp(netHeadYaw, -55.0F, 55.0F) * ((float) Math.PI / 180F);
+			this.swimcontrol.zRot = entity.roll * 2;
 			this.animate(entity.idleAnimationState, GlimAnimation.swim, ageInTicks, 0.2f + limbSwingAmount);
 		} else {
 			this.animate(entity.idleAnimationState, GlimAnimation.flop, ageInTicks, 1);

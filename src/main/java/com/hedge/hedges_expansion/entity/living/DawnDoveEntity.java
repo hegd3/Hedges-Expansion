@@ -1,11 +1,16 @@
 package com.hedge.hedges_expansion.entity.living;
 
 import com.hedge.hedges_expansion.entity.AI.control.HEFlyingMoveControl;
-import com.hedge.hedges_expansion.entity.AI.goal.GroupFollowLeaderGoal;
-import com.hedge.hedges_expansion.entity.AI.goal.SemiFlyerFlyingGoal;
+import com.hedge.hedges_expansion.entity.AI.goal.*;
 import com.hedge.hedges_expansion.entity.AI.navigation.MMPathNavigatorGround;
 import com.hedge.hedges_expansion.entity.types.TamableFlyer;
+import com.hedge.hedges_expansion.entity.util.MathHelpers;
+import com.hedge.hedges_expansion.registry.HEEntities;
 import com.hedge.hedges_expansion.util.SmoothAnimationState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,16 +19,14 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class DawnDoveEntity extends TamableFlyer {
 
@@ -44,34 +47,109 @@ public class DawnDoveEntity extends TamableFlyer {
                 .add(Attributes.ATTACK_KNOCKBACK, 0.2D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.4)
                 .add(Attributes.FOLLOW_RANGE, 35F)
-                .add(Attributes.MOVEMENT_SPEED, 0.2F);
+                .add(Attributes.MOVEMENT_SPEED, 0.15F);
     }
 
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
+        this.goalSelector.addGoal(0, new HESitWhenOrderedGoal(this, false));
+        this.goalSelector.addGoal(2, new FlyerFollowOwnerGoal(this, 1.2D, 1.6D, 8.0f, 5.0f));
         this.goalSelector.addGoal(3, new SemiFlyerFlyingGoal<>(this, 1.0f, 35, 25, 20, 800));
-        this.goalSelector.addGoal(4, new RandomStrollGoal(this, 1.0));
+        this.goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1.0));
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, LivingEntity.class, 10));
         this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
     }
 
-    /*
     @Override
-    protected void tickRidden(Player pPlayer, Vec3 pTravelVector) {
-        super.tickRidden(pPlayer, pTravelVector);
-        Vec2 vec2 = this.getRiddenRotation(pPlayer);
-        this.setRot(vec2.y, vec2.x);
-        this.yRotO = this.yBodyRot = this.yHeadRot = this.getYRot();
-        if (this.isControlledByLocalInstance()) {
-            if (this.onGround()) {
-                if (!this.isFlying() &&
+    public void travel(Vec3 vec3d) {
+
+
+        if (isControlledByLocalInstance() && getControllingPassenger() != null && getControllingPassenger() instanceof Player rider) {
+            boolean flag = this.isFlying();
+            float speed = (float) this.getAttributeValue(Attributes.MOVEMENT_SPEED);
+
+
+            if (isControlledByLocalInstance()) {
+
+                if (Minecraft.getInstance().options.keyJump.isDown()) {
+                    this.setDeltaMovement(this.getDeltaMovement().add(0, 0.03, 0));
+                    if (!flag) {
+                        this.setFlying(true);
+                    }
+
+                } else if (Minecraft.getInstance().options.keySprint.isDown() && flag) {
+                    this.setDeltaMovement(this.getDeltaMovement().add(0, -0.03, 0));
+                }
+
+
+                this.setSpeed(flag ? speed * 7 : speed);
+            } else if (rider instanceof Player) {
+                setDeltaMovement(Vec3.ZERO);
+                return;
             }
         }
+        super.travel(vec3d);
+    }
+    protected void tickRidden(Player pPlayer, Vec3 pTravelVector) {
+        super.tickRidden(pPlayer, pTravelVector);
+        float turnSpeed = 5.0F;
+        float currentYaw = this.getYRot();
+        float targetYaw = pPlayer.getYRot();
+        float deltaYaw = Mth.wrapDegrees(targetYaw - currentYaw);
+
+        float newYaw = currentYaw + Mth.clamp(deltaYaw, -turnSpeed, turnSpeed);
+        this.setYRot(newYaw);
+        this.setYHeadRot(pPlayer.getYHeadRot());
+        this.setXRot(pPlayer.getXRot() * 0.5f);
+        if (this.isFlying()) {
+            this.setDeltaMovement(this.getDeltaMovement().add(0, -0.004, 0));
+            if (this.onGround()) {
+                this.setFlying(false);
+            }
+        }
+    }
+
+    protected Vec3 getRiddenInput(Player pPlayer, Vec3 pTravelVector) {
+
+        //float f = pPlayer.xxa * 0.5F;
+        float f1 = pPlayer.zza * 0.5F;
+        if (f1 <= 0.0F)
+            f1 *= 0.25F;
+
+        return new Vec3(!this.isFlying() ? pPlayer.xxa * 0.5f : 0, 0.0, f1);
+
 
     }
 
-     */
+    @Override
+    public void positionRider(Entity passenger, Entity.MoveFunction moveFunc) {
+        /*
+        final float radius = 0.5F;
+        final float angle = (MathHelpers.STARTING_ANGLE * this.yBodyRot);
+        final double extraX = radius * Mth.sin(Mth.PI + angle);
+        final double extraZ = radius * Mth.cos(angle);
+        final double extraY = 2 + Mth.sin(-this.getFlightPitch(1.0f));
+
+        passenger.setPos(this.getX() + extraX, this.getY() + extraY, this.getZ() + extraZ);
+
+         */
+        if (this.isPassengerOfSameVehicle(passenger) && passenger instanceof LivingEntity && !this.touchingUnloadedChunk()) {
+            final float angle = (MathHelpers.STARTING_ANGLE * this.yBodyRot);
+            float flight = this.getFlyProgress(1.0F);
+            //Vec3 seatOffset = new Vec3(0F, 0.0F, 0.2F - 1.5F * flight).xRot((float) Math.toRadians(this.getXRot())).yRot((float) Math.toRadians(-this.yBodyRot));
+            double targetY = this.getY() + passenger.getBbHeight() + 0.25F * flight;
+            double extraX = 0.5f * Mth.sin(Mth.PI + angle);
+            double extraZ = 0.5f * Mth.cos(angle);
+
+            passenger.setYBodyRot(this.yBodyRot);
+            passenger.fallDistance = 0.0F;
+            moveFunc.accept(passenger, this.getX() + extraX, targetY, this.getZ() + extraZ);
+        } else {
+            super.positionRider(passenger, moveFunc);
+        }
+
+    }
 
 
 
@@ -85,10 +163,17 @@ public class DawnDoveEntity extends TamableFlyer {
         }
     }
 
+    @Override
+    public Vec3 getDismountLocationForPassenger(LivingEntity pPassenger) {
+        if (this.isFlying() && pPassenger == this.getFirstPassenger()) {
+            this.setFlying(false);
+        }
+        return super.getDismountLocationForPassenger(pPassenger);
+    }
 
     @Override
     protected boolean canOwnerMount(Player player) {
-        return true;
+        return !this.isBaby();
     }
 
     @Override
@@ -124,6 +209,7 @@ public class DawnDoveEntity extends TamableFlyer {
         boolean flying = this.isFlying();
         Vec3 delta = this.getDeltaMovement();
         this.idleAnimationState.animateWhen(!flying, this.tickCount);
+        this.sitAnimationState.animateWhen(this.isSitting() && !this.isVehicle(), this.tickCount);
         this.flyUpAnimationState.animateWhen(flying && (delta.y >= 0 || delta.horizontalDistanceSqr() < 0.002), this.tickCount);
         this.flyForwardAnimationState.animateWhen(flying && delta.horizontalDistanceSqr() >= 0.002 && flyUpAnimationState.isStarted(), this.tickCount);
         this.glideAnimationState.animateWhen(flying && !flyUpAnimationState.isStarted(), this.tickCount);
@@ -137,7 +223,7 @@ public class DawnDoveEntity extends TamableFlyer {
     @Override
     protected void switchNav(boolean flying) {
         if (flying) {
-            this.moveControl = new HEFlyingMoveControl(this, 45, 8, 0.9f);
+            this.moveControl = new HEFlyingMoveControl(this, 45, 8, 1.6f);
             this.lookControl = new SmoothSwimmingLookControl(this, 30);
             this.navigation = new FlyingPathNavigation(this, this.level());
         } else {
@@ -145,5 +231,10 @@ public class DawnDoveEntity extends TamableFlyer {
             this.moveControl = new MoveControl(this);
             this.navigation = new MMPathNavigatorGround(this, this.level());
         }
+    }
+
+    @Override
+    public @Nullable AgeableMob getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
+        return HEEntities.DAWN_DOVE.get().create(level);
     }
 }

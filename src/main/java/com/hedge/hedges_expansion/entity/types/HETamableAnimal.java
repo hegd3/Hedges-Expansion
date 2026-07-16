@@ -11,6 +11,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -117,11 +118,21 @@ public abstract class HETamableAnimal extends TamableAnimal implements AnimState
     }
 
     @Override
-    public boolean hurt(DamageSource pSource, float pAmount) {
-        if (this.isInvulnerableTo(pSource)) {
+    public boolean isInvulnerableTo(DamageSource source) {
+        if (source.is(DamageTypes.IN_WALL)) {
+            return true;
+        }
+        return super.isInvulnerableTo(source);
+    }
+
+
+
+    @Override
+    public boolean hurt(DamageSource source, float pAmount) {
+        if (this.isInvulnerableTo(source)) {
             return false;
         } else {
-            Entity entity = pSource.getEntity();
+            Entity entity = source.getEntity();
             if (!this.level().isClientSide) {
                 this.setOrderedToSit(false);
             }
@@ -130,7 +141,7 @@ public abstract class HETamableAnimal extends TamableAnimal implements AnimState
                 pAmount = (pAmount + 1.0F) / 2.0F;
             }
 
-            return super.hurt(pSource, pAmount);
+            return super.hurt(source, pAmount);
         }
     }
 
@@ -173,6 +184,14 @@ public abstract class HETamableAnimal extends TamableAnimal implements AnimState
         return new Vec2(pEntity.getXRot() * 0.5F, pEntity.getYRot());
     }
 
+    @Override
+    public void tame(Player player) {
+        super.tame(player);
+        if (this.getTarget() == player) {
+            this.setTarget(null);
+        }
+    }
+
     public void setSitting(boolean b) {
         this.entityData.set(IS_SITTING, b);
     }
@@ -187,7 +206,7 @@ public abstract class HETamableAnimal extends TamableAnimal implements AnimState
     }
 
     @Override
-    public @Nullable AgeableMob getBreedOffspring(ServerLevel pLevel, AgeableMob pOtherParent) {
+    public @Nullable AgeableMob getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
         return null;
     }
 }

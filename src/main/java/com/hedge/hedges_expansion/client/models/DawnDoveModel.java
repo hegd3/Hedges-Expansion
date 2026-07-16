@@ -2,20 +2,24 @@ package com.hedge.hedges_expansion.client.models;
 
 
 import com.hedge.hedges_expansion.client.animations.DawnDoveAnimation;
+import com.hedge.hedges_expansion.client.animations.MurkAnimation2;
 import com.hedge.hedges_expansion.client.layer.EntityLayers;
 import com.hedge.hedges_expansion.entity.living.DawnDoveEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Vector4f;
 
 public class DawnDoveModel extends HEModel<DawnDoveEntity> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = EntityLayers.DAWN_DOVE_LAYER;
 	private final ModelPart root;
-	private final ModelPart flycontrol;
-	private final ModelPart body;
+	public final ModelPart flycontrol;
+	public final ModelPart body;
 	private final ModelPart neck;
 	private final ModelPart head;
 	private final ModelPart jaw;
@@ -29,6 +33,7 @@ public class DawnDoveModel extends HEModel<DawnDoveEntity> {
 	private final ModelPart rightleg;
 
 	public DawnDoveModel(ModelPart root) {
+		super(0.5f, 24);
 		this.root = root.getChild("root");
 		this.flycontrol = this.root.getChild("flycontrol");
 		this.body = this.flycontrol.getChild("body");
@@ -114,28 +119,32 @@ public class DawnDoveModel extends HEModel<DawnDoveEntity> {
 
 		netHeadYaw = Mth.clamp(netHeadYaw, -35.0F, 35.0F) * ((float)Math.PI / 180F);
 		headPitch = Mth.clamp(headPitch, -25.0F, 25.0F) * ((float)Math.PI / 180F);;
-
-		this.animateSmooth(entity.idleAnimationState, DawnDoveAnimation.idle, ageInTicks, 0.5f);
-		this.animateSmooth(entity.flyUpAnimationState, DawnDoveAnimation.fly_up, ageInTicks, limbSwingAmount * 0.25f + 0.6f);
-		this.animateSmooth(entity.flyForwardAnimationState, DawnDoveAnimation.fly_forward, ageInTicks, 1);
-		this.animateSmooth(entity.glideAnimationState, DawnDoveAnimation.glide, ageInTicks, limbSwingAmount * 0.25f + 0.7f);
+		if (this.young) {
+			this.applyStatic(MurkAnimation2.baby_transform);
+		}
+		this.animateSmooth(entity.idleAnimationState, DawnDoveAnimation.IDLE, ageInTicks, 0.5f);
+		this.animateSmooth(entity.sitAnimationState, DawnDoveAnimation.SIT, ageInTicks, 1f);
+		this.animateSmooth(entity.flyUpAnimationState, DawnDoveAnimation.FLY_UP, ageInTicks, this.young? limbSwingAmount * 0.4f + 0.8f : limbSwingAmount * 0.25f + 0.6f);
+		this.animateSmooth(entity.flyForwardAnimationState, DawnDoveAnimation.FLY_FORWARD, ageInTicks, 1);
+		this.animateSmooth(entity.glideAnimationState, DawnDoveAnimation.GLIDE, ageInTicks, limbSwingAmount * 0.25f + 0.7f);
 		if (entity.isFlying()) {
 			float partialTicks = ageInTicks - entity.tickCount;
 			float flyProgress = entity.getFlyProgress(partialTicks);
 
 
-			this.flycontrol.xRot = entity.getFlightPitch(partialTicks) / 57.295776F * flyProgress / 1.2f;
+			this.flycontrol.xRot = entity.getFlightPitch(partialTicks) / 57.295776F * flyProgress / 2;
 			this.flycontrol.zRot = entity.getFlightRoll(partialTicks) / 57.295776F * flyProgress / 4;
 
 		} else {
-			this.animateWalk(DawnDoveAnimation.walk, limbSwing, limbSwingAmount, 1.5f, 2.5f);
+			this.animateWalk(DawnDoveAnimation.WALK, limbSwing, limbSwingAmount, 1.5f, 2.5f);
 		}
 		float tailYaw = entity.getTrailYaw(ageInTicks - entity.tickCount);
-		this.tail.yRot += Mth.lerp(0.3F, this.tail.yRot, tailYaw * 0.2F);
-		this.tail2.yRot += Mth.lerp(0.3F, this.tail2.yRot, tailYaw * 0.15F);
+		this.tail.yRot += Mth.lerp(0.3F, this.tail.yRot, tailYaw * 0.25F);
+		this.tail2.yRot += Mth.lerp(0.3F, this.tail2.yRot, tailYaw * 0.2F);
 
 		this.head.yRot += netHeadYaw;
 		this.head.xRot += headPitch;
 
 	}
+
 }

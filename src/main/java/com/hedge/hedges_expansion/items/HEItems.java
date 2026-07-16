@@ -32,8 +32,14 @@ public class HEItems {
 
     // CRAFTED ITEMS
 
-    public static final RegistryObject<Item> BURODON_TREAT = ITEMS.register("burodon_treat",
-            () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> PLAIN_TREAT = ITEMS.register("plain_treat",
+            () -> new TreatItem(0));
+
+    public static final RegistryObject<Item> SEASONED_TREAT = ITEMS.register("seasoned_treat",
+            () -> new TreatItem(1));
+
+    public static final RegistryObject<Item> HEARTY_TREAT = ITEMS.register("hearty_treat",
+            () -> new TreatItem(2));
 
     // FOODS
 

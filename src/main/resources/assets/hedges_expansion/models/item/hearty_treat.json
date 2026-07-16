@@ -1,5 +1,5 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "hedges_expansion:item/burodon_treat"
+    "layer0": "hedges_expansion:item/hearty_treat"
   }}

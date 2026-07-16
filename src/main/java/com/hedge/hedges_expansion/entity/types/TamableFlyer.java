@@ -3,6 +3,7 @@ package com.hedge.hedges_expansion.entity.types;
 import com.hedge.hedges_expansion.entity.AI.control.HEFlyingMoveControl;
 import com.hedge.hedges_expansion.entity.AI.navigation.MMPathNavigatorGround;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -42,11 +43,29 @@ public abstract class TamableFlyer extends HETamableAnimal implements HESemiFlye
     }
 
     @Override
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.setFlying(pCompound.getBoolean("Flying"));
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putBoolean("Flying", this.isFlying());
+    }
+
+    @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
         super.onSyncedDataUpdated(pKey);
         if (pKey == FLYING) {
             switchNav(this.isFlying());
         }
+    }
+
+    @Override
+    public void setSitting(boolean b) {
+        super.setSitting(b);
+        if (b) this.setFlying(false);
     }
 
     @Override

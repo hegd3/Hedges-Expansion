@@ -625,4 +625,6 @@ public class GurkAnimation {
 			new Keyframe(0.0F, KeyframeAnimations.degreeVec(-32.5F, 15.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
 		))
 		.build();
+
+
 }

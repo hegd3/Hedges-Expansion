@@ -138,11 +138,8 @@ public class BurodonModel extends HEModel<BurodonEntity> {
 		this.neckrot.xRot = headPitch / 2;
 
 		if (entity.inAirTimer < 5) {
-			if (entity.getDeltaMovement().horizontalDistanceSqr() > 0.01) {
-				this.animateWalk(BurodonAnimation.run, limbSwing, limbSwingAmount, 1.2f, 2.2f);
-			} else {
-				this.animateWalk(BurodonAnimation.walk, limbSwing, limbSwingAmount, 1.5f, 2.5f);
-			}
+			this.animateWalk(BurodonAnimation.run, limbSwing, limbSwingAmount * (entity.runProgress/5f), 1.3f, 2.2f);
+			this.animateWalk(BurodonAnimation.walk, limbSwing, limbSwingAmount/3f * (1 - entity.runProgress/5f), 2f, 2.5f);
 		}
 		this.animateSmooth(entity.idleAnimationState, BurodonAnimation.idle, ageInTicks, 1f);
 		this.animateSmooth(entity.sitAnimationState, BurodonAnimation.sit, ageInTicks, 1f);

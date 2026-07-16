@@ -38,6 +38,8 @@ import java.util.List;
 public class BansheeEntity extends HEMonster {
     private static final EntityDataAccessor<Boolean> LEFT = SynchedEntityData.defineId(BansheeEntity.class, EntityDataSerializers.BOOLEAN);
 
+
+    public float roll = 0.0f;
     private float prevTrail;
     private float trail = 0.0f;
     private int spinCD = 0;
@@ -144,7 +146,7 @@ public class BansheeEntity extends HEMonster {
                         this.getLookControl().setLookAt(target, 10f, 30f);
                         if (this.animTicks % 5 == 0) {
                             BansheeScream projectile = HEEntities.BANSHEE_SCREAM.get().create(this.level());
-                            projectile.moveTo(this.position().add(0, 0.8 + this.getLookAngle().y, 0));
+                            projectile.moveTo(this.getEyePosition());
                             projectile.shootFromRotation(this, this.getXRot(), this.getYRot(), 0.0f, 3, 0);
                             projectile.setXRot(this.getXRot());
                             projectile.setYRot(this.getYRot());
@@ -207,7 +209,7 @@ public class BansheeEntity extends HEMonster {
     protected void clientTick() {
         super.clientTick();
         this.tickTrailYaw();
-
+        this.tickRoll();
     }
 
     private void tickTrailYaw() {
@@ -258,6 +260,13 @@ public class BansheeEntity extends HEMonster {
     @Override
     public double getAttackReachSqr(LivingEntity entity) {
         return this.getBbWidth() * 15 * this.getBbWidth() * 15 + entity.getBbWidth();
+    }
+
+    private void tickRoll() {
+        float prevRoll = this.roll;
+        float targetRoll = Math.max(-0.45F, Math.min(0.45F, (this.getYRot() - this.yRotO) * 0.1F));
+        targetRoll = -targetRoll;
+        this.roll = prevRoll + (targetRoll - prevRoll) * 0.05F;
     }
 
 }

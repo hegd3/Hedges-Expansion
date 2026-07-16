@@ -113,6 +113,7 @@ public class SpottedStrikerModel extends HEModel<SpottedStrikerEntity> {
 
 		if (entity.isInFluidType()) {
 			this.swimcontrol.xRot = headPitch;
+			this.swimcontrol.zRot = entity.roll * 0.8f;
 			this.animate(entity.idleAnimationState, SpottedStrikerAnimation.idle, ageInTicks, 0.3f);
 			this.animateWalk(SpottedStrikerAnimation.swim, limbSwing, limbSwingAmount, 1.7f, 2.5f);
 		} else {

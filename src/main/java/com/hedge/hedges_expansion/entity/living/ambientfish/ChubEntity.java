@@ -35,6 +35,7 @@ import javax.annotation.Nullable;
 
 public class ChubEntity extends HEBucketableSchoolingMob {
 
+
     public ChubEntity(EntityType<? extends ChubEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.moveControl = new HESwimmingMoveControl(this, 999, 15, 0.02f, 0.1f);

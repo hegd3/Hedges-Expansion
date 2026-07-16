@@ -67,7 +67,7 @@ public abstract class HEAnimStateAnimal extends Animal implements AnimStateMob, 
     }
 
     @Override
-    public @Nullable AgeableMob getBreedOffspring(ServerLevel pLevel, AgeableMob pOtherParent) {
+    public @Nullable AgeableMob getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
         return null;
     }
 

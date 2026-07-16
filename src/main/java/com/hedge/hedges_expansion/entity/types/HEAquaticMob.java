@@ -15,6 +15,8 @@ import net.minecraft.world.phys.Vec3;
 
 public class HEAquaticMob extends WaterAnimal implements AnimStateMob {
 
+    public float roll = 0.0f;
+
     private static final EntityDataAccessor<Integer> ANIM_STATE = SynchedEntityData.defineId(HEAquaticMob.class, EntityDataSerializers.INT);
 
     public final SmoothAnimationState idleAnimationState = new SmoothAnimationState();
@@ -40,8 +42,10 @@ public class HEAquaticMob extends WaterAnimal implements AnimStateMob {
         }
     }
 
+
     protected void clientTick() {
-        setUpAnimStates();
+        this.setUpAnimStates();
+        this.tickRoll();
     }
 
 
@@ -120,4 +124,12 @@ public class HEAquaticMob extends WaterAnimal implements AnimStateMob {
         this.animTicks = 0;
         this.setAnimState(0);
     }
+
+    protected void tickRoll() {
+        float prevRoll = this.roll;
+        float targetRoll = Math.max(-0.45F, Math.min(0.45F, (this.getYRot() - this.yRotO) * 0.1F));
+        targetRoll = -targetRoll;
+        this.roll = prevRoll + (targetRoll - prevRoll) * 0.05F;
+    }
+
 }

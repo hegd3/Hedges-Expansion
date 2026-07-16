@@ -80,7 +80,7 @@ public class GildGliderModel extends HEModel<GildGliderEntity> {
 		headPitch = Mth.clamp(headPitch, -45.0F, 45.0F) * ((float) Math.PI / 180F);
 		if (entity.isInFluidType()) {
 			this.swimcontrol.xRot = headPitch;
-			this.swimcontrol.zRot = -netHeadYaw;
+			this.swimcontrol.zRot = entity.roll * 2;
 			this.animate(entity.idleAnimationState, GildGliderAnimation.idle, ageInTicks, 0.4f);
 			this.animateWalk(GildGliderAnimation.swim, limbSwing, limbSwingAmount, 1f, 1.5f);
 		} else if (entity.groundTimer == 0) {

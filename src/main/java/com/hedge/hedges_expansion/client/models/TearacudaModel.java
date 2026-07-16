@@ -101,6 +101,7 @@ public class TearacudaModel extends HEModel<TearacudaEntity> {
 
 		if (entity.isInFluidType()) {
 			this.swimcontrol.xRot = headPitch;
+			this.swimcontrol.zRot = entity.roll;
 			this.animate(entity.idleAnimationState, TearacudaAnimation.idle, ageInTicks, 0.5f);
 			if (entity.getAnimState() != 2) {
 				this.animateWalk(TearacudaAnimation.swim, limbSwing, limbSwingAmount, 2.5f, 2.5f);

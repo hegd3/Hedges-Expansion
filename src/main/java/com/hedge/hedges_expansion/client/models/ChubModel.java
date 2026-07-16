@@ -71,7 +71,7 @@ public class ChubModel extends HEModel<ChubEntity> {
 
 		if (entity.isInFluidType()) {
 			this.swimcontrol.xRot = Mth.clamp(headPitch, -45.0F, 45.0F) * ((float) Math.PI / 180F);
-			this.swimcontrol.zRot = -Mth.clamp(netHeadYaw, -55.0F, 55.0F) * ((float) Math.PI / 180F);
+			this.swimcontrol.zRot = entity.roll * 2;
 			this.animate(entity.idleAnimationState, ChubAnimation.idle, ageInTicks, 0.2f + limbSwingAmount * 0.5f);
 			this.animateWalk(ChubAnimation.swim, limbSwing, limbSwingAmount, 1.5f, 2.5f);
 		} else {

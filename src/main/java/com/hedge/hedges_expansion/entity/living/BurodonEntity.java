@@ -10,6 +10,7 @@ import com.hedge.hedges_expansion.entity.types.HETamableAnimal;
 import com.hedge.hedges_expansion.entity.types.AdvancedTurningMob;
 import com.hedge.hedges_expansion.entity.types.AttackStateMob;
 import com.hedge.hedges_expansion.items.HEItems;
+import com.hedge.hedges_expansion.items.TreatItem;
 import com.hedge.hedges_expansion.util.SmoothAnimationState;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.server.level.ServerLevel;
@@ -24,6 +25,7 @@ import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
@@ -54,6 +56,7 @@ public class BurodonEntity extends HETamableAnimal implements AttackStateMob, Ad
     private boolean jumpAway = false;
     private Vec3 jumpVector;
     public int inAirTimer = 0;
+    public float runProgress = 0;
     private int attackCD = 0;
     private int jumpCD = 0;
     private int roarCD = 0;
@@ -89,17 +92,19 @@ public class BurodonEntity extends HETamableAnimal implements AttackStateMob, Ad
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
         InteractionResult type = super.mobInteract(player, hand);
-        if (!this.isTame() && itemStack.is(HEItems.BURODON_TREAT.get()) && this.getAnimState() == ROAR_ANIM) {
-            if (!this.level().isClientSide) {
-                if (!player.getAbilities().instabuild) {
-                    itemStack.shrink(1);
+        if (!this.isTame() && itemStack.getItem() instanceof TreatItem treat && treat.getTier() > 0) {
+            if (this.getAnimState() == ROAR_ANIM) {
+                if (!this.level().isClientSide) {
+                    if (!player.getAbilities().instabuild) {
+                        itemStack.shrink(1);
+                    }
+                    this.level().broadcastEntityEvent(this, (byte) 7);
+                    this.tame(player);
+                    this.heal(this.getMaxHealth());
                 }
-                this.level().broadcastEntityEvent(this, (byte) 7);
-                this.tame(player);
-                this.heal(this.getMaxHealth());
+                this.playSound(SoundEvents.GENERIC_EAT);
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
             }
-            this.playSound(SoundEvents.GENERIC_EAT);
-            return InteractionResult.sidedSuccess(this.level().isClientSide);
         }
         return type;
     }
@@ -113,7 +118,7 @@ public class BurodonEntity extends HETamableAnimal implements AttackStateMob, Ad
         this.goalSelector.addGoal(4, new HEFollowOwnerGoal(this, 1.2D, 1.6D, 7.0f, 4.0f));
         this.goalSelector.addGoal(5, new HERandomlySitGoal(this));
         this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, LivingEntity.class, 7));
-        this.goalSelector.addGoal(7, new RandomStrollGoal(this, 1.0, 20));
+        this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0, 20));
         this.goalSelector.addGoal(8, new IdleAnimationGoal<>(this, 500));
 
 
@@ -140,7 +145,15 @@ public class BurodonEntity extends HETamableAnimal implements AttackStateMob, Ad
                 this.inAirTimer++;
             } else {
                 this.inAirTimer = 0;
+                if (this.getDeltaMovement().horizontalDistanceSqr() > 0.01) {
+                    if (this.runProgress < 5) {
+                        this.runProgress+=0.1f;
+                    }
+                } else if (this.runProgress > 0) {
+                    this.runProgress-=0.1f;
+                }
             }
+
         } else {
             if (this.tickCount % 200 == 0) {
                 this.heal(10);

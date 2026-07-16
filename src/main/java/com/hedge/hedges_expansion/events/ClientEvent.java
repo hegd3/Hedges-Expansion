@@ -1,22 +1,37 @@
 package com.hedge.hedges_expansion.events;
 
 import com.hedge.hedges_expansion.HedgesExpansion;
+import com.hedge.hedges_expansion.client.ClientProxy;
 import com.hedge.hedges_expansion.client.layer.EntityLayers;
 import com.hedge.hedges_expansion.client.models.*;
 import com.hedge.hedges_expansion.client.renderer.*;
 import com.hedge.hedges_expansion.registry.HEEntities;
+import com.hedge.hedges_expansion.registry.HEKeyMappings;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+
+import java.awt.event.KeyEvent;
 
 @OnlyIn(Dist.CLIENT)
 @Mod.EventBusSubscriber(modid = HedgesExpansion.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 
 public class ClientEvent {
+
+
+    @SubscribeEvent
+    public static void registerKeyMappings(final RegisterKeyMappingsEvent event) {
+        event.register(HEKeyMappings.MOUNT_ABILITY_KEY);
+    }
+
 
     @SubscribeEvent
     public static void registerLayer(EntityRenderersEvent.RegisterLayerDefinitions event) {
@@ -58,4 +73,5 @@ public class ClientEvent {
         EntityRenderers.register(HEEntities.DAWN_DOVE.get(), DawnDoveRenderer::new);
 
     }
+
 }

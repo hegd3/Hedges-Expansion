@@ -17,8 +17,8 @@ public class HEFollowOwnerGoal extends Goal {
 
     protected final HETamableAnimal mob;
     protected Entity owner;
-    private final double speedModifier;
-    private final double sprintSpeedModifier;
+    protected final double speedModifier;
+    protected final double sprintSpeedModifier;
     protected int timeToRecalcPath;
     private final float stopDistance;
     private final float startDistance;

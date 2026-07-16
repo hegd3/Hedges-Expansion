@@ -110,5 +110,6 @@ public class BansheeModel extends HEModel<BansheeEntity> {
 		this.tail2.yRot = Mth.lerp(0.3F, this.tail2.yRot, tailYaw * 0.25F);
 		this.tail3.yRot = Mth.lerp(0.3F, this.tail3.yRot, tailYaw * 0.15F);
 		this.flycontrol.xRot = Mth.clamp(headPitch, -35.0F, 35.0F) * ((float) Math.PI / 180F);
+		this.flycontrol.zRot = entity.roll * 2f;
 	}
 }

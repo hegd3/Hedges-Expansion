@@ -1,6 +1,7 @@
 package com.hedge.hedges_expansion.client.renderer;
 
 import com.hedge.hedges_expansion.HedgesExpansion;
+import com.hedge.hedges_expansion.client.layer.DawnDoveRiderLayer;
 import com.hedge.hedges_expansion.client.layer.EntityLayers;
 import com.hedge.hedges_expansion.client.models.DawnDoveModel;
 import com.hedge.hedges_expansion.client.models.FerocetusModel;
@@ -17,6 +18,7 @@ public class DawnDoveRenderer extends MobRenderer<DawnDoveEntity, DawnDoveModel>
 
     public DawnDoveRenderer(EntityRendererProvider.Context pContext) {
         super(pContext, new DawnDoveModel(pContext.bakeLayer(EntityLayers.DAWN_DOVE_LAYER)), 1.2f);
+        this.addLayer(new DawnDoveRiderLayer(this));
     }
 
     @Override

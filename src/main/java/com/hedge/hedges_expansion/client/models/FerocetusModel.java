@@ -87,6 +87,7 @@ public class FerocetusModel extends HEModel<FerocetusEntity> {
 		this.animateSmooth(entity.callAnimationState, FerocetusAnimation.call, ageInTicks, 1f);
 		if (entity.isInFluidType()) {
 			this.swimcontrol.xRot = headPitch;
+			this.swimcontrol.zRot = entity.roll;
 			this.animateWalk(FerocetusAnimation.swim, limbSwing, limbSwingAmount, 1.3f, 1f);
 			this.animateSmooth(entity.idleAnimationState, FerocetusAnimation.idle, ageInTicks, 0.5f);
 		} else {

@@ -46,6 +46,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.fluids.FluidType;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -240,8 +241,8 @@ public class MurkEntity extends HETamableAnimal implements AttackStateMob, Advan
                                 MurkSmoke projectile = HEEntities.MURK_SMOKE.get().create(this.level());
                                 if (projectile != null) {
                                     projectile.setCharged(this.isCharged());
-                                    projectile.moveTo(this.position().add(0, 0.8 + this.getLookAngle().y, 0));
-                                    projectile.shootFromRotation(this, this.getXRot(), this.getYRot() + i, 0.0f, 3, 0);
+                                    projectile.moveTo(this.getEyePosition());
+                                    projectile.shootFromRotation(this, Mth.clamp(this.getXRot(), -45, 45), this.getYRot() + i, 0.0f, 3, 0);
                                     this.level().addFreshEntity(projectile);
                                 }
                             }
@@ -314,8 +315,8 @@ public class MurkEntity extends HETamableAnimal implements AttackStateMob, Advan
                             if (projectile != null) {
                                 projectile.setCharged(this.isCharged());
                                 Vec3 v = EntityHelpers.bodyAngle(this).cross(EntityHelpers.UP).scale(this.projectileRot * 0.1);
-                                projectile.moveTo(this.position().add(v.x, 0.5 + this.getLookAngle().y, v.z));
-                                projectile.shootFromRotation(this, this.getXRot(), this.getYRot() + this.projectileRot, 0.0f, 3, 0);
+                                projectile.moveTo(this.getEyePosition().add(v));
+                                projectile.shootFromRotation(this, Mth.clamp(this.getXRot(), -45, 45), this.getYRot() + this.projectileRot, 0.0f, 3, 0);
                                 this.level().addFreshEntity(projectile);
                                 this.projectileRot += this.swingingLeft() ? 5 : -5;
                             }
@@ -524,7 +525,7 @@ public class MurkEntity extends HETamableAnimal implements AttackStateMob, Advan
 
     @Override
     public float getTurnSpeed() {
-        return 22.25f;
+        return this.isInWaterOrBubble() ? 22.25f : 45f;
     }
 
     @Override
@@ -536,6 +537,11 @@ public class MurkEntity extends HETamableAnimal implements AttackStateMob, Advan
     public void playIdle() {
         this.setAnimState(8);
         this.playSound(HESounds.MURK_CLICKS.get(), 1 - (this.getRandom().nextFloat() / 2), 1 - (this.getRandom().nextFloat() / 4));
+    }
+
+    @Override
+    public @Nullable AgeableMob getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
+        return HEEntities.MURK.get().create(level);
     }
 }
 

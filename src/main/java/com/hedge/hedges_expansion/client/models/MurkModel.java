@@ -51,6 +51,8 @@ public class MurkModel extends HEModel<MurkEntity> {
 	private final ModelPart rightlegpos2;
 
 	public MurkModel(ModelPart root) {
+		super(0.5f, 24);
+
 		this.root = root.getChild("root");
 		this.swimcontrol = this.root.getChild("swimcontrol");
 		this.wholebody = this.swimcontrol.getChild("wholebody");
@@ -195,19 +197,22 @@ public class MurkModel extends HEModel<MurkEntity> {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 
 		netHeadYaw = Mth.clamp(netHeadYaw, -25.0F, 25.0F) * ((float)Math.PI / 180F);
-		headPitch = Mth.clamp(headPitch, -25.0F, 25.0F) * ((float)Math.PI / 180F);
+		headPitch = Mth.clamp(headPitch, -45.0F, 45.0F) * ((float)Math.PI / 180F);
 		float tailYaw = entity.getTrailYaw(ageInTicks - entity.tickCount);
 
 
 
-		this.tailrot.yRot = Mth.lerp(0.3F, this.tailrot.yRot, tailYaw * 0.2F);
-		this.tailrot2.yRot = Mth.lerp(0.3F, this.tailrot2.yRot, tailYaw * 0.15F);
+		this.tailrot.yRot = Mth.lerp(0.3F, this.tailrot.yRot, tailYaw * 0.25F);
+		this.tailrot2.yRot = Mth.lerp(0.3F, this.tailrot2.yRot, tailYaw * 0.2F);
 
 		this.neckrot.yRot = netHeadYaw / 2;
 		this.headrot.yRot = netHeadYaw;
 		this.headrot.xRot = headPitch;
+		if (this.young) {
+			this.applyStatic(MurkAnimation2.baby_transform);
+		}
 		if (entity.isInFluidType()) {
-			this.swimcontrol.xRot = headPitch * 0.9f;
+			this.swimcontrol.xRot = headPitch * 0.6f;
 			this.animateWalk(MurkAnimation.swim, limbSwing, limbSwingAmount, 1.2f, 2.5f);
 			this.animate(entity.idleAnimationState, MurkAnimation.swim_idle, ageInTicks, 0.5f);
 			this.animate(entity.powerBiteAnimationState, entity.swingingLeft() ? MurkAnimation.power_bite_left : MurkAnimation.power_bite_right, ageInTicks, 1);
@@ -232,5 +237,7 @@ public class MurkModel extends HEModel<MurkEntity> {
 		this.animate(entity.sideSlamAnimationState, entity.swingingLeft() ? MurkAnimation2.side_slam_left : MurkAnimation2.side_slam_right, ageInTicks, 1f);
 		this.animateSmooth(entity.clicksAnimationState, MurkAnimation2.clicks, ageInTicks, 1f);
 		this.animateSmooth(entity.sitAnimationState, MurkAnimation2.sit, ageInTicks, 1f);
+
+
 	}
 }
