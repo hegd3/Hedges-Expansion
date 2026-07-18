@@ -1,0 +1,21 @@
+package com.hedge.hedges_bestiary.entity.AI.goal;
+
+import com.hedge.hedges_bestiary.entity.types.HBGroupMob;
+import com.hedge.hedges_bestiary.entity.types.TamableFlyer;
+
+public class FlockingGoal<E extends TamableFlyer & HBGroupMob<E>> extends GroupFollowLeaderGoal<E> {
+    public FlockingGoal(E mob) {
+        super(mob);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (this.mob.tickCount % 10 == 0) {
+            if (this.mob.getLeader().isFlying() && !this.mob.isFlying()) {
+                this.mob.setFlying(true);
+                this.mob.setLanding(this.mob.getLeader().isLanding());
+            }
+        }
+    }
+}

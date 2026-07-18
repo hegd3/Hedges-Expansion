@@ -1,6 +1,0 @@
-{
-  "parent": "hedges_expansion:block/large_egg_template",
-  "textures": {
-    "texture": "hedges_expansion:block/egg/murk_egg_very_cracked"
-  }
-}

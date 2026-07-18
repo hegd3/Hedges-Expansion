@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smoking",
+  "category": "food",
+  "cookingtime": 100,
+  "experience": 0.7,
+  "ingredient": {
+    "item": "hedges_bestiary:raw_urkmeat"
+  },
+  "result": "hedges_bestiary:cooked_urkmeat"
+}

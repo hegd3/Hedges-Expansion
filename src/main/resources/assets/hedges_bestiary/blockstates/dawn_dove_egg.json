@@ -1,0 +1,13 @@
+{
+  "variants": {
+      "hatch=0": {
+        "model": "hedges_bestiary:block/dawn_dove_egg"
+      },
+      "hatch=1": {
+        "model": "hedges_bestiary:block/dawn_dove_egg_cracked"
+      },
+      "hatch=2": {
+        "model": "hedges_bestiary:block/dawn_dove_egg_very_cracked"
+      }
+  }
+}
