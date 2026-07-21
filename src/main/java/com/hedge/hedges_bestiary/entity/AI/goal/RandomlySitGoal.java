@@ -23,7 +23,7 @@ public class RandomlySitGoal extends Goal {
         this.mob = mob;
         this.cooldown = cooldown;
         this.maxTicksSitting = maxTicksSitting;
-        this.ticksTillSit = this.cooldown * (int)(this.mob.getRandom().nextDouble() + 1);
+        this.ticksTillSit = this.cooldown + this.mob.getRandom().nextInt(this.cooldown);
         this.setFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE, Flag.LOOK));
     }
 
@@ -37,8 +37,12 @@ public class RandomlySitGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        if (this.mob.isTame() || this.mob.getTarget() != null)
+
+        if (this.mob.getTarget() != null)
             return false;
+        else if (this.mob.getCommand() != 0  || this.mob.isVehicle()) {
+            return false;
+        }
         else if (this.mob.isInFluidType() || !this.mob.onGround())
             return false;
         return this.ticksSitting <  this.maxTicksSitting;
@@ -46,8 +50,11 @@ public class RandomlySitGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        if (this.mob.isTame() || this.mob.getTarget() != null)
+        if (this.mob.getTarget() != null)
             return false;
+        else if (this.mob.getCommand() != 0 || this.mob.isVehicle()) {
+            return false;
+        }
         else if (this.mob.isInFluidType() || !this.mob.onGround())
             return false;
 
@@ -69,7 +76,7 @@ public class RandomlySitGoal extends Goal {
         if (this.mob.isSitting() && this.mob.getCommand() != 1) {
             this.mob.setSitting(false);
         }
-        this.ticksTillSit = this.cooldown * (int)(this.mob.getRandom().nextDouble() + 1);
+        this.ticksTillSit = this.cooldown + this.mob.getRandom().nextInt(this.cooldown);
 
     }
 }

@@ -4,7 +4,7 @@ import com.hedge.hedges_bestiary.blocks.HEBlocks;
 import com.hedge.hedges_bestiary.entity.AI.control.SemiaquaticLookControl;
 import com.hedge.hedges_bestiary.entity.AI.control.SemiaquaticMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.*;
-import com.hedge.hedges_bestiary.entity.AI.navigation.HEAmphibiousPathNavigator;
+import com.hedge.hedges_bestiary.entity.AI.navigation.HBAmphibiousPathNavigator;
 import com.hedge.hedges_bestiary.entity.types.EggLayer;
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
 import com.hedge.hedges_bestiary.entity.types.VariantMob;
@@ -88,7 +88,7 @@ public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer 
 
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
-        return new HEAmphibiousPathNavigator(this, pLevel);
+        return new HBAmphibiousPathNavigator(this, pLevel);
     }
 
     public static AttributeSupplier.Builder bakeAttributes(){

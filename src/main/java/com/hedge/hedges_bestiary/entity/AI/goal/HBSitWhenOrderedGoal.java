@@ -48,9 +48,7 @@ public class HBSitWhenOrderedGoal extends Goal {
 
     public void stop() {
         this.mob.setInSittingPose(false);
-        if (this.mob.isSitting() && this.mob.getCommand() != 1) {
-            this.mob.setSitting(false);
-        }
+        this.mob.setSitting(false);
     }
 
 }

@@ -6,8 +6,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.AmphibiousNodeEvaluator;
 import net.minecraft.world.level.pathfinder.PathFinder;
 
-public class HEAmphibiousPathNavigator extends AmphibiousPathNavigation {
-    public HEAmphibiousPathNavigator(Mob mob, Level level) {
+public class HBAmphibiousPathNavigator extends AmphibiousPathNavigation {
+    public HBAmphibiousPathNavigator(Mob mob, Level level) {
         super(mob, level);
     }
 

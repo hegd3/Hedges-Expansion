@@ -1,7 +1,10 @@
 package com.hedge.hedges_bestiary.entity.types;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
+import com.hedge.hedges_bestiary.entity.living.PlomboEntity;
+import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.message.DanceJukeboxMessage;
+import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -18,12 +21,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
 public abstract class HBTamableAnimal extends TamableAnimal implements AnimStateMob, IdleAnimMob {
     public final SmoothAnimationState sitAnimationState = new SmoothAnimationState(0.25f);
+    public final SmoothAnimationState napAnimationState = new SmoothAnimationState(0.1f);
     public final SmoothAnimationState idleAnimationState = new SmoothAnimationState();
     public final SmoothAnimationState danceAnimationState = new SmoothAnimationState();
 
@@ -31,6 +36,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     protected static final EntityDataAccessor<Integer> TAME_COMMAND = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.INT);
     protected static final EntityDataAccessor<Boolean> IS_SITTING = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.BOOLEAN);
     protected static final EntityDataAccessor<Boolean> IS_DANCING = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.BOOLEAN);
+    protected static final EntityDataAccessor<Boolean> IS_NAPPING = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.BOOLEAN);
 
     protected int animTicks = 0;
 
@@ -45,7 +51,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     @Override
     public boolean isAlliedTo(Entity pEntity) {
         if (this.isTame() && pEntity instanceof OwnableEntity e) {
-            if (e.getOwner() == this.getOwner()) {
+            if (e.getOwnerUUID() == this.getOwnerUUID()) {
                 return true;
             }
         }
@@ -90,6 +96,14 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     @Override
     public void tick() {
         super.tick();
+        this.tickNap();
+    }
+
+    protected void tickNap() {
+        if (this.isNapping() && this.level().isClientSide() && this.tickCount % 30 == 0) {
+            Vec3 rand = this.getEyePosition().add(EntityHelpers.getRandomVec3(0.6));
+            this.level().addParticle(HBParticles.SLEEP.get(), rand.x, rand.y, rand.z, rand.x, 0.1, rand.z);
+        }
     }
 
     @Override
@@ -98,6 +112,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
         this.entityData.define(ANIM_STATE, 0);
         this.entityData.define(IS_SITTING, false);
         this.entityData.define(IS_DANCING, false);
+        this.entityData.define(IS_NAPPING, false);
         this.entityData.define(TAME_COMMAND, 0);
     }
 
@@ -105,6 +120,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     public void readAdditionalSaveData(CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
         this.setSitting(pCompound.getBoolean("Is_Sitting"));
+        this.setNapping(pCompound.getBoolean("Is_Napping"));
         this.setCommand(pCompound.getInt("Tame_Command"));
     }
 
@@ -112,6 +128,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     public void addAdditionalSaveData(CompoundTag pCompound) {
         super.addAdditionalSaveData(pCompound);
         pCompound.putBoolean("Is_Sitting", this.isSitting());
+        pCompound.putBoolean("Is_Napping", this.isNapping());
         pCompound.putInt("Tame_Command", this.getCommand());
     }
 
@@ -139,21 +156,20 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
 
     @Override
     public boolean hurt(DamageSource source, float pAmount) {
-        if (this.isInvulnerableTo(source)) {
-            return false;
-        } else {
-            Entity entity = source.getEntity();
-            if (!this.level().isClientSide) {
-                this.setOrderedToSit(false);
+        if (super.hurt(source, pAmount)) {
+            if(!this.level().isClientSide()) {
+                if (!this.isOrderedToSit() && this.isSitting()) {
+                    this.setSitting(false);
+                } else if (this.isNapping()) {
+                    this.setNapping(false);
+                }
             }
-
-            if (entity != null && !(entity instanceof Player) && !(entity instanceof AbstractArrow)) {
-                pAmount = (pAmount + 1.0F) / 2.0F;
-            }
-
-            return super.hurt(source, pAmount);
+            return true;
         }
+        return false;
     }
+
+
 
     @Override
     public void setAnimState(int i) {
@@ -179,6 +195,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     public void setUpAnimStates() {
         this.idleAnimationState.animateWhen(this.isAlive(), this.tickCount);
         this.sitAnimationState.animateWhen(this.isSitting() && !this.isDancing(), this.tickCount);
+        this.napAnimationState.animateWhen(this.isNapping(), this.tickCount);
         this.danceAnimationState.animateWhen(this.isDancing(), this.tickCount);
     }
 
@@ -234,6 +251,14 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
 
     public boolean isDancing() {
         return this.entityData.get(IS_DANCING);
+    }
+
+    public boolean isNapping() {
+        return this.entityData.get(IS_NAPPING);
+    }
+
+    public void setNapping(boolean b) {
+        this.entityData.set(IS_NAPPING, b);
     }
 
     @Override

@@ -5,7 +5,9 @@ import com.hedge.hedges_bestiary.entity.AI.control.FlyingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.*;
 import com.hedge.hedges_bestiary.entity.AI.navigation.MMPathNavigatorGround;
 import com.hedge.hedges_bestiary.entity.types.*;
+import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.registry.HBEntities;
+import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -101,6 +103,8 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
         this.goalSelector.addGoal(8, new IdleAnimationGoal<>(this));
         this.goalSelector.addGoal(9, new DancingGoal(this));
+
+        this.targetSelector.addGoal(2, new HBHurtByTargetGoal(this));
     }
 
     @Override
@@ -139,12 +143,17 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         this.prevGlowProgress = this.glowProgress;
         if (this.getAnimState() > 0) {
             if (!this.pulse) {
+
                 if (this.glowProgress < 5.0F) {
+                    Vec3 rand = EntityHelpers.getRandomVec3(0.6);
+                    this.level().addParticle(HBParticles.ELECTRIC_SPARKS.get(), this.getX() + rand.x + rand.x,
+                            this.getY() + rand.y + 0.5, this.getZ() + rand.z, rand.x, rand.y + 0.2, rand.z);
                     this.glowProgress += 0.5f;
                 } else {
                     this.pulse = true;
                 }
             } else {
+
                 if (this.glowProgress > 1.0F) {
                     this.glowProgress -= 0.5f;
                 }
@@ -153,7 +162,6 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         } else {
             if (this.glowProgress > 0.5F) {
                 this.glowProgress -= 0.5f;
-                if (this.pulse) this.pulse = false;
             } else if (this.pulse) {
                 this.pulse = false;
             }

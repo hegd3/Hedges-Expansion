@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 public class EntityLayers {
     public static final ModelLayerLocation BURODON_LAYER = main("burodon");
     public static final ModelLayerLocation SPOTTED_STRIKER_LAYER = main("spotted_striker");
-    public static final ModelLayerLocation GRUIN_LAYER= main("gruin");
+    public static final ModelLayerLocation PLOMBO_LAYER = main("plombo");
     public static final ModelLayerLocation GURK_LAYER= main("gurk");
     public static final ModelLayerLocation MURK_LAYER = main("murk");
     public static final ModelLayerLocation TEARACUDA_LAYER = main("tearacuda");

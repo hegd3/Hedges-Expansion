@@ -24,7 +24,7 @@ public class ServerEvent {
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(HBEntities.BURODON.get(), BurodonEntity.bakeAttributes().build());
         event.put(HBEntities.SPOTTED_STRIKER.get(), SpottedStrikerEntity.bakeAttributes().build());
-        event.put(HBEntities.GRUIN.get(), GruinEntity.bakeAttributes().build());
+        event.put(HBEntities.PLOMBO.get(), PlomboEntity.bakeAttributes().build());
         event.put(HBEntities.GURK.get(), GurkEntity.bakeAttributes().build());
         event.put(HBEntities.MURK.get(), MurkEntity.bakeAttributes().build());
         event.put(HBEntities.TEARACUDA.get(), TearacudaEntity.bakeAttributes().build());
@@ -51,13 +51,16 @@ public class ServerEvent {
 
     @SubscribeEvent
     public static void registerParticleFactories(RegisterParticleProvidersEvent event) {
-        event.registerSpriteSet(HBParticles.MURK_CHARGE.get(), MurkChargeParticle.Provider::new);
+        event.registerSpriteSet(HBParticles.MURK_CHARGE.get(), AuraParticle.Provider::new);
         event.registerSpriteSet(HBParticles.MURK_CHARGE_SHOOT.get(), ProjectileTrailParticle.MurkChargeShotProvider::new);
         event.registerSpriteSet(HBParticles.MURK_EXPLODE.get(), DynamicExplosionParticle.MurkExplosionProvider::new);
         event.registerSpriteSet(HBParticles.MURK_IMPACT.get(), DynamicExplosionParticle.MurkImpactProvider::new);
 
         event.registerSpriteSet(HBParticles.SMOKE.get(), SmokeParticle.Provider::new);
         event.registerSpriteSet(HBParticles.BANSHEE_SCREAM.get(), BansheeScreamParticle.Provider::new);
+        event.registerSpriteSet(HBParticles.ELECTRIC_SPARKS.get(), AuraParticle.Provider::new);
+        event.registerSpriteSet(HBParticles.FIREBALL.get(), ProjectileTrailParticle.FireBallProvider::new);
+        event.registerSpriteSet(HBParticles.SLEEP.get(), FadingAuraParticle.Provider::new);
 
     }
 

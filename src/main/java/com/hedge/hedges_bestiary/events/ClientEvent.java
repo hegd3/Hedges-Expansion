@@ -31,7 +31,7 @@ public class ClientEvent {
     public static void registerLayer(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(EntityLayers.BURODON_LAYER, BurodonModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.SPOTTED_STRIKER_LAYER, SpottedStrikerModel::createBodyLayer);
-        event.registerLayerDefinition(EntityLayers.GRUIN_LAYER, GruinModel::createBodyLayer);
+        event.registerLayerDefinition(EntityLayers.PLOMBO_LAYER, PlomboModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.GURK_LAYER, GurkModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.MURK_LAYER, MurkModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.TEARACUDA_LAYER, TearacudaModel::createBodyLayer);
@@ -51,7 +51,7 @@ public class ClientEvent {
     {
         EntityRenderers.register(HBEntities.BURODON.get(), BurodonRenderer::new);
         EntityRenderers.register(HBEntities.SPOTTED_STRIKER.get(), SpottedStrikerRenderer::new);
-        EntityRenderers.register(HBEntities.GRUIN.get(), GruinRenderer::new);
+        EntityRenderers.register(HBEntities.PLOMBO.get(), PlomboRenderer::new);
         EntityRenderers.register(HBEntities.GURK.get(), GurkRenderer::new);
         EntityRenderers.register(HBEntities.MURK.get(), MurkRenderer::new);
         EntityRenderers.register(HBEntities.MURK_SMOKE.get(), ModellessProjectileRenderer::new);
@@ -65,6 +65,7 @@ public class ClientEvent {
         EntityRenderers.register(HBEntities.BANSHEE.get(), BansheeRenderer::new);
         EntityRenderers.register(HBEntities.BANSHEE_SCREAM.get(), ModellessProjectileRenderer::new);
         EntityRenderers.register(HBEntities.DAWN_DOVE.get(), DawnDoveRenderer::new);
+        EntityRenderers.register(HBEntities.DAWN_DOVE_FIREBALL.get(), ModellessProjectileRenderer::new);
 
     }
 

@@ -34,6 +34,7 @@ public class MountedEntityKeyMessage {
         buf.writeInt(message.type);
     }
 
+
     public static void handle(MountedEntityKeyMessage message, Supplier<NetworkEvent.Context> context) {
         context.get().enqueueWork(() -> {
             Player playerSided = context.get().getSender();

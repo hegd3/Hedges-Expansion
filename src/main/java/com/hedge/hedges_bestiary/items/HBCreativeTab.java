@@ -15,9 +15,9 @@ public class HBCreativeTab {
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, HedgesBestiary.MODID);
 
 
-    public static final RegistryObject<CreativeModeTab> CREATIVE_TAB = CREATIVE_MODE_TABS.register("hedges_expansion_tab",
+    public static final RegistryObject<CreativeModeTab> CREATIVE_TAB = CREATIVE_MODE_TABS.register("hedges_bestiary_tab",
             () -> CreativeModeTab.builder().icon(() -> new ItemStack(HBItems.MURK_CLAW.get()))
-                    .title(Component.translatable("creativetab.hedges_expansion_tab"))
+                    .title(Component.translatable("creativetab.hedges_bestiary_tab"))
                     .displayItems((itemDisplayParameters, output) -> {
                         // blocks
                         output.accept(HEBlocks.GURK_EGG.get());
@@ -49,7 +49,7 @@ public class HBCreativeTab {
                         // spawn eggs
                         output.accept(HBItems.BURODON_SPAWN_EGG.get());
                         output.accept(HBItems.SPOTTED_STRIKER_SPAWN_EGG.get());
-                        output.accept(HBItems.GRUIN_SPAWN_EGG.get());
+                        output.accept(HBItems.PLOMBO_SPAWN_EGG.get());
                         output.accept(HBItems.GURK_SPAWN_EGG.get());
                         output.accept(HBItems.MURK_SPAWN_EGG.get());
                         output.accept(HBItems.TEARACUDA_SPAWN_EGG.get());

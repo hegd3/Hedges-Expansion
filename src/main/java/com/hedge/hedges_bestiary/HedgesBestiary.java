@@ -6,6 +6,7 @@ import com.hedge.hedges_bestiary.client.HBSounds;
 import com.hedge.hedges_bestiary.items.HBCreativeTab;
 import com.hedge.hedges_bestiary.items.HBItems;
 import com.hedge.hedges_bestiary.message.DanceJukeboxMessage;
+import com.hedge.hedges_bestiary.message.MountedEntityKeyMessage;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.mojang.logging.LogUtils;
@@ -63,7 +64,8 @@ public class HedgesBestiary
     private void commonSetup(final FMLCommonSetupEvent event)
     {
         int packetsRegistered = 0;
-        NETWORK_WRAPPER.registerMessage(packetsRegistered++, DanceJukeboxMessage.class, DanceJukeboxMessage::write, DanceJukeboxMessage::read, DanceJukeboxMessage.Handler::handle);
+        NETWORK_WRAPPER.registerMessage(packetsRegistered++, DanceJukeboxMessage.class, DanceJukeboxMessage::write, DanceJukeboxMessage::read, DanceJukeboxMessage::handle);
+        NETWORK_WRAPPER.registerMessage(packetsRegistered++, MountedEntityKeyMessage.class, MountedEntityKeyMessage::write, MountedEntityKeyMessage::read, MountedEntityKeyMessage::handle);
 
     }
 

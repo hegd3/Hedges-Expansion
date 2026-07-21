@@ -34,22 +34,19 @@ public class DanceJukeboxMessage {
         buf.writeBlockPos(message.jukeBox);
     }
 
-    public static class Handler {
-        public Handler() {
-        }
 
-        public static void handle(DanceJukeboxMessage message, Supplier<NetworkEvent.Context> context) {
-            context.get().setPacketHandled(true);
-            context.get().enqueueWork(() -> {
-                Player player = context.get().getSender();
-                if(context.get().getDirection().getReceptionSide() == LogicalSide.CLIENT){
-                    player = HedgesBestiary.PROXY.getClientSidePlayer();
-                }
+    public static void handle(DanceJukeboxMessage message, Supplier<NetworkEvent.Context> context) {
+        context.get().setPacketHandled(true);
+        context.get().enqueueWork(() -> {
+            Player player = context.get().getSender();
+            if(context.get().getDirection().getReceptionSide() == LogicalSide.CLIENT){
+                player = HedgesBestiary.PROXY.getClientSidePlayer();
+            }
 
-                if (player != null) {
-                    HedgesBestiary.PROXY.handleJukeboxPacket(player.level(), message.entityID, message.jukeBox, message.dance);
-                }
-            });
-        }
+            if (player != null) {
+                HedgesBestiary.PROXY.handleJukeboxPacket(player.level(), message.entityID, message.jukeBox, message.dance);
+            }
+        });
     }
+
 }

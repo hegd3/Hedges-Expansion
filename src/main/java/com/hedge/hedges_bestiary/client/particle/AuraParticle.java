@@ -7,11 +7,11 @@ import net.minecraft.util.Mth;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class MurkChargeParticle extends TextureSheetParticle {
+public class AuraParticle extends TextureSheetParticle {
 
-    private final SpriteSet sprites;
+    protected final SpriteSet sprites;
 
-    protected MurkChargeParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, SpriteSet pSprites) {
+    protected AuraParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, SpriteSet pSprites) {
         super(pLevel, pX, pY, pZ);
         this.xd += ((this.random.nextFloat() - this.random.nextFloat()) * 0.05F);
         this.zd += ((this.random.nextFloat() - this.random.nextFloat()) * 0.05F);
@@ -67,7 +67,7 @@ public class MurkChargeParticle extends TextureSheetParticle {
         }
 
         public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
-            return new MurkChargeParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites);
+            return new AuraParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites);
         }
     }
 }

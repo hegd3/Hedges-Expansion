@@ -78,9 +78,7 @@ public class AttackHelpers {
 
     }
 
-    public static List<LivingEntity> projectileZoneHitbox(Entity entity, Vec3 offset, double pX, double pY, double pZ, int limit) {
-
-        Vec3 origin = entity.position().add(offset);
+    public static List<LivingEntity> projectileZoneHitbox(Entity entity, Vec3 origin, double pX, double pY, double pZ, int limit) {
 
         AABB zone = new AABB(origin.subtract(pX, pY, pZ), origin.add(pX, pY, pZ));
 

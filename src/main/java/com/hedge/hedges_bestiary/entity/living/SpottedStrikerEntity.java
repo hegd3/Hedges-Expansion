@@ -3,6 +3,7 @@ package com.hedge.hedges_bestiary.entity.living;
 import com.hedge.hedges_bestiary.entity.AI.control.SwimmingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.AvoidTargetWhenLowGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.CustomSwimGoal;
+import com.hedge.hedges_bestiary.entity.AI.goal.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.SpottedStrikerAttackGoal;
 import com.hedge.hedges_bestiary.entity.AI.navigation.FluidPathNavigation;
 import com.hedge.hedges_bestiary.entity.types.AttackStateMob;
@@ -84,7 +85,7 @@ public class SpottedStrikerEntity extends HBAquaticMob implements AttackStateMob
         this.goalSelector.addGoal(1, new SpottedStrikerAttackGoal(this));
         this.goalSelector.addGoal(4, new CustomSwimGoal(this, 1.0f, 30, 4, 5, false));
 
-        this.targetSelector.addGoal(0, new HurtByTargetGoal(this));
+        this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, HBSchoolingMob.class, true));
 
     }

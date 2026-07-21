@@ -34,7 +34,7 @@ public class DawnDoveRiderLayer extends RenderLayer<DawnDoveEntity, DawnDoveMode
                 this.getParentModel().root().translateAndRotate(poseStack);
                 this.getParentModel().flycontrol.translateAndRotate(poseStack);
                 this.getParentModel().body.translateAndRotate(poseStack);
-                poseStack.translate(0, -1.2, -1);
+                poseStack.translate(0, -1.2, entity.getPassengers().indexOf(passenger) == 0 ? -1 : 0.25);
                 poseStack.mulPose(Axis.XN.rotationDegrees(180F));
                 poseStack.mulPose(Axis.YN.rotationDegrees(360F - bodyYaw));
 

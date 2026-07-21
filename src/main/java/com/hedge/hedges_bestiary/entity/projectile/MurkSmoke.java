@@ -25,9 +25,7 @@ public class MurkSmoke extends GenericProjectile {
 
     protected void onHitEntity(EntityHitResult hit) {
         super.onHitEntity(hit);
-        if (this.getOwner() != null) {
-            hit.getEntity().hurt(this.getOwner().damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), this.getDamage());
-        }
+        hit.getEntity().hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), this.getDamage());
     }
 
     @Override

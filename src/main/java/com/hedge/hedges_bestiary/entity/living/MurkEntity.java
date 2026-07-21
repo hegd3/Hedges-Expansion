@@ -7,7 +7,7 @@ import com.hedge.hedges_bestiary.entity.AI.control.ATMSemiaquaticMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.control.ATMSwimLookControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.*;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.MurkAttackGoal;
-import com.hedge.hedges_bestiary.entity.AI.navigation.HEAmphibiousPathNavigator;
+import com.hedge.hedges_bestiary.entity.AI.navigation.HBAmphibiousPathNavigator;
 import com.hedge.hedges_bestiary.entity.projectile.MurkSmoke;
 import com.hedge.hedges_bestiary.entity.types.*;
 import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
@@ -144,7 +144,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.goalSelector.addGoal(6, new IdleAnimationGoal<>(this));
         this.goalSelector.addGoal(7, new DancingGoal(this));
 
-        this.targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
+        this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
 
@@ -179,7 +179,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
-        return new HEAmphibiousPathNavigator(this, pLevel);
+        return new HBAmphibiousPathNavigator(this, pLevel);
     }
 
     @Override

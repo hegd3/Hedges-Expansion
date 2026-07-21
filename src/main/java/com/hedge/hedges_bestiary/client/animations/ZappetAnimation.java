@@ -740,11 +740,11 @@ public class ZappetAnimation {
 					new Keyframe(0.5F, KeyframeAnimations.degreeVec(-28.7639F, 23.382F, -50.0F), AnimationChannel.Interpolations.LINEAR)
 			))
 			.addAnimation("leftwing", new AnimationChannel(AnimationChannel.Targets.POSITION,
-					new Keyframe(0.0F, KeyframeAnimations.posVec(1.0F, 0.5F, -2.0773F), AnimationChannel.Interpolations.LINEAR),
-					new Keyframe(0.1667F, KeyframeAnimations.posVec(1.0F, -0.25F, -1.7555F), AnimationChannel.Interpolations.LINEAR),
-					new Keyframe(0.25F, KeyframeAnimations.posVec(1.0F, -0.5F, -1.9227F), AnimationChannel.Interpolations.LINEAR),
-					new Keyframe(0.4167F, KeyframeAnimations.posVec(1.0F, 0.25F, -2.2445F), AnimationChannel.Interpolations.LINEAR),
-					new Keyframe(0.5F, KeyframeAnimations.posVec(1.0F, 0.5F, -2.0773F), AnimationChannel.Interpolations.LINEAR)
+					new Keyframe(0.0F, KeyframeAnimations.posVec(-1.0F, 0.5F, -2.0773F), AnimationChannel.Interpolations.LINEAR),
+					new Keyframe(0.1667F, KeyframeAnimations.posVec(-1.0F, -0.25F, -1.7555F), AnimationChannel.Interpolations.LINEAR),
+					new Keyframe(0.25F, KeyframeAnimations.posVec(-1.0F, -0.5F, -1.9227F), AnimationChannel.Interpolations.LINEAR),
+					new Keyframe(0.4167F, KeyframeAnimations.posVec(-1.0F, 0.25F, -2.2445F), AnimationChannel.Interpolations.LINEAR),
+					new Keyframe(0.5F, KeyframeAnimations.posVec(-1.0F, 0.5F, -2.0773F), AnimationChannel.Interpolations.LINEAR)
 			))
 			.addAnimation("leftwing2", new AnimationChannel(AnimationChannel.Targets.ROTATION,
 					new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 48.7639F), AnimationChannel.Interpolations.LINEAR),
@@ -792,11 +792,11 @@ public class ZappetAnimation {
 					new Keyframe(0.5F, KeyframeAnimations.degreeVec(-28.7639F, -23.382F, 50.0F), AnimationChannel.Interpolations.LINEAR)
 			))
 			.addAnimation("rightwing", new AnimationChannel(AnimationChannel.Targets.POSITION,
-					new Keyframe(0.0F, KeyframeAnimations.posVec(-1.0F, 0.5F, -2.0773F), AnimationChannel.Interpolations.LINEAR),
-					new Keyframe(0.1667F, KeyframeAnimations.posVec(-1.0F, -0.25F, -1.7555F), AnimationChannel.Interpolations.LINEAR),
-					new Keyframe(0.25F, KeyframeAnimations.posVec(-1.0F, -0.5F, -1.9227F), AnimationChannel.Interpolations.LINEAR),
-					new Keyframe(0.4167F, KeyframeAnimations.posVec(-1.0F, 0.25F, -2.2445F), AnimationChannel.Interpolations.LINEAR),
-					new Keyframe(0.5F, KeyframeAnimations.posVec(-1.0F, 0.5F, -2.0773F), AnimationChannel.Interpolations.LINEAR)
+					new Keyframe(0.0F, KeyframeAnimations.posVec(1.0F, 0.5F, -2.0773F), AnimationChannel.Interpolations.LINEAR),
+					new Keyframe(0.1667F, KeyframeAnimations.posVec(1.0F, -0.25F, -1.7555F), AnimationChannel.Interpolations.LINEAR),
+					new Keyframe(0.25F, KeyframeAnimations.posVec(1.0F, -0.5F, -1.9227F), AnimationChannel.Interpolations.LINEAR),
+					new Keyframe(0.4167F, KeyframeAnimations.posVec(1.0F, 0.25F, -2.2445F), AnimationChannel.Interpolations.LINEAR),
+					new Keyframe(0.5F, KeyframeAnimations.posVec(1.0F, 0.5F, -2.0773F), AnimationChannel.Interpolations.LINEAR)
 			))
 			.addAnimation("rightwing2", new AnimationChannel(AnimationChannel.Targets.ROTATION,
 					new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, -48.7639F), AnimationChannel.Interpolations.LINEAR),

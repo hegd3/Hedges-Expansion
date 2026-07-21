@@ -33,7 +33,7 @@ public class ProjectileTrailParticle extends TextureSheetParticle {
             this.setSpriteFromAge(this.sprites);
 
             this.oRoll = this.roll;
-            this.roll += (float)Math.PI * 0.1F;
+            this.roll += (float)Math.PI * 0.01F;
             if (this.onGround) {
                 this.oRoll = this.roll = 0.0F;
             }
@@ -69,6 +69,19 @@ public class ProjectileTrailParticle extends TextureSheetParticle {
 
         public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
             return new ProjectileTrailParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites, 5, 0.4f, 1.0f);
+        }
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static class FireBallProvider implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet sprites;
+
+        public FireBallProvider(SpriteSet pSprites) {
+            this.sprites = pSprites;
+        }
+
+        public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
+            return new ProjectileTrailParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites, 4, 1f, 1.0f);
         }
     }
 

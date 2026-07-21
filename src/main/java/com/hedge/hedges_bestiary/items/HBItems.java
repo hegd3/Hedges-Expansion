@@ -62,8 +62,7 @@ public class HBItems {
     public static final RegistryObject<Item> SPOTTED_STRIKER_SPAWN_EGG = ITEMS.register("spotted_striker_spawn_egg",
             () -> new ForgeSpawnEggItem(HBEntities.SPOTTED_STRIKER, 0x50555E, 0x8A896B, new Item.Properties()));
 
-    public static final RegistryObject<Item> GRUIN_SPAWN_EGG = ITEMS.register("gruin_spawn_egg",
-            () -> new ForgeSpawnEggItem(HBEntities.GRUIN, 0x21152B, 0x968466, new Item.Properties()));
+    public static final RegistryObject<Item> PLOMBO_SPAWN_EGG = createEgg("plombo", HBEntities.PLOMBO, 0x2D2F3B, 0x827363);
 
     public static final RegistryObject<Item> GURK_SPAWN_EGG = ITEMS.register("gurk_spawn_egg",
             () -> new ForgeSpawnEggItem(HBEntities.GURK, 0x2E7037, 0x63A64E, new Item.Properties()));

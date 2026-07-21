@@ -68,7 +68,7 @@ public abstract class GenericProjectile extends Projectile {
             deltaMovementOld = getDeltaMovement();
         }
         if (tickCount > this.getLifespan()) {
-            discard();
+            this.onMaxAge();
             return;
         }
         if (this.level().isClientSide) {
@@ -147,6 +147,10 @@ public abstract class GenericProjectile extends Projectile {
         super.readAdditionalSaveData(tag);
         this.damage = tag.getFloat("damage");
         this.tickCount = tag.getInt("age");
+    }
+
+    protected void onMaxAge() {
+        this.discard();
     }
 
 

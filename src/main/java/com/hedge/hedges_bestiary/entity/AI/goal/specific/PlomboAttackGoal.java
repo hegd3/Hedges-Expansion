@@ -1,11 +1,11 @@
 package com.hedge.hedges_bestiary.entity.AI.goal.specific;
 
 import com.hedge.hedges_bestiary.entity.AI.goal.GenericMeleeGoal;
-import com.hedge.hedges_bestiary.entity.living.GruinEntity;
+import com.hedge.hedges_bestiary.entity.living.PlomboEntity;
 import net.minecraft.world.entity.LivingEntity;
 
-public class GruinAttackGoal extends GenericMeleeGoal<GruinEntity> {
-    public GruinAttackGoal(GruinEntity pMob) {
+public class PlomboAttackGoal extends GenericMeleeGoal<PlomboEntity> {
+    public PlomboAttackGoal(PlomboEntity pMob) {
         super(pMob, 1.3);
     }
 
@@ -28,7 +28,7 @@ public class GruinAttackGoal extends GenericMeleeGoal<GruinEntity> {
         if (livingentity != null) {
             this.attackReach = this.mob.getAttackReachSqr(livingentity);
             this.dist = this.mob.distanceToSqr(livingentity);
-            if (this.mob.getAnimState() != 3) {
+            if (this.mob.getAnimState() != 2) {
                 if (this.attackReach < this.dist) {
                     this.tickPath(livingentity);
                 } else {
@@ -39,7 +39,7 @@ public class GruinAttackGoal extends GenericMeleeGoal<GruinEntity> {
             }
             if (this.mob.getAnimState() == 0) {
                 if (this.mob.canUseMultiAttack(this.attackReach, this.dist)) {
-                    this.mob.setAnimState(3);
+                    this.mob.setAnimState(2);
                 } else if (this.mob.canUseAttack(livingentity, this.attackReach, this.dist)) {
                     this.mob.setAttacking();
                 }

@@ -2,6 +2,7 @@ package com.hedge.hedges_bestiary.entity.living;
 
 import com.hedge.hedges_bestiary.entity.AI.control.FlyingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.FlyingWanderGoal;
+import com.hedge.hedges_bestiary.entity.AI.goal.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.BansheeAttackGoal;
 import com.hedge.hedges_bestiary.entity.projectile.BansheeScream;
 import com.hedge.hedges_bestiary.entity.types.HBMonster;
@@ -69,7 +70,7 @@ public class BansheeEntity extends HBMonster {
         this.goalSelector.addGoal(0, new BansheeAttackGoal(this));
         this.goalSelector.addGoal(1, new FlyingWanderGoal(this, 1.0f, 35, 22));
 
-        this.targetSelector.addGoal(0, new HurtByTargetGoal(this));
+        this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, LivingEntity.class, true));
 
     }

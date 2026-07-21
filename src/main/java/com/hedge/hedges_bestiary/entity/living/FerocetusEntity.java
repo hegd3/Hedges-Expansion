@@ -1,6 +1,7 @@
 package com.hedge.hedges_bestiary.entity.living;
 
 import com.hedge.hedges_bestiary.entity.AI.control.SwimmingMoveControl;
+import com.hedge.hedges_bestiary.entity.AI.goal.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.IdleAnimationGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.FerocetusAttackGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.GroupFollowLeaderGoal;
@@ -102,7 +103,7 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
         this.goalSelector.addGoal(2, new GroupFollowLeaderGoal<>(this));
         this.goalSelector.addGoal(3, new IdleAnimationGoal<>(this));
 
-        this.targetSelector.addGoal(0, new HurtByTargetGoal(this).setAlertOthers());
+        this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, TearacudaEntity.class, true));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, MurkEntity.class, true));
 

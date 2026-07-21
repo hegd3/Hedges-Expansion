@@ -6,6 +6,7 @@ import com.hedge.hedges_bestiary.entity.living.ambientfish.GildGliderEntity;
 import com.hedge.hedges_bestiary.entity.living.ambientfish.GlimEntity;
 import com.hedge.hedges_bestiary.entity.living.ambientfish.ChubEntity;
 import com.hedge.hedges_bestiary.entity.projectile.BansheeScream;
+import com.hedge.hedges_bestiary.entity.projectile.DawnDoveFireBall;
 import com.hedge.hedges_bestiary.entity.projectile.MurkSmoke;
 import com.hedge.hedges_bestiary.entity.projectile.WaveEntity;
 import net.minecraft.world.entity.EntityType;
@@ -27,9 +28,9 @@ public class HBEntities {
             ENTITY_TYPES.register("spotted_striker", () -> EntityType.Builder.of(SpottedStrikerEntity::new, MobCategory.WATER_CREATURE)
                     .sized(1.6f, 1.37f).build("spotted_striker"));
 
-    public static final RegistryObject<EntityType<GruinEntity>> GRUIN =
-            ENTITY_TYPES.register("gruin", () -> EntityType.Builder.of(GruinEntity::new, MobCategory.CREATURE)
-                    .sized(1.8f, 2.2f).build("gruin"));
+    public static final RegistryObject<EntityType<PlomboEntity>> PLOMBO =
+            ENTITY_TYPES.register("plombo", () -> EntityType.Builder.of(PlomboEntity::new, MobCategory.CREATURE)
+                    .sized(1.8f, 2.2f).build("plombo"));
 
     public static final RegistryObject<EntityType<GurkEntity>> GURK =
             ENTITY_TYPES.register("gurk", () -> EntityType.Builder.of(GurkEntity::new, MobCategory.CREATURE)
@@ -83,6 +84,9 @@ public class HBEntities {
             ENTITY_TYPES.register("dawn_dove", () -> EntityType.Builder.of(DawnDoveEntity::new, MobCategory.CREATURE)
                     .sized(2.8f, 2.5f).build("dawn_dove"));
 
+    public static final RegistryObject<EntityType<DawnDoveFireBall>> DAWN_DOVE_FIREBALL =
+            ENTITY_TYPES.register("dawn_dove_fireball", () -> EntityType.Builder.of(DawnDoveFireBall::new, MobCategory.MISC)
+                    .sized(1f, 1f).build("dawn_dove_fireball"));
 
     public static void register(IEventBus eventbus) {
         ENTITY_TYPES.register(eventbus);

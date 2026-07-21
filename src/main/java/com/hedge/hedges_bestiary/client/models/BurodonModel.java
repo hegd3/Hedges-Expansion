@@ -113,12 +113,6 @@ public class BurodonModel extends HBModel<BurodonEntity> {
 		return LayerDefinition.create(meshdefinition, 128, 128);
 	}
 
-
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-		root.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-	}
-
 	@Override
 	public ModelPart root() {
 		return this.root;
@@ -138,8 +132,8 @@ public class BurodonModel extends HBModel<BurodonEntity> {
 			this.applyStatic(GenericPosesAnimation.BABY_TRANSFORM_WITH_NECK);
 		}
 		if (entity.inAirTimer < 5) {
-			this.animateWalk(BurodonAnimation.RUN, limbSwing, limbSwingAmount * (entity.runProgress/5f), 1.3f, 2.2f);
-			this.animateWalk(BurodonAnimation.WALK, limbSwing, limbSwingAmount/3f * (1 - entity.runProgress/5f), 2f, 2.5f);
+			this.animateWalk(BurodonAnimation.RUN, limbSwing, limbSwingAmount * (entity.runProgress/5), 1.3f, 2.2f);
+			this.animateWalk(BurodonAnimation.WALK, limbSwing, limbSwingAmount/3f * (1 - entity.runProgress/5), 2f, 2.5f);
 		}
 		this.animateSmooth(entity.idleAnimationState, BurodonAnimation.IDLE, ageInTicks, 1f);
 		this.animateSmooth(entity.sitAnimationState, BurodonAnimation.SIT, ageInTicks, 1f);
@@ -147,7 +141,7 @@ public class BurodonModel extends HBModel<BurodonEntity> {
 		this.animateSmooth(entity.danceAnimationState, BurodonAnimation.DANCE, ageInTicks, 1f);
 		if (entity.getAnimState() > 0) {
 			this.animateSmooth(entity.biteAnimationState, BurodonAnimation.BITE, ageInTicks, 1f);
-			this.animateSmooth(entity.jumpAnimationState, BurodonAnimation.JUMP, ageInTicks, 1f);
+			this.animateSmooth(entity.jumpAnimationState, BurodonAnimation.JUMP, ageInTicks, 2f);
 			this.animateSmooth(entity.roarAnimationState, BurodonAnimation.ROAR, ageInTicks, 1f);
 			this.animateSmooth(entity.yawnAnimationState, BurodonAnimation.YAWN, ageInTicks, 1f);
 		}

@@ -25,11 +25,13 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -49,6 +51,7 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
     private boolean jumpAway = false;
     private Vec3 jumpVector;
     public int inAirTimer = 0;
+
     public float runProgress = 0;
     private int attackCD = 0;
     private int jumpCD = 0;
@@ -112,12 +115,14 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
         this.goalSelector.addGoal(5, new RandomlySitGoal(this));
         this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, LivingEntity.class, 7));
         this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0, 20));
-        this.goalSelector.addGoal(8, new IdleAnimationGoal<>(this, 500));
+        this.goalSelector.addGoal(8, new IdleAnimationGoal<>(this));
         this.goalSelector.addGoal(9, new DancingGoal(this));
 
         this.targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
-        this.targetSelector.addGoal(2, new HurtByTargetGoal(this).setAlertOthers());
+        this.targetSelector.addGoal(2, new HBHurtByTargetGoal(this));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Sheep.class, true));
+        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this,Player.class, true));
     }
 
 
@@ -140,10 +145,10 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
                 this.inAirTimer = 0;
                 if (this.getDeltaMovement().horizontalDistanceSqr() > 0.01) {
                     if (this.runProgress < 5) {
-                        this.runProgress+=0.1f;
+                        this.runProgress+=0.25f;
                     }
                 } else if (this.runProgress > 0) {
-                    this.runProgress-=0.1f;
+                    this.runProgress-=0.25f;
                 }
             }
 
@@ -182,7 +187,7 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
                 }
                 case JUMP_ANIM-> {
                     this.navigation.stop();
-                    if (this.getAnimTicks() < 15) {
+                    if (this.getAnimTicks() < 5) {
                         if (target != null) {
                             if (this.jumpAway && jumpVector != null) {
                                 this.lookAt(EntityAnchorArgument.Anchor.EYES, jumpVector);
@@ -193,10 +198,10 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
                             }
                         }
                     }
-                    else if (this.animTicks == 19) {
+                    else if (this.animTicks == 9) {
                         Vec3 v = this.getLookAngle();
                         this.setDeltaMovement(this.getDeltaMovement().add(v.x, 0.4, v.z).scale(1.5));
-                    } else if (this.animTicks >= 30) {
+                    } else if (this.animTicks >= 15) {
                         this.jumpCD = 100;
                         this.jumpVector = null;
                         this.jumpAway = false;
