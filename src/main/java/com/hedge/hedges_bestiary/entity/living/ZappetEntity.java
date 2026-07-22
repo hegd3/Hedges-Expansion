@@ -267,7 +267,7 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
 
     @Override
     public boolean canBeFollowed() {
-        if (this.getOwnerUUID() != null) {
+        if (this.getOwnerUUID() != null || this.isBaby()) {
             return false;
         }
         return HBGroupMob.super.canBeFollowed();
@@ -302,10 +302,10 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
 
     @Override
     public void addFollowers(Stream<ZappetEntity> pFollowers) {
-        pFollowers.limit((long)(this.getMaxGroupSize() - this.groupSize)).filter((p_27538_) -> {
-            return p_27538_ != this;
-        }).forEach((p_27536_) -> {
-            p_27536_.startFollowing(this);
+        pFollowers.limit((long)(this.getMaxGroupSize() - this.groupSize)).filter((zappet) -> {
+            return zappet != this;
+        }).forEach((zappet) -> {
+            zappet.startFollowing(this);
         });
     }
 

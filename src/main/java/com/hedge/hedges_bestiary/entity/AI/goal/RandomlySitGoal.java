@@ -38,9 +38,7 @@ public class RandomlySitGoal extends Goal {
     @Override
     public boolean canContinueToUse() {
 
-        if (this.mob.getTarget() != null)
-            return false;
-        else if (this.mob.getCommand() != 0  || this.mob.isVehicle()) {
+        if (this.mob.getCommand() != 0  || this.mob.isVehicle()) {
             return false;
         }
         else if (this.mob.isInFluidType() || !this.mob.onGround())
@@ -50,9 +48,7 @@ public class RandomlySitGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        if (this.mob.getTarget() != null)
-            return false;
-        else if (this.mob.getCommand() != 0 || this.mob.isVehicle()) {
+        if (this.mob.getCommand() != 0 || this.mob.isVehicle()) {
             return false;
         }
         else if (this.mob.isInFluidType() || !this.mob.onGround())

@@ -53,7 +53,6 @@ public class NapGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        this.napCD = Math.max(this.napCD - 1, 0);
         if (!this.mob.isNapping()) {
             return false;
         }
@@ -69,13 +68,13 @@ public class NapGoal extends Goal {
 
     private boolean canSleep() {
         this.resetNapCD();
-        long dayTime = this.mob.level().getDayTime();
+        long dayTime = this.mob.level().getDayTime() % 24000;
         return switch (this.sleepType) {
-            case DIURNAL -> dayTime > 13000 || dayTime < 6000;
-            case NOCTURNAL -> dayTime < 23000 && dayTime > 6000;
+            case DIURNAL -> dayTime > 13000 && dayTime < 23992;
+            case NOCTURNAL -> dayTime < 13000 || dayTime > 23000;
             case CATHERMAL -> (dayTime < 12000 || dayTime > 18000) && dayTime < 23000 && dayTime > 8000; // active "randomly"
             case MATUTINAL -> dayTime > 23000 || dayTime < 1000; // active at sunrise
-            case VESPERTINE -> dayTime < 12000 || dayTime > 18000;
+            case VESPERTINE -> dayTime < 12000 || dayTime > 18000; //active sunset
         };
     }
 
@@ -88,7 +87,7 @@ public class NapGoal extends Goal {
         NOCTURNAL,
         CATHERMAL,
         MATUTINAL,
-        VESPERTINE,
+        VESPERTINE
 
     }
 }

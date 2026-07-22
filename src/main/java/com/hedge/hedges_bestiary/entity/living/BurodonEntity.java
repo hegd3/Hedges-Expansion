@@ -23,6 +23,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -44,6 +45,9 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
     public final SmoothAnimationState jumpAnimationState = new SmoothAnimationState();
     public final SmoothAnimationState roarAnimationState = new SmoothAnimationState();
     public final SmoothAnimationState yawnAnimationState = new SmoothAnimationState();
+    public final SmoothAnimationState sighAnimationState = new SmoothAnimationState();
+    public final SmoothAnimationState tailFlickAnimationState = new SmoothAnimationState();
+
     public final SmoothAnimationState airAnimationState = new SmoothAnimationState();
 
 
@@ -112,11 +116,13 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
         this.goalSelector.addGoal(2, new AvoidTargetWhenLowGoal(this, 1.6D, 20, 15, 16, 7));
         this.goalSelector.addGoal(3, new BurodonAttackGoal(this));
         this.goalSelector.addGoal(4, new HBFollowOwnerGoal(this, 1.2D, 1.6D, 7.0f, 4.0f));
-        this.goalSelector.addGoal(5, new RandomlySitGoal(this));
-        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, LivingEntity.class, 7));
-        this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0, 20));
-        this.goalSelector.addGoal(8, new IdleAnimationGoal<>(this));
-        this.goalSelector.addGoal(9, new DancingGoal(this));
+        this.goalSelector.addGoal(5, new NapGoal(this));
+        this.goalSelector.addGoal(6, new RandomlySitGoal(this));
+        this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, LivingEntity.class, 7));
+        this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 1.0, 20));
+        this.goalSelector.addGoal(9, new IdleAnimationGoal<>(this));
+        this.goalSelector.addGoal(10, new DancingGoal(this));
+        this.goalSelector.addGoal(11, new RandomLookAroundGoal(this));
 
         this.targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
@@ -222,13 +228,23 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
                         this.resetAnimState();
                     }
                 }
+                case 5 -> {
+                    if (this.animTicks >= 20 || target != null) {
+                        this.resetAnimState();
+                    }
+                }
+                case 6 -> {
+                    if (this.animTicks >= 35 || target != null) {
+                        this.resetAnimState();
+                    }
+                }
             }
         }
     }
 
     @Override
     public void playIdle() {
-        this.setAnimState(YAWN_ANIM);
+        this.setAnimState(this.getRandom().nextInt(3) + YAWN_ANIM);
     }
 
     @Override
@@ -243,7 +259,7 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
 
     @Override
     protected float getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions) {
-        return 1.3f;
+        return this.getBbHeight()/1.38f;
     }
 
     @Override
@@ -255,12 +271,17 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
     public void setUpAnimStates() {
         this.idleAnimationState.animateWhen(inAirTimer < 5 && keepsIdle(), this.tickCount);
         this.sitAnimationState.animateWhen(this.isSitting() && !this.isDancing(), this.tickCount);
+        this.napAnimationState.animateWhen(this.isNapping(), this.tickCount);
         this.danceAnimationState.animateWhen(this.isDancing(), this.tickCount);
+        int animState = this.getAnimState();
         this.airAnimationState.animateWhen(inAirTimer > 5 && keepsIdle(), this.tickCount);
-        this.biteAnimationState.animateWhen(this.getAnimState() == 1, this.tickCount);
-        this.jumpAnimationState.animateWhen(this.getAnimState() == 2, this.tickCount);
-        this.roarAnimationState.animateWhen(this.getAnimState() == 3, this.tickCount);
-        this.yawnAnimationState.animateWhen(this.getAnimState() == 4, this.tickCount);
+        this.biteAnimationState.animateWhen(animState == 1, this.tickCount);
+        this.jumpAnimationState.animateWhen(animState == 2, this.tickCount);
+        this.roarAnimationState.animateWhen(animState == 3, this.tickCount);
+        this.yawnAnimationState.animateWhen(animState == 4, this.tickCount);
+        this.tailFlickAnimationState.animateWhen(animState == 5, this.tickCount);
+        this.sighAnimationState.animateWhen(animState == 6, this.tickCount);
+
     }
 
     private boolean keepsIdle() {

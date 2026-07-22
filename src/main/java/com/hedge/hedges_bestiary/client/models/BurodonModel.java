@@ -69,31 +69,31 @@ public class BurodonModel extends HBModel<BurodonEntity> {
 
 		PartDefinition bodyheadtail = bodyandfrontlegs.addOrReplaceChild("bodyheadtail", CubeListBuilder.create(), PartPose.offset(0.0F, 1.0F, -4.0F));
 
-		PartDefinition body = bodyheadtail.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-7.5F, -9.0F, -13.0F, 15.0F, 19.0F, 23.0F, new CubeDeformation(0.0F))
-		.texOffs(48, 88).addBox(0.0F, -15.0F, -1.0F, 0.0F, 6.0F, 9.0F, new CubeDeformation(0.0F))
-		.texOffs(0, 42).addBox(-7.5F, 10.0F, -13.0F, 15.0F, 3.0F, 23.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -10.0F, 1.0F));
+		PartDefinition body = bodyheadtail.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-7.5F, -19.0F, -12.0F, 15.0F, 19.0F, 23.0F, new CubeDeformation(0.0F))
+				.texOffs(48, 88).addBox(0.0F, -25.0F, 0.0F, 0.0F, 6.0F, 9.0F, new CubeDeformation(0.0F))
+				.texOffs(0, 42).addBox(-7.5F, 0.0F, -12.0F, 15.0F, 3.0F, 23.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
 		PartDefinition neckrot = bodyheadtail.addOrReplaceChild("neckrot", CubeListBuilder.create(), PartPose.offset(0.0F, -9.5F, -12.0F));
 
 		PartDefinition neck = neckrot.addOrReplaceChild("neck", CubeListBuilder.create().texOffs(0, 68).addBox(-4.5F, -11.5F, -4.0F, 9.0F, 19.0F, 15.0F, new CubeDeformation(0.0F))
-		.texOffs(88, 90).addBox(-4.5F, 7.5F, -4.0F, 9.0F, 2.0F, 4.0F, new CubeDeformation(0.0F))
-		.texOffs(86, 73).addBox(0.0F, -17.5F, -1.0F, 0.0F, 6.0F, 11.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+				.texOffs(88, 90).addBox(-4.5F, 7.5F, -4.0F, 9.0F, 2.0F, 4.0F, new CubeDeformation(0.0F))
+				.texOffs(86, 73).addBox(0.0F, -17.5F, -1.0F, 0.0F, 6.0F, 11.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
 		PartDefinition headrot = neck.addOrReplaceChild("headrot", CubeListBuilder.create(), PartPose.offset(0.0F, -1.0F, -2.0F));
 
 		PartDefinition head = headrot.addOrReplaceChild("head", CubeListBuilder.create().texOffs(88, 96).addBox(0.0F, 6.5F, -9.0F, 0.0F, 4.0F, 7.0F, new CubeDeformation(0.0F))
-		.texOffs(0, 102).addBox(0.0F, -7.5F, -14.0F, 0.0F, 4.0F, 6.0F, new CubeDeformation(0.0F))
-		.texOffs(48, 68).addBox(-5.5F, -5.5F, -8.0F, 11.0F, 12.0F, 8.0F, new CubeDeformation(0.0F))
-		.texOffs(66, 101).addBox(5.5F, 1.5F, -6.0F, 4.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
-		.texOffs(66, 101).mirror().addBox(-9.5F, 1.5F, -6.0F, 4.0F, 3.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false)
-		.texOffs(76, 0).addBox(-3.5F, -3.5F, -18.0F, 7.0F, 5.0F, 10.0F, new CubeDeformation(0.01F))
-		.texOffs(34, 110).addBox(-3.5F, 1.5F, -18.0F, 7.0F, 2.0F, 10.0F, new CubeDeformation(0.01F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+				.texOffs(0, 102).addBox(0.0F, -7.5F, -14.0F, 0.0F, 4.0F, 6.0F, new CubeDeformation(0.0F))
+				.texOffs(48, 68).addBox(-5.5F, -5.5F, -8.0F, 11.0F, 12.0F, 8.0F, new CubeDeformation(0.0F))
+				.texOffs(66, 101).addBox(5.5F, 1.5F, -6.0F, 4.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+				.texOffs(66, 101).mirror().addBox(-9.5F, 1.5F, -6.0F, 4.0F, 3.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false)
+				.texOffs(76, 0).addBox(-3.5F, -3.5F, -18.0F, 7.0F, 5.0F, 10.0F, new CubeDeformation(0.01F))
+				.texOffs(34, 110).addBox(-3.5F, 1.5F, -18.0F, 7.0F, 2.0F, 10.0F, new CubeDeformation(0.01F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
 		PartDefinition ear = head.addOrReplaceChild("ear", CubeListBuilder.create().texOffs(75, 55).addBox(1.06F, -4.0F, -1.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
-		.texOffs(12, 102).addBox(-0.94F, -3.0F, -1.0F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(2.5F, -5.5F, -6.0F));
+				.texOffs(12, 102).addBox(-0.94F, -3.0F, -1.0F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(2.5F, -5.5F, -6.0F));
 
 		PartDefinition ear2 = head.addOrReplaceChild("ear2", CubeListBuilder.create().texOffs(75, 55).mirror().addBox(-1.06F, -4.0F, -1.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)).mirror(false)
-		.texOffs(12, 102).mirror().addBox(-1.06F, -3.0F, -1.0F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-3.5F, -5.5F, -6.0F));
+				.texOffs(12, 102).mirror().addBox(-1.06F, -3.0F, -1.0F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-3.5F, -5.5F, -6.0F));
 
 		PartDefinition jaw = head.addOrReplaceChild("jaw", CubeListBuilder.create().texOffs(76, 32).addBox(-3.5F, 0.0F, -10.0F, 7.0F, 4.0F, 10.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 1.5F, -8.0F));
 
@@ -104,7 +104,7 @@ public class BurodonModel extends HBModel<BurodonEntity> {
 		PartDefinition tail = bodyheadtail.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(66, 90).addBox(-2.5F, -2.5F, 0.0F, 5.0F, 5.0F, 6.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -2.5F, 11.0F));
 
 		PartDefinition tail2 = tail.addOrReplaceChild("tail2", CubeListBuilder.create().texOffs(76, 16).addBox(-3.5F, -3.5F, 0.0F, 7.0F, 7.0F, 9.0F, new CubeDeformation(0.01F))
-		.texOffs(112, 25).addBox(-3.5F, -3.5F, 4.0F, 7.0F, 7.0F, 0.0F, new CubeDeformation(0.01F)), PartPose.offset(0.0F, 0.0F, 6.0F));
+				.texOffs(112, 25).addBox(-3.5F, -3.5F, 4.0F, 7.0F, 7.0F, 0.0F, new CubeDeformation(0.01F)), PartPose.offset(0.0F, 0.0F, 6.0F));
 
 		PartDefinition rightleg2 = root.addOrReplaceChild("rightleg2", CubeListBuilder.create().texOffs(86, 56).mirror().addBox(-3.0F, 0.0F, -3.5F, 6.0F, 10.0F, 7.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-3.5F, -10.0F, 5.5F));
 
@@ -137,14 +137,19 @@ public class BurodonModel extends HBModel<BurodonEntity> {
 		}
 		this.animateSmooth(entity.idleAnimationState, BurodonAnimation.IDLE, ageInTicks, 1f);
 		this.animateSmooth(entity.sitAnimationState, BurodonAnimation.SIT, ageInTicks, 1f);
+		this.animateSmooth(entity.napAnimationState, BurodonAnimation.SLEEP, ageInTicks, 1f);
 		this.animateSmooth(entity.airAnimationState, BurodonAnimation.AIR, ageInTicks, 1f);
 		this.animateSmooth(entity.danceAnimationState, BurodonAnimation.DANCE, ageInTicks, 1f);
 		if (entity.getAnimState() > 0) {
 			this.animateSmooth(entity.biteAnimationState, BurodonAnimation.BITE, ageInTicks, 1f);
 			this.animateSmooth(entity.jumpAnimationState, BurodonAnimation.JUMP, ageInTicks, 2f);
 			this.animateSmooth(entity.roarAnimationState, BurodonAnimation.ROAR, ageInTicks, 1f);
-			this.animateSmooth(entity.yawnAnimationState, BurodonAnimation.YAWN, ageInTicks, 1f);
 		}
+		this.animateSmooth(entity.yawnAnimationState, BurodonAnimation.YAWN, ageInTicks, 1f);
+		this.animateSmooth(entity.sighAnimationState, BurodonAnimation.SIGH, ageInTicks, 1f);
+		this.animateSmooth(entity.tailFlickAnimationState, BurodonAnimation.TAIL_FLICK, ageInTicks, 1f);
+
+
 	}
 
 

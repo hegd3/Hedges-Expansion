@@ -111,14 +111,15 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
         this.goalSelector.addGoal(1, new HBSitWhenOrderedGoal(this));
         this.goalSelector.addGoal(2, new AvoidTargetWhenLowGoal(this, 1.3f, 20, 30, 20, 3));
         this.goalSelector.addGoal(3, new PlomboAttackGoal(this));
-        this.goalSelector.addGoal(4, new HBFollowOwnerGoal(this, 1.2D, 1.3D, 7.0f, 4.0f));
+        this.goalSelector.addGoal(4, new HBFollowOwnerGoal(this, 1.1D, 1.3D, 7.0f, 4.0f));
         this.goalSelector.addGoal(5, new PlomboScratchLeavesGoal(this));
         this.goalSelector.addGoal(6, new NapGoal(this, NapGoal.SleepType.CATHERMAL, false));
         this.goalSelector.addGoal(7, new RandomlySitGoal(this, 200, 400));
-        this.goalSelector.addGoal(8, new RandomStrollGoal(this, 1));
+        this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 1));
         this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, LivingEntity.class, 8));
-        this.goalSelector.addGoal(10, new IdleAnimationGoal<>(this, 50));
-        this.goalSelector.addGoal(11, new DancingGoal(this));
+        this.goalSelector.addGoal(10, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(11, new IdleAnimationGoal<>(this, 50));
+        this.goalSelector.addGoal(12, new DancingGoal(this));
 
         this.targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
@@ -228,7 +229,7 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @javax.annotation.Nullable SpawnGroupData pSpawnData, @javax.annotation.Nullable CompoundTag pDataTag) {
         if (pReason == MobSpawnType.CHUNK_GENERATION || pReason == MobSpawnType.NATURAL) {
             long dayTime = this.level().getDayTime();
-            if ((dayTime < 12000 || dayTime > 18000) && dayTime < 23000 && dayTime > 6000) {
+            if ((dayTime < 12000 || dayTime > 18000) && dayTime < 23000 && dayTime > 8000) {
                 this.setNapping(true);
             }
         }
@@ -362,7 +363,7 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
         }
 
         public double acceptedDistance() {
-            return 4D;
+            return 2D;
         }
 
 
@@ -378,7 +379,10 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
                 return false;
             }
             if (this.plombo.isScratching()) {
-                return this.ticksScratching < 200 && this.isValidTarget(this.plombo.level(), this.blockPos) && blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance());
+                if (this.ticksScratching > 60 && !blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance())) {
+                    return false;
+                }
+                return this.ticksScratching < 200 && this.isValidTarget(this.plombo.level(), this.blockPos);
             }
             return super.canContinueToUse();
         }

@@ -152,7 +152,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     @Override
     protected float getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions) {
-        return 1.0f;
+        return this.getBbHeight()/2.45f;
     }
 
     @Override
