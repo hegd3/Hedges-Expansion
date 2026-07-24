@@ -28,6 +28,7 @@ public class DawnDoveFireBall extends GenericProjectile {
         if (this.getOwner() != null && this.getOwner().isAlliedTo(entity))  {
             return;
         }
+        entity.setRemainingFireTicks(60);
         if (entity.hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), this.getDamage())) {
             this.explode();
             this.discard();
@@ -50,19 +51,19 @@ public class DawnDoveFireBall extends GenericProjectile {
 
     private void explode() {
         if (!this.level().isClientSide()) {
-            List<LivingEntity> hit = AttackHelpers.projectileZoneHitbox(this.getOwner() != null ? this.getOwner() : this, this.position(), 5, 5, 5, 20);
+            List<LivingEntity> hit = AttackHelpers.projectileZoneHitbox(this, this.position(), 3, 3, 3, 10);
             for (LivingEntity entity : hit) {
                 entity.setRemainingFireTicks(60);
                 entity.hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), this.getDamage() - (float)entity.distanceToSqr(this.position()));
             }
-            //this.level().broadcastEntityEvent(this, (byte)39);
+            // this.level().broadcastEntityEvent(this, (byte)39);
         }
     }
 
     @Override
     public void handleEntityEvent(byte pId) {
         if (pId == 39) {
-            this.level().addParticle(ParticleTypes.EXPLOSION_EMITTER, this.getX(), this.getY(), this.getZ(), 0.0D, 0.0D, 0.0D);
+            this.level().addParticle(ParticleTypes.LAVA, this.getX(), this.getY(), this.getZ(), 0.0D, 0.0D, 0.0D);
         } else {
             super.handleEntityEvent(pId);
         }
@@ -94,7 +95,7 @@ public class DawnDoveFireBall extends GenericProjectile {
 
     @Override
     public int getLifespan() {
-        return 2000;
+        return 3000;
     }
 
     @Override

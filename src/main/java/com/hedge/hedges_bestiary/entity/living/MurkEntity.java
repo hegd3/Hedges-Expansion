@@ -8,6 +8,7 @@ import com.hedge.hedges_bestiary.entity.AI.control.ATMSwimLookControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.*;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.MurkAttackGoal;
 import com.hedge.hedges_bestiary.entity.AI.navigation.HBAmphibiousPathNavigator;
+import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.projectile.MurkSmoke;
 import com.hedge.hedges_bestiary.entity.types.*;
 import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
@@ -29,7 +30,6 @@ import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
@@ -49,8 +49,6 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     public final AnimationState idleAnimationState = new AnimationState();
     public final AnimationState biteAnimationState = new AnimationState();
-    public final AnimationState shootAnimationState = new AnimationState();
-    public final AnimationState powerBiteAnimationState = new AnimationState();
     public final AnimationState roarAnimationState = new AnimationState();
     public final AnimationState sideSlamAnimationState = new AnimationState();
     public final AnimationState breathAnimationState = new AnimationState();
@@ -60,11 +58,10 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     public final SmoothAnimationState sitAnimationState = new SmoothAnimationState();
 
     private int attackCD = 0;
-    private int powerBiteCD = 0;
+    private int multiBiteCD = 0;
     private int roarCD = 0;
     private int projCD = 0;
     private int chargeTicks = 0;
-    private int shotCount = 0;
     private int projectileRot = 0;
 
     private float prevTrail;
@@ -79,7 +76,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
         this.setPathfindingMalus(BlockPathTypes.WATER, 0.0f);
         this.setPathfindingMalus(BlockPathTypes.WATER_BORDER, 0.0f);
-        this.setMaxUpStep(2.0F);
+        this.setMaxUpStep(1.0F);
 
     }
 
@@ -144,7 +141,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.goalSelector.addGoal(6, new IdleAnimationGoal<>(this));
         this.goalSelector.addGoal(7, new DancingGoal(this));
 
-        this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this));
+        this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this, true, TamableAnimal.class));
         this.targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
 
@@ -185,6 +182,9 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     @Override
     public void tick() {
         super.tick();
+        if (!this.shouldInstantTurn()) {
+            this.yBodyRot = Mth.approachDegrees(this.yBodyRotO, yBodyRot, 10);
+        }
         if (this.level().isClientSide()) {
             this.setUpAnimStates();
             if (this.isCharged()) {
@@ -196,7 +196,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         } else {
             this.attackCD = Math.max(this.attackCD - 1, 0);
             this.projCD = Math.max(this.projCD - 1, 0);
-            this.powerBiteCD = Math.max(this.powerBiteCD - 1, 0);
+            this.multiBiteCD = Math.max(this.multiBiteCD - 1, 0);
             if (this.isCharged()) {
                 this.chargeTicks = Math.max(this.chargeTicks - 1, 0);
                 if (this.chargeTicks == 0) {
@@ -223,27 +223,25 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                         }
                     }
                     case 2 -> {
-                        if (!this.isInFluidType()) {
-                            this.getNavigation().stop();
-                        }
-                        if (this.animTicks < 8 && target != null) {
+                        this.getNavigation().stop();
+                        if (this.animTicks < 10 && target != null) {
                             this.lookAt(target, 30f, 30f);
                             this.getLookControl().setLookAt(target, 30f, 30f);
                         }
-                        else if (this.animTicks == 15) {
-                            for (int i = -5; i <= 5; i+=5) {
-                                MurkSmoke projectile = HBEntities.MURK_SMOKE.get().create(this.level());
-                                if (projectile != null) {
-                                    projectile.setCharged(this.isCharged());
-                                    projectile.moveTo(this.getEyePosition());
-                                    projectile.shootFromRotation(this, Mth.clamp(this.getXRot(), -45, 45), this.getYRot() + i, 0.0f, 3, 0);
-                                    this.level().addFreshEntity(projectile);
-                                }
+                        else if (this.animTicks >= 16 && this.animTicks <= 24 && this.animTicks % 2 == 0) {
+                            MurkSmoke projectile = HBEntities.MURK_SMOKE.get().create(this.level());
+                            if (projectile != null) {
+                                projectile.setCharged(this.isCharged());
+                                Vec3 v = (EntityHelpers.bodyAngle(this).scale(1.3f)).cross(EntityHelpers.UP).scale(this.projectileRot * 0.1);
+                                projectile.moveTo(this.getEyePosition().add(v));
+                                projectile.shootFromRotation(this, Mth.clamp(this.getXRot(), -45, 45), this.getYRot() + this.projectileRot, 0.0f, 3, 0);
+                                this.level().addFreshEntity(projectile);
+                                this.projectileRot += this.swingingLeft() ? 5 : -5;
                             }
-                        } else if (this.animTicks >= 28) {
-                            this.shotCount--;
+
+                        } else if (this.animTicks >= 39) {
                             this.resetAnimState();
-                            this.projCD = this.shotCount > 0 ? 3 : 200;
+                            this.projCD = 100;
                         }
                     }
                     case 3 -> {
@@ -254,12 +252,16 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                                 this.getLookControl().setLookAt(target, 15f, 30f);
                             }
                             this.addDeltaMovement(EntityHelpers.bodyAngle(this).scale(this.isInFluidType() ? 0.1 : 0.25));
-                        }
-                        else if (this.animTicks == 19) {
-                            this.powerBite();
-                        } else if (this.animTicks >= 39){
+                        } else if (this.animTicks >= 75){
                             this.resetAnimState();
-                            this.powerBiteCD = 200;
+                            this.multiBiteCD = 120;
+                        } else {
+                            switch (this.animTicks) {
+                                case 19, 36, 54 -> {
+                                    this.powerBite();
+                                    this.addDeltaMovement(EntityHelpers.bodyAngle(this).scale(0.4));
+                                }
+                            }
                         }
                     }
                     case 4 -> {
@@ -299,49 +301,6 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
                     }
                     case 6 -> {
-                        this.getNavigation().stop();
-                        if (this.animTicks < 10 && target != null) {
-                            this.lookAt(target, 30f, 30f);
-                            this.getLookControl().setLookAt(target, 30f, 30f);
-                        }
-                        else if (this.animTicks >= 16 && this.animTicks <= 24 && this.animTicks % 2 == 0) {
-                            MurkSmoke projectile = HBEntities.MURK_SMOKE.get().create(this.level());
-                            if (projectile != null) {
-                                projectile.setCharged(this.isCharged());
-                                Vec3 v = EntityHelpers.bodyAngle(this).cross(EntityHelpers.UP).scale(this.projectileRot * 0.1);
-                                projectile.moveTo(this.getEyePosition().add(v));
-                                projectile.shootFromRotation(this, Mth.clamp(this.getXRot(), -45, 45), this.getYRot() + this.projectileRot, 0.0f, 3, 0);
-                                this.level().addFreshEntity(projectile);
-                                this.projectileRot += this.swingingLeft() ? 5 : -5;
-                            }
-
-                        } else if (this.animTicks >= 39) {
-                            this.shotCount--;
-                            this.resetAnimState();
-                            this.projCD = 100;
-                        }
-                    }
-                    case 7 -> {
-                        this.getNavigation().stop();
-                        if (this.animTicks % 5 == 0 && this.animTicks < 18) {
-                            if (target != null) {
-                                this.lookAt(target, 15f, 30f);
-                                this.getLookControl().setLookAt(target, 15f, 30f);
-                            }
-                            this.addDeltaMovement(EntityHelpers.bodyAngle(this).scale(this.isInFluidType() ? 0.1 : 0.25));
-                        } else if (this.animTicks >= 75){
-                            this.resetAnimState();
-                            this.powerBiteCD = 120;
-                        } else {
-                            switch (this.animTicks) {
-                                case 19, 36, 54 -> {
-                                    this.powerBite();
-                                    this.addDeltaMovement(EntityHelpers.bodyAngle(this).scale(0.4));
-                                }
-                            }
-                        }
-                    }
-                    case 8 -> {
                         if (this.animTicks > 20) {
                             this.resetAnimState();
                         }
@@ -411,23 +370,21 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.attackCD += 5;
         this.roarCD+=5;
         this.projCD+=5;
-        this.powerBiteCD+=5;
+        this.multiBiteCD +=5;
     }
 
     @Override
     public void setUpAnimStates() {
         this.idleAnimationState.animateWhen(this.isAlive(), this.tickCount);
-        this.biteAnimationState.animateWhen(this.getAnimState() == 1, this.tickCount);
-        this.shootAnimationState.animateWhen(this.getAnimState() == 2, this.tickCount);
-        this.powerBiteAnimationState.animateWhen(this.getAnimState() == 3, this.tickCount);
+        int animstate = this.getAnimState();
+        this.biteAnimationState.animateWhen(animstate == 1, this.tickCount);
+        this.breathAnimationState.animateWhen(animstate == 2, this.tickCount);
+        this.multiBiteAnimationState.animateWhen(animstate == 3, this.tickCount);
 
-        this.roarAnimationState.animateWhen(this.getAnimState() == 4, this.tickCount);
-        this.sideSlamAnimationState.animateWhen(this.getAnimState() == 5, this.tickCount);
+        this.roarAnimationState.animateWhen(animstate == 4, this.tickCount);
+        this.sideSlamAnimationState.animateWhen(animstate == 5, this.tickCount);
 
-        this.breathAnimationState.animateWhen(this.getAnimState() == 6, this.tickCount);
-        this.multiBiteAnimationState.animateWhen(this.getAnimState() == 7, this.tickCount);
-
-        this.clicksAnimationState.animateWhen(this.getAnimState() == 8, this.tickCount);
+        this.clicksAnimationState.animateWhen(animstate == 6, this.tickCount);
         this.sitAnimationState.animateWhen(this.isSitting() && !this.isDancing(), this.tickCount);
         this.danceAnimationState.animateWhen(this.isDancing(), this.tickCount);
     }
@@ -444,8 +401,8 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         return this.roarCD == 0 && !this.isCharged() && attackReach * 20 >= dist;
     }
 
-    public boolean canPowerBite(double attackReach, double dist) {
-        return this.powerBiteCD == 0 && attackReach * 1.4 >= dist;
+    public boolean canMultiBite(double attackReach, double dist) {
+        return this.multiBiteCD == 0 && attackReach * 1.4 >= dist;
     }
 
     public void setSlam() {
@@ -459,23 +416,12 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     }
 
     public void setShooting() {
-        if (this.isCharged()) {
-            this.setLeft(!this.swingingLeft());
-            this.projectileRot = this.swingingLeft() ? -10 : 10;
-            this.setAnimState(6);
-        } else {
-            this.shotCount = this.getRandom().nextInt(3) + 1;
-            this.setAnimState(2);
-        }
+        this.setLeft(!this.swingingLeft());
+        this.projectileRot = this.swingingLeft() ? -10 : 10;
+        this.setAnimState(2);
+
     }
 
-    public int getShotCount() {
-        return this.shotCount;
-    }
-
-    public void setShotCount(int i) {
-        this.shotCount = i;
-    }
 
     public boolean swingingLeft() {
         return this.entityData.get(LEFT);
@@ -512,8 +458,8 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     @Override
     public boolean shouldLockAngle() {
-        return switch(this.getAnimState()) {
-            case 5, 6 -> this.animTicks > 15;
+        return switch (this.getAnimState()) {
+            case 3, 5 -> this.animTicks > 15;
             default -> false;
         };
     }
@@ -521,14 +467,14 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     @Override
     public boolean shouldInstantTurn() {
         return switch (this.getAnimState()) {
-            case 2, 4, 6 -> true;
+            case 2, 3 -> true;
             default -> false;
         };
     }
 
     @Override
     public float getTurnSpeed() {
-        return this.isInWaterOrBubble() ? 22.25f : 45f;
+        return 45f;
     }
 
     @Override
@@ -538,7 +484,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     @Override
     public void playIdle() {
-        this.setAnimState(8);
+        this.setAnimState(6);
         this.playSound(HBSounds.MURK_CLICKS.get(), 1 - (this.getRandom().nextFloat() / 2), 1 - (this.getRandom().nextFloat() / 4));
     }
 

@@ -6,16 +6,16 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class FadingAuraParticle extends TextureSheetParticle {
+public class SleepParticle extends TextureSheetParticle {
     private final SpriteSet sprites;
 
-    public FadingAuraParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, SpriteSet pSprites) {
+    public SleepParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, SpriteSet pSprites) {
         super(pLevel, pX, pY, pZ);
         this.xd += ((this.random.nextFloat() - this.random.nextFloat()) * 0.05F);
         this.zd += ((this.random.nextFloat() - this.random.nextFloat()) * 0.05F);
 
         this.friction = 0.96F;
-        this.quadSize = 0.6F;
+        this.quadSize = 0.5F;
         this.lifetime = 40 + this.random.nextInt(4);
         this.sprites = pSprites;
         this.setSpriteFromAge(pSprites);
@@ -53,6 +53,7 @@ public class FadingAuraParticle extends TextureSheetParticle {
             this.yd += 0.006;
 
             if (this.alpha > 0.00F) {
+                this.quadSize-=0.01f;
                 this.alpha -= 0.05F;
             }
         }
@@ -68,7 +69,7 @@ public class FadingAuraParticle extends TextureSheetParticle {
 
         @Override
         public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
-            return new FadingAuraParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites);
+            return new SleepParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites);
         }
 
     }

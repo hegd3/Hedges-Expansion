@@ -14,7 +14,6 @@ public class FlockingGoal<E extends TamableFlyer & HBGroupMob<E>> extends GroupF
         if (this.mob.tickCount % 10 == 0) {
             if (this.mob.getLeader().isFlying() && !this.mob.isFlying()) {
                 this.mob.setFlying(true);
-                this.mob.setLanding(this.mob.getLeader().isLanding());
             }
         }
     }

@@ -25,7 +25,9 @@ public class MurkSmoke extends GenericProjectile {
 
     protected void onHitEntity(EntityHitResult hit) {
         super.onHitEntity(hit);
-        hit.getEntity().hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), this.getDamage());
+        if (!hit.getEntity().isAlliedTo(this)) {
+            hit.getEntity().hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), this.getDamage());
+        }
     }
 
     @Override
@@ -53,7 +55,7 @@ public class MurkSmoke extends GenericProjectile {
     public void trailParticles() {
         Vec3 v = getDeltaMovement();
         double length = v.length();
-        int c = (int)Math.min(20, Math.round(length) * 3) + 1;
+        int c = (int)Math.min(8, Math.round(length) * 3) + 1;
         float f = (float)length / c / 2;
         for (int i = 0; i < c; i++) {
             Vec3 rand = EntityHelpers.getRandomVec3(0.02);

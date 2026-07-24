@@ -27,6 +27,14 @@ public abstract class GenericProjectile extends Projectile {
     }
 
     @Override
+    public boolean isAlliedTo(Entity pEntity) {
+        if (this.getOwner() != null) {
+            return this.getOwner().isAlliedTo(pEntity);
+        }
+        return super.isAlliedTo(pEntity);
+    }
+
+    @Override
     public void shoot(double pX, double pY, double pZ, float pVelocity, float pInaccuracy) {
         Vec3 vec3 = (new Vec3(pX, pY, pZ)).normalize().add(this.random.triangle(0.0D, 0.0172275D * (double)pInaccuracy), this.random.triangle(0.0D, 0.0172275D * (double)pInaccuracy), this.random.triangle(0.0D, 0.0172275D * (double)pInaccuracy)).scale((double)pVelocity);
         this.setDeltaMovement(vec3);
@@ -63,6 +71,7 @@ public abstract class GenericProjectile extends Projectile {
 
     @Override
     public void tick() {
+
         super.tick();
         if (tickCount == 1) {
             deltaMovementOld = getDeltaMovement();

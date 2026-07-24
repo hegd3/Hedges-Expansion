@@ -22,8 +22,6 @@ import net.minecraft.world.phys.Vec3;
 public abstract class TamableFlyer extends HBTamableAnimal implements SemiFlyer {
 
     public static final EntityDataAccessor<Boolean> FLYING = SynchedEntityData.defineId(TamableFlyer.class, EntityDataSerializers.BOOLEAN);
-    private int groundTicks = 0;
-    private boolean isLanding = false;
 
     private float flyProgress;
     private float prevFlyProgress;
@@ -140,20 +138,6 @@ public abstract class TamableFlyer extends HBTamableAnimal implements SemiFlyer 
         return this.navigation instanceof MMPathNavigatorGround;
     }
 
-    @Override
-    public boolean isLanding() {
-        return this.isLanding;
-    }
-
-    @Override
-    public void setLanding(boolean b) {
-        this.isLanding = b;
-    }
-
-    @Override
-    public int getGroundTicks() {
-        return this.groundTicks;
-    }
 
     public void tickFlight() {
         if (this.isFlying() && flyProgress < 5F) this.flyProgress++;
@@ -161,7 +145,6 @@ public abstract class TamableFlyer extends HBTamableAnimal implements SemiFlyer 
 
         if (this.isFlying()) {
             this.setNoGravity(true);
-            if (groundTicks > 0) this.setFlying(false);
             if (this.isLandNav()) {
                 this.switchNav(false);
             }
@@ -172,12 +155,10 @@ public abstract class TamableFlyer extends HBTamableAnimal implements SemiFlyer 
             }
         }
 
-        if (groundTicks > 0) groundTicks--;
 
         if (!level().isClientSide) {
             if (this.isFlying() && this.isAlive() && !this.isVehicle()) {
-                if (this.isLanding) this.setDeltaMovement(this.getDeltaMovement().add(0, -0.1D, 0));
-                if (horizontalCollision && !this.isLanding && !this.isInWater()) {
+                if (horizontalCollision && !this.isInWater()) {
                     this.setDeltaMovement(this.getDeltaMovement().add(0, 0.05D, 0));
                 }
             }

@@ -6,6 +6,7 @@ import com.hedge.hedges_bestiary.entity.AI.control.ATMMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.*;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.PlomboAttackGoal;
 import com.hedge.hedges_bestiary.entity.AI.navigation.MMPathNavigatorGround;
+import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
 import com.hedge.hedges_bestiary.entity.types.AdvancedTurningMob;
 import com.hedge.hedges_bestiary.entity.types.AttackStateMob;
@@ -21,6 +22,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -107,23 +109,25 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new HBSitWhenOrderedGoal(this));
-        this.goalSelector.addGoal(2, new AvoidTargetWhenLowGoal(this, 1.3f, 20, 30, 20, 3));
-        this.goalSelector.addGoal(3, new PlomboAttackGoal(this));
-        this.goalSelector.addGoal(4, new HBFollowOwnerGoal(this, 1.1D, 1.3D, 7.0f, 4.0f));
-        this.goalSelector.addGoal(5, new PlomboScratchLeavesGoal(this));
-        this.goalSelector.addGoal(6, new NapGoal(this, NapGoal.SleepType.CATHERMAL, false));
-        this.goalSelector.addGoal(7, new RandomlySitGoal(this, 200, 400));
-        this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 1));
-        this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, LivingEntity.class, 8));
-        this.goalSelector.addGoal(10, new RandomLookAroundGoal(this));
-        this.goalSelector.addGoal(11, new IdleAnimationGoal<>(this, 50));
-        this.goalSelector.addGoal(12, new DancingGoal(this));
+        int i = 0;
+        this.goalSelector.addGoal(i++, new FloatGoal(this));
+        this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this));
+        this.goalSelector.addGoal(i++, new AvoidTargetWhenLowGoal(this, 1.3f, 20, 30, 20, 3));
+        this.goalSelector.addGoal(i++, new PlomboAttackGoal(this));
+        this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.1D, 1.3D, 7.0f, 4.0f));
+        this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this, 1.2d, 16, 4d));
+        this.goalSelector.addGoal(i++, new PlomboScratchLeavesGoal(this));
+        this.goalSelector.addGoal(i++, new NapGoal(this, NapGoal.SleepType.CATHERMAL, false));
+        this.goalSelector.addGoal(i++, new RandomlySitGoal(this, 200, 400));
+        this.goalSelector.addGoal(i++, new WaterAvoidingRandomStrollGoal(this, 1));
+        this.goalSelector.addGoal(i++, new LookAtPlayerGoal(this, LivingEntity.class, 8));
+        this.goalSelector.addGoal(i++, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(i++, new IdleAnimationGoal<>(this, 50));
+        this.goalSelector.addGoal(i, new DancingGoal(this));
 
         this.targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
-        this.targetSelector.addGoal(2, new HBHurtByTargetGoal(this));
+        this.targetSelector.addGoal(2, new HBHurtByTargetGoal(this, true, TamableAnimal.class));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Monster.class, true));
     }
 
@@ -135,6 +139,9 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
     @Override
     public void tick() {
         super.tick();
+        if (!this.shouldTurnWholeBody()) {
+            this.yBodyRot = Mth.approachDegrees(this.yBodyRotO, yBodyRot, 10);
+        }
         if (this.level().isClientSide()) {
             this.setUpAnimStates();
         } else {
@@ -225,12 +232,15 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
     }
 
     @Override
-    @javax.annotation.Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @javax.annotation.Nullable SpawnGroupData pSpawnData, @javax.annotation.Nullable CompoundTag pDataTag) {
-        if (pReason == MobSpawnType.CHUNK_GENERATION || pReason == MobSpawnType.NATURAL) {
-            long dayTime = this.level().getDayTime();
-            if ((dayTime < 12000 || dayTime > 18000) && dayTime < 23000 && dayTime > 8000) {
-                this.setNapping(true);
+    public @NotNull SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @javax.annotation.Nullable SpawnGroupData pSpawnData, @javax.annotation.Nullable CompoundTag pDataTag) {
+
+        if (!this.level().isClientSide()) {
+            this.setHomePos(this.blockPosition());
+            if (pReason == MobSpawnType.CHUNK_GENERATION || pReason == MobSpawnType.NATURAL) {
+                long dayTime = this.level().getDayTime();
+                if ((dayTime < 12000 || dayTime > 18000) && dayTime < 23000 && dayTime > 8000) {
+                    this.setNapping(true);
+                }
             }
         }
 

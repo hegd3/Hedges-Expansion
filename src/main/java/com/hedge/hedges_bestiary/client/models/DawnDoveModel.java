@@ -70,13 +70,13 @@ public class DawnDoveModel extends HBModel<DawnDoveEntity> {
 
 		PartDefinition jaw = head.addOrReplaceChild("jaw", CubeListBuilder.create().texOffs(154, 92).addBox(-5.5F, 0.0F, -16.0F, 11.0F, 5.0F, 16.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 2.0F, -11.0F));
 
-		PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(0, 103).addBox(-8.5F, -7.0F, 0.0F, 17.0F, 15.0F, 13.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -11.0F, 10.0F));
+		PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(31, 172).addBox(-8.5F, -7.0F, 0.0F, 17.0F, 15.0F, 17.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -11.0F, 10.0F));
 
 		PartDefinition tail2 = tail.addOrReplaceChild("tail2", CubeListBuilder.create().texOffs(86, 86).addBox(-5.5F, -4.0F, 0.0F, 11.0F, 7.0F, 20.0F, new CubeDeformation(0.0F))
 				.texOffs(110, 138).addBox(0.0F, -10.0F, 3.0F, 0.0F, 6.0F, 17.0F, new CubeDeformation(0.01F))
 				.texOffs(80, 143).addBox(0.0F, 3.0F, 5.0F, 0.0F, 4.0F, 15.0F, new CubeDeformation(0.01F))
 				.texOffs(42, 143).addBox(5.5F, 0.0F, 5.0F, 4.0F, 0.0F, 15.0F, new CubeDeformation(0.01F))
-				.texOffs(42, 143).mirror().addBox(-9.5F, 0.0F, 5.0F, 4.0F, 0.0F, 15.0F, new CubeDeformation(0.01F)).mirror(false), PartPose.offset(0.0F, 3.0F, 13.0F));
+				.texOffs(42, 143).mirror().addBox(-9.5F, 0.0F, 5.0F, 4.0F, 0.0F, 15.0F, new CubeDeformation(0.01F)).mirror(false), PartPose.offset(0.0F, 3.0F, 17.0F));
 
 		PartDefinition leftwing = body.addOrReplaceChild("leftwing", CubeListBuilder.create().texOffs(108, 61).addBox(0.0F, -3.0F, -5.0F, 26.0F, 6.0F, 9.0F, new CubeDeformation(0.0F))
 				.texOffs(0, 86).addBox(0.0F, -1.0F, 4.0F, 26.0F, 0.0F, 17.0F, new CubeDeformation(0.01F))
@@ -126,6 +126,7 @@ public class DawnDoveModel extends HBModel<DawnDoveEntity> {
 		this.animateSmooth(entity.flyUpAnimationState, DawnDoveAnimation.FLY_UP, ageInTicks, this.young? limbSwingAmount * 0.4f + 0.8f : limbSwingAmount * 0.25f + 0.6f);
 		this.animateSmooth(entity.flyForwardAnimationState, DawnDoveAnimation.FLY_FORWARD, ageInTicks, 1);
 		this.animateSmooth(entity.glideAnimationState, DawnDoveAnimation.GLIDE, ageInTicks, limbSwingAmount * 0.25f + 0.7f);
+		this.animateSmooth(entity.napAnimationState, DawnDoveAnimation.SLEEP, ageInTicks, 1f);
 		this.animate(entity.biteAnimationState, DawnDoveAnimation.BITE, ageInTicks);
 		this.animate(entity.shootAnimationState, DawnDoveAnimation.SHOOT, ageInTicks);
 		if (entity.isFlying()) {

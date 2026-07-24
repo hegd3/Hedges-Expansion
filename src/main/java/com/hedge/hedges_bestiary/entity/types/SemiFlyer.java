@@ -8,10 +8,5 @@ public interface SemiFlyer {
 
     boolean isLandNav();
 
-    boolean isLanding();
-
-    void setLanding(boolean b);
-
-    int getGroundTicks();
 
 }

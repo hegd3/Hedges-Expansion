@@ -1,9 +1,9 @@
 package com.hedge.hedges_bestiary.entity.living.ambientfish;
 
 import com.hedge.hedges_bestiary.entity.AI.control.SwimmingMoveControl;
-import com.hedge.hedges_bestiary.entity.AI.goal.specific.GildGliderJumpGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.GroupFollowLeaderGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.CustomSwimGoal;
+import com.hedge.hedges_bestiary.entity.AI.goal.JumpFromWaterGoal;
 import com.hedge.hedges_bestiary.entity.types.HBBucketableSchoolingMob;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.items.HBItems;
@@ -53,10 +53,10 @@ public class GildGliderEntity extends HBBucketableSchoolingMob {
 
     @Override
     protected void registerGoals() {
+        this.goalSelector.addGoal(0, new GroupFollowLeaderGoal<>(this));
         this.goalSelector.addGoal(1, new CustomSwimGoal(this, 1.0f, 10, 6, 5, true));
         this.goalSelector.addGoal(2, new AvoidEntityGoal<>(this, Player.class, 10, 1.4f, 1.4f));
-        this.goalSelector.addGoal(2, new GildGliderJumpGoal(this));
-        this.goalSelector.addGoal(4, new GroupFollowLeaderGoal<>(this));
+        this.goalSelector.addGoal(3, new GildGliderJumpGoal(this));
     }
 
     @Override
@@ -136,5 +136,42 @@ public class GildGliderEntity extends HBBucketableSchoolingMob {
 
         return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
 
+    }
+
+    static class GildGliderJumpGoal extends JumpFromWaterGoal {
+
+        private final GildGliderEntity mob;
+
+        public GildGliderJumpGoal(GildGliderEntity mob) {
+            super(mob, 10, 0.8);
+            this.mob = mob;
+        }
+
+        @Override
+        public boolean canUse() {
+
+            if (!this.mob.isFollower()) {
+                if (this.mob.getRandom().nextInt(this.interval) != 0) {
+                    return false;
+                }
+                return this.canJump();
+            } else if (((GildGliderEntity)this.mob.getLeader()).canJump()) {
+                return this.canJump();
+            }
+            return false;
+
+        }
+
+        @Override
+        public void start() {
+            super.start();
+            this.mob.setCanJump(true);
+        }
+
+        @Override
+        public void stop() {
+            super.stop();
+            this.mob.setCanJump(false);
+        }
     }
 }

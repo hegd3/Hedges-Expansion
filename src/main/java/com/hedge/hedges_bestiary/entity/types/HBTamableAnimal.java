@@ -12,11 +12,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.util.datafix.fixes.BlockEntityJukeboxFix;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
@@ -25,6 +27,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 public abstract class HBTamableAnimal extends TamableAnimal implements AnimStateMob, IdleAnimMob {
     public final SmoothAnimationState sitAnimationState = new SmoothAnimationState(0.25f);
@@ -32,6 +35,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     public final SmoothAnimationState idleAnimationState = new SmoothAnimationState();
     public final SmoothAnimationState danceAnimationState = new SmoothAnimationState();
 
+    protected static final EntityDataAccessor<BlockPos> HOME_POS = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.BLOCK_POS);
     protected static final EntityDataAccessor<Integer> ANIM_STATE = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.INT);
     protected static final EntityDataAccessor<Integer> TAME_COMMAND = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.INT);
     protected static final EntityDataAccessor<Boolean> IS_SITTING = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.BOOLEAN);
@@ -50,9 +54,11 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
 
     @Override
     public boolean isAlliedTo(Entity pEntity) {
-        if (this.isTame() && pEntity instanceof OwnableEntity e) {
-            if (e.getOwnerUUID() == this.getOwnerUUID()) {
-                return true;
+        if (this.isTame()) {
+            if (pEntity instanceof OwnableEntity e) {
+                if (e.getOwnerUUID() == this.getOwnerUUID() || e.getOwner() == this.getOwner()) {
+                    return true;
+                }
             }
         }
         return super.isAlliedTo(pEntity);
@@ -89,6 +95,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
         return InteractionResult.PASS;
     }
 
+
     protected abstract boolean canOwnerMount(Player player);
 
     protected abstract boolean canOwnerCommand(Player player);
@@ -109,6 +116,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
+        this.entityData.define(HOME_POS, BlockPos.ZERO);
         this.entityData.define(ANIM_STATE, 0);
         this.entityData.define(IS_SITTING, false);
         this.entityData.define(IS_DANCING, false);
@@ -122,6 +130,10 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
         this.setSitting(pCompound.getBoolean("Is_Sitting"));
         this.setNapping(pCompound.getBoolean("Is_Napping"));
         this.setCommand(pCompound.getInt("Tame_Command"));
+        int i = pCompound.getInt("HomePosX");
+        int j = pCompound.getInt("HomePosY");
+        int k = pCompound.getInt("HomePosZ");
+        this.setHomePos(new BlockPos(i, j, k));
     }
 
     @Override
@@ -130,6 +142,9 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
         pCompound.putBoolean("Is_Sitting", this.isSitting());
         pCompound.putBoolean("Is_Napping", this.isNapping());
         pCompound.putInt("Tame_Command", this.getCommand());
+        pCompound.putInt("HomePosX", this.getHomePos().getX());
+        pCompound.putInt("HomePosY", this.getHomePos().getY());
+        pCompound.putInt("HomePosZ", this.getHomePos().getZ());
     }
 
     @Override
@@ -259,6 +274,14 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
 
     public void setNapping(boolean b) {
         this.entityData.set(IS_NAPPING, b);
+    }
+
+    public void setHomePos(BlockPos pos) {
+        this.entityData.set(HOME_POS, pos);
+    }
+
+    public BlockPos getHomePos() {
+        return this.entityData.get(HOME_POS);
     }
 
     @Override

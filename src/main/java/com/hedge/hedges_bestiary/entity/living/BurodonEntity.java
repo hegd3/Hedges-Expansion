@@ -6,6 +6,7 @@ import com.hedge.hedges_bestiary.entity.AI.goal.specific.BurodonAttackGoal;
 import com.hedge.hedges_bestiary.entity.AI.control.ATMLookControl;
 import com.hedge.hedges_bestiary.entity.AI.control.ATMMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.navigation.MMPathNavigatorGround;
+import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
 import com.hedge.hedges_bestiary.entity.types.AdvancedTurningMob;
 import com.hedge.hedges_bestiary.entity.types.AttackStateMob;
@@ -25,7 +26,6 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
@@ -126,7 +126,7 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
 
         this.targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
-        this.targetSelector.addGoal(2, new HBHurtByTargetGoal(this));
+        this.targetSelector.addGoal(2, new HBHurtByTargetGoal(this, true, TamableAnimal.class));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Sheep.class, true));
         this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this,Player.class, true));
     }
@@ -134,7 +134,7 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
 
     @Override
     public boolean isAlliedTo(Entity pEntity) {
-        if (pEntity instanceof BurodonEntity burodon && burodon.getOwner() == this.getOwner()) {
+        if (pEntity instanceof BurodonEntity burodon && burodon.getOwnerUUID() == this.getOwnerUUID()) {
             return true;
         }
         return super.isAlliedTo(pEntity);

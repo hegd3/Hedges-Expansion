@@ -4,6 +4,7 @@ import com.hedge.hedges_bestiary.blocks.HEBlocks;
 import com.hedge.hedges_bestiary.entity.AI.control.FlyingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.*;
 import com.hedge.hedges_bestiary.entity.AI.navigation.MMPathNavigatorGround;
+import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.types.*;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.registry.HBEntities;
@@ -104,7 +105,15 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         this.goalSelector.addGoal(8, new IdleAnimationGoal<>(this));
         this.goalSelector.addGoal(9, new DancingGoal(this));
 
-        this.targetSelector.addGoal(2, new HBHurtByTargetGoal(this));
+        this.targetSelector.addGoal(2, new HBHurtByTargetGoal(this, true, TamableAnimal.class));
+    }
+
+    @Override
+    public boolean isAlliedTo(Entity pEntity) {
+        if (pEntity instanceof ZappetEntity zappet && zappet.getOwnerUUID() == this.getOwnerUUID()) {
+            return true;
+        }
+        return super.isAlliedTo(pEntity);
     }
 
     @Override

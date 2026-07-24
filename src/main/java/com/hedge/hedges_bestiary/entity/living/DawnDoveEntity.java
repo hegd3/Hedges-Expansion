@@ -5,6 +5,7 @@ import com.hedge.hedges_bestiary.blocks.HEBlocks;
 import com.hedge.hedges_bestiary.entity.AI.control.FlyingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.*;
 import com.hedge.hedges_bestiary.entity.AI.navigation.MMPathNavigatorGround;
+import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.projectile.DawnDoveFireBall;
 import com.hedge.hedges_bestiary.entity.types.AttackStateMob;
 import com.hedge.hedges_bestiary.entity.types.EggLayer;
@@ -17,8 +18,10 @@ import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.registry.HBKeyMappings;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -30,6 +33,7 @@ import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -67,17 +71,20 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(0, new HBSitWhenOrderedGoal(this, false));
-        this.goalSelector.addGoal(2, new FlyerFollowOwnerGoal(this, 1.2D, 1.6D, 8.0f, 5.0f));
-        this.goalSelector.addGoal(3, new RandomlySitGoal(this));
-        this.goalSelector.addGoal(4, new SemiFlyerFlyingGoal<>(this, 1.0f, 45, 25, 20, 800));
-        this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0));
-        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, LivingEntity.class, 10));
-        this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
-        this.goalSelector.addGoal(8, new DancingGoal(this));
+        int i = 0;
+        this.goalSelector.addGoal(i, new FloatGoal(this));
+        this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this, false));
+        this.goalSelector.addGoal(i++, new FlyerFollowOwnerGoal(this, 1.2D, 1.6D, 8.0f, 5.0f));
+        this.goalSelector.addGoal(i++, new FlyerMoveToHomePosGoal(this, 1.2D, 64, 4d));
+        this.goalSelector.addGoal(i++, new NapGoal(this, NapGoal.SleepType.MATUTINAL, false));
+        this.goalSelector.addGoal(i++, new RandomlySitGoal(this));
+        this.goalSelector.addGoal(i++, new SemiFlyerFlyingGoal<>(this, 1.0f, 45, 25, 200, 800));
+        this.goalSelector.addGoal(i++, new WaterAvoidingRandomStrollGoal(this, 1.0));
+        this.goalSelector.addGoal(i++, new LookAtPlayerGoal(this, LivingEntity.class, 10));
+        this.goalSelector.addGoal(i++, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(i, new DancingGoal(this));
 
-        this.targetSelector.addGoal(2, new HBHurtByTargetGoal(this));
+        this.targetSelector.addGoal(2, new HBHurtByTargetGoal(this, true, TamableAnimal.class));
     }
 
     @Override
@@ -101,14 +108,16 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
                     this.setDeltaMovement(this.getDeltaMovement().add(0, -0.03, 0));
                 }
 
-                if (HBKeyMappings.MOUNT_ABILITY_KEY.isDown()) {
-                    HedgesBestiary.sendMSGToServer(new MountedEntityKeyMessage(this.getId(), rider.getId(), 2));
-                } else if (Minecraft.getInstance().options.keyAttack.isDown()) {
-                    HedgesBestiary.sendMSGToServer(new MountedEntityKeyMessage(this.getId(), rider.getId(), 1));
+                if (this.getAnimState() == 0) {
+                    if (HBKeyMappings.MOUNT_ABILITY_KEY.isDown()) {
+                        HedgesBestiary.sendMSGToServer(new MountedEntityKeyMessage(this.getId(), rider.getId(), 2));
+                    } else if (Minecraft.getInstance().options.keyAttack.isDown()) {
+                        HedgesBestiary.sendMSGToServer(new MountedEntityKeyMessage(this.getId(), rider.getId(), 1));
+                    }
                 }
 
 
-                this.setSpeed(flag ? speed * 7 : speed);
+                this.setSpeed(flag ? speed * 8 : speed);
             } else if (rider instanceof Player) {
                 setDeltaMovement(Vec3.ZERO);
                 return;
@@ -120,7 +129,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     @Override
     protected void tickRidden(Player pPlayer, Vec3 pTravelVector) {
         super.tickRidden(pPlayer, pTravelVector);
-        float turnSpeed = 5.0F;
+        float turnSpeed = 4.0F;
         float currentYaw = this.getYRot();
         float targetYaw = pPlayer.getYRot();
         float deltaYaw = Mth.wrapDegrees(targetYaw - currentYaw);
@@ -137,6 +146,9 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         }
     }
 
+
+
+    /*
     @Override
     public void push(Entity pEntity) {
         if (this.hasControllingPassenger() && pEntity.getVehicle() == null) {
@@ -144,6 +156,8 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         }
         super.push(pEntity);
     }
+
+     */
 
     protected Vec3 getRiddenInput(Player pPlayer, Vec3 pTravelVector) {
 
@@ -161,7 +175,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         if (this.isPassengerOfSameVehicle(passenger) && passenger instanceof LivingEntity && !this.touchingUnloadedChunk()) {
             final float angle = (MathHelpers.STARTING_ANGLE * this.yBodyRot);
             float flight = this.getFlyProgress(1.0F);
-            double targetY = this.getY() + passenger.getBbHeight() + 0.25F * flight;
+            double targetY = this.getY() + passenger.getBbHeight() + 0.35F * flight;
             double extraX = 0;
             double extraZ = 0;
             if (this.getPassengers().size() > 1) {
@@ -228,6 +242,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     @Override
     public void tick() {
         super.tick();
+        this.yBodyRot = Mth.approachDegrees(this.yBodyRotO, yBodyRot, 10);
         if (this.level().isClientSide()) {
             this.setUpAnimStates();
             this.tickTrailYaw();
@@ -255,7 +270,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
                             this.level().addFreshEntity(fireball);
                         } else if (animTicks > 23) {
                             this.resetAnimState();
-                            this.shootCD = 100;
+                            this.shootCD = 40;
                         }
                     }
                 }
@@ -291,6 +306,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         this.idleAnimationState.animateWhen(!flying, this.tickCount);
         this.sitAnimationState.animateWhen(this.isSitting() && !this.isVehicle() && !this.isDancing(), this.tickCount);
         this.danceAnimationState.animateWhen(this.isDancing() && !this.isVehicle(), this.tickCount);
+        this.napAnimationState.animateWhen(this.isNapping(), this.tickCount);
         this.flyUpAnimationState.animateWhen(flying && (delta.y >= 0 || delta.horizontalDistanceSqr() < 0.002), this.tickCount);
         this.flyForwardAnimationState.animateWhen(flying && delta.horizontalDistanceSqr() >= 0.002 && flyUpAnimationState.isStarted(), this.tickCount);
         this.glideAnimationState.animateWhen(flying && !flyUpAnimationState.isStarted(), this.tickCount);
@@ -301,6 +317,14 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     @Override
     public void playIdle() {
 
+    }
+
+    @Override
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+        if (!this.level().isClientSide()) {
+            this.setHomePos(this.blockPosition());
+        }
+        return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
     }
 
     @Override

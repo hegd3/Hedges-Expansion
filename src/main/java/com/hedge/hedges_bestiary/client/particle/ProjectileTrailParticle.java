@@ -81,7 +81,7 @@ public class ProjectileTrailParticle extends TextureSheetParticle {
         }
 
         public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
-            return new ProjectileTrailParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites, 4, 1f, 1.0f);
+            return new ProjectileTrailParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites, 6, 1f, 1.0f);
         }
     }
 

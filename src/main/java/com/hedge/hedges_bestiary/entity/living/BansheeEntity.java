@@ -2,7 +2,7 @@ package com.hedge.hedges_bestiary.entity.living;
 
 import com.hedge.hedges_bestiary.entity.AI.control.FlyingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.FlyingWanderGoal;
-import com.hedge.hedges_bestiary.entity.AI.goal.HBHurtByTargetGoal;
+import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.BansheeAttackGoal;
 import com.hedge.hedges_bestiary.entity.projectile.BansheeScream;
 import com.hedge.hedges_bestiary.entity.types.HBMonster;
@@ -21,7 +21,6 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;

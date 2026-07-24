@@ -4,7 +4,7 @@ import com.hedge.hedges_bestiary.client.particle.SmokeParticleOptions;
 import com.hedge.hedges_bestiary.entity.AI.control.SwimmingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.CustomSwimGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.GroupFollowLeaderGoal;
-import com.hedge.hedges_bestiary.entity.AI.goal.HBHurtByTargetGoal;
+import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.TearacudaAttackGoal;
 import com.hedge.hedges_bestiary.entity.AI.navigation.FluidPathNavigation;
 import com.hedge.hedges_bestiary.entity.types.HBBucketableSchoolingMob;
@@ -23,7 +23,6 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.AbstractSchoolingFish;
@@ -68,9 +67,10 @@ public class TearacudaEntity extends HBSchoolingMob implements AttackStateMob {
 
     @Override
     protected void registerGoals() {
+
         this.goalSelector.addGoal(0, new TearacudaAttackGoal(this));
-        this.goalSelector.addGoal(1, new CustomSwimGoal(this, 1.0f, 10, 6, 5, true));
-        this.goalSelector.addGoal(2, new GroupFollowLeaderGoal<>(this));
+        this.goalSelector.addGoal(1, new GroupFollowLeaderGoal<>(this));
+        this.goalSelector.addGoal(2, new CustomSwimGoal(this, 1.0f, 10, 6, 5, true));
 
         this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, AbstractSchoolingFish.class, true));

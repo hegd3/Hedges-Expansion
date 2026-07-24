@@ -32,6 +32,9 @@ public class NapGoal extends Goal {
         if (!this.sleepsInWater && (this.mob.isInFluidType() || !this.mob.onGround())) {
             return false;
         }
+        if (this.mob.hasControllingPassenger()) {
+            return false;
+        }
         this.napCD = Math.max(this.napCD - 1, 0);
         return this.napCD == 0 && this.canSleep();
     }
@@ -59,6 +62,9 @@ public class NapGoal extends Goal {
         if (!this.sleepsInWater && this.mob.isInFluidType()) {
             return false;
         }
+        if (this.mob.hasControllingPassenger()) {
+            return false;
+        }
         this.napCD = Math.max(this.napCD - 1, 0);
         if (this.napCD == 0) {
             return this.canSleep();
@@ -73,7 +79,7 @@ public class NapGoal extends Goal {
             case DIURNAL -> dayTime > 13000 && dayTime < 23992;
             case NOCTURNAL -> dayTime < 13000 || dayTime > 23000;
             case CATHERMAL -> (dayTime < 12000 || dayTime > 18000) && dayTime < 23000 && dayTime > 8000; // active "randomly"
-            case MATUTINAL -> dayTime > 23000 || dayTime < 1000; // active at sunrise
+            case MATUTINAL -> dayTime < 23000 && dayTime > 1000; // active at sunrise
             case VESPERTINE -> dayTime < 12000 || dayTime > 18000; //active sunset
         };
     }

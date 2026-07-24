@@ -19,11 +19,10 @@ public class SemiFlyerFlyingGoal<E extends PathfinderMob & SemiFlyer> extends Go
     private final int flightRange;
     private final int flightHeight;
     private final int interval;
-    private int flyTicks = 0;
+    private int flyTicks;
+    private boolean isLanding;
     protected final int maxTimeFlying;
-    protected double x;
-    protected double y;
-    protected double z;
+    protected Vec3 pos;
 
     public SemiFlyerFlyingGoal(E mob, float speedModifier, int flightRange, int flightHeight, int interval, int maxTimeFlying) {
         this.setFlags(EnumSet.of(Flag.MOVE));
@@ -43,17 +42,16 @@ public class SemiFlyerFlyingGoal<E extends PathfinderMob & SemiFlyer> extends Go
         if (!mob.isFlying() && mob.getRandom().nextInt(interval) != 0) {
             return false;
         }
-        Vec3 target = this.findFlightPos();
-        this.x = target.x;
-        this.y = target.y;
-        this.z = target.z;
+        this.pos = this.findFlightPos();
         return true;
     }
 
     @Override
     public void start() {
+        this.flyTicks = 0;
+        this.isLanding = false;
         this.mob.setFlying(true);
-        this.mob.getNavigation().moveTo(this.x, this.y, this.z, speedModifier);
+        this.mob.getNavigation().moveTo(this.pos.x, this.pos.y, this.pos.z, speedModifier);
         if (mob.onGround()) {
             this.mob.setDeltaMovement(mob.getDeltaMovement().add(0.0D, 0.5D, 0.0D));
         }
@@ -62,35 +60,35 @@ public class SemiFlyerFlyingGoal<E extends PathfinderMob & SemiFlyer> extends Go
     @Override
     public void stop() {
         this.mob.getNavigation().stop();
-        this.mob.setLanding(false);
-        this.x = 0;
-        this.y = 0;
-        this.z = 0;
+        this.pos = null;
     }
 
     @Override
     public void tick() {
-        if (this.mob.isFlying()) {
-            this.flyTicks++;
-            if (this.mob.onGround() && this.flyTicks > 40) {
-                this.mob.setFlying(false);
-            }
+        this.flyTicks++;
+        if (this.mob.onGround() && this.flyTicks > 40) {
+            this.mob.setFlying(false);
+        } else if (this.isLanding) {
+            this.mob.getDeltaMovement().add(0, -0.01, 0);
+        }
+        else if (this.mob.isFlying()) {
             if (this.flyTicks % maxTimeFlying == 0 && !this.isOverWaterOrVoid()) {
-                this.mob.setLanding(true);
+                this.isLanding = true;
+                this.pos = this.groundPosition(this.pos);
+                this.mob.getNavigation().moveTo(this.pos.x, this.pos.y, this.pos.z, speedModifier);
             }
         }
-        if (this.isOverWaterOrVoid() || this.mob.isInFluidType()) {
+        else if (this.isOverWaterOrVoid() || this.mob.isInFluidType()) {
             this.mob.setFlying(true);
-            this.mob.setLanding(false);
         }
     }
 
     @Override
     public boolean canContinueToUse() {
-        if (this.mob.isLanding()) {
-            return !this.mob.getNavigation().isDone() && !this.mob.onGround() && this.mob.getGroundTicks() <= 0;
+        if (this.isLanding) {
+            return !this.mob.getNavigation().isDone() && !this.mob.onGround();
         } else {
-            return this.mob.isFlying() && !this.mob.getNavigation().isDone() && this.mob.getGroundTicks() <= 0;
+            return this.mob.isFlying() && !this.mob.getNavigation().isDone();
         }
     }
 

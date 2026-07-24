@@ -10,6 +10,8 @@ import net.minecraft.world.entity.ai.goal.JumpGoal;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.EnumSet;
+
 public class JumpFromWaterGoal extends JumpGoal {
     private static final int[] STEPS_TO_CHECK = new int[]{0, 1, 4, 5, 6, 7};
     private final PathfinderMob mob;
@@ -24,10 +26,6 @@ public class JumpFromWaterGoal extends JumpGoal {
         this.jumpStrength = jumpStrength;
     }
 
-    /**
-     * Returns whether execution should begin. You can also read and cache any state necessary for execution in this
-     * method as well.
-     */
     public boolean canUse() {
         this.jumpCD = Math.max(0, this.jumpCD - 1);
         if (this.jumpCD > 0 && this.mob.getRandom().nextInt(this.interval) != 0) {

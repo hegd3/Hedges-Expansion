@@ -60,7 +60,7 @@ public class ServerEvent {
         event.registerSpriteSet(HBParticles.BANSHEE_SCREAM.get(), BansheeScreamParticle.Provider::new);
         event.registerSpriteSet(HBParticles.ELECTRIC_SPARKS.get(), AuraParticle.Provider::new);
         event.registerSpriteSet(HBParticles.FIREBALL.get(), ProjectileTrailParticle.FireBallProvider::new);
-        event.registerSpriteSet(HBParticles.SLEEP.get(), FadingAuraParticle.Provider::new);
+        event.registerSpriteSet(HBParticles.SLEEP.get(), SleepParticle.Provider::new);
 
     }
 

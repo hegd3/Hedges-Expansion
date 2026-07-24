@@ -30,7 +30,6 @@ public class MurkAttackGoal extends GenericMeleeGoal<MurkEntity> {
     @Override
     public void start() {
         super.start();
-        this.mob.setShotCount(0);
         this.shouldPathAway = false;
         this.pathTicks = 0;
     }
@@ -41,12 +40,8 @@ public class MurkAttackGoal extends GenericMeleeGoal<MurkEntity> {
         if (this.mob.getAnimState() < 2) {
             this.attackReach = this.mob.getAttackReachSqr(livingentity);
             this.dist = this.mob.distanceToSqr(livingentity);
-            if (this.mob.getShotCount() > 0) {
-                if (this.mob.getProjCD() == 0) {
-                        this.mob.setAnimState(2);
-                }
 
-            } else if (this.mob.isInFluidType() && (this.canStartPathAway() || this.shouldPathAway)) {
+            if (this.mob.isInFluidType() && (this.canStartPathAway() || this.shouldPathAway)) {
                 this.pathTicks++;
                 if (!this.shouldPathAway) {
                     Vec3 vec3 = DefaultRandomPos.getPosAway(this.mob, 6, 6, livingentity.position());
@@ -80,8 +75,8 @@ public class MurkAttackGoal extends GenericMeleeGoal<MurkEntity> {
 
         if (this.mob.getAnimState() == 0 && this.mob.hasLineOfSight(livingentity)) {
             if (this.mob.isInFluidType()) {
-                if (this.mob.canPowerBite(this.attackReach, this.dist)) {
-                    this.mob.setAnimState(this.mob.isCharged() ? 7 : 3);
+                if (this.mob.canMultiBite(this.attackReach, this.dist)) {
+                    this.mob.setAnimState(3);
                 }
                 else if (this.mob.canUseAttack(livingentity, this.attackReach, this.dist)) {
                     if (this.mob.getRandom().nextInt(5) == 0) {
@@ -100,8 +95,8 @@ public class MurkAttackGoal extends GenericMeleeGoal<MurkEntity> {
                 }
             } else if (this.mob.canRoar(this.attackReach, this.dist)) {
                 this.mob.setAnimState(4);
-            } else if (this.mob.canPowerBite(this.attackReach, this.dist)) {
-                this.mob.setAnimState(this.mob.isCharged() ? 7 : 3);
+            } else if (this.mob.canMultiBite(this.attackReach, this.dist)) {
+                this.mob.setAnimState(3);
             }
             else if (this.mob.canUseAttack(livingentity, this.attackReach, this.dist)) {
                 this.mob.setAttacking();
