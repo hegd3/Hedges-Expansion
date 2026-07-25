@@ -28,6 +28,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
@@ -55,6 +56,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     public final AnimationState multiBiteAnimationState = new AnimationState();
 
     public final SmoothAnimationState clicksAnimationState = new SmoothAnimationState();
+    public final SmoothAnimationState yawnAnimationState = new SmoothAnimationState();
     public final SmoothAnimationState sitAnimationState = new SmoothAnimationState();
 
     private int attackCD = 0;
@@ -122,11 +124,13 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(0, new HBSitWhenOrderedGoal(this, false));
-        this.goalSelector.addGoal(1, new MurkAttackGoal(this));
-        this.goalSelector.addGoal(2, new HBFollowOwnerGoal(this, 1.2, 1.6, 7.0f, 4.0f));
-        this.goalSelector.addGoal(3, new CustomSwimGoal(this, 1.0, 10, 4, 7, false));
-        this.goalSelector.addGoal(4, new RandomStrollGoal(this, 1.0) {
+        int i = 0;
+        this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this, false));
+        this.goalSelector.addGoal(i++, new MurkAttackGoal(this));
+        this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2, 1.6, 7.0f, 4.0f));
+        this.goalSelector.addGoal(i++, new NapGoal(this, NapGoal.SleepType.CATHERMAL, false));
+        this.goalSelector.addGoal(i++, new CustomSwimGoal(this, 1.0, 10, 4, 7, false));
+        this.goalSelector.addGoal(i++, new RandomStrollGoal(this, 1.0) {
             @Override
             public boolean canUse() {
                 return !this.mob.isInWaterOrBubble() && super.canUse();
@@ -137,9 +141,11 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                 return !this.mob.isInWaterOrBubble() && super.canContinueToUse();
             }
         });
-        this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, LivingEntity.class, 5));
-        this.goalSelector.addGoal(6, new IdleAnimationGoal<>(this));
-        this.goalSelector.addGoal(7, new DancingGoal(this));
+        this.goalSelector.addGoal(i++, new LookAtPlayerGoal(this, LivingEntity.class, 5));
+        this.goalSelector.addGoal(i++, new RandomLookAroundGoal(this));
+
+        this.goalSelector.addGoal(i++, new IdleAnimationGoal<>(this));
+        this.goalSelector.addGoal(i, new DancingGoal(this));
 
         this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this, true, TamableAnimal.class));
         this.targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
@@ -149,7 +155,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     @Override
     protected float getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions) {
-        return this.getBbHeight()/2.45f;
+        return this.getBbHeight() * 0.82f;
     }
 
     @Override
@@ -305,6 +311,11 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                             this.resetAnimState();
                         }
                     }
+                    case 7 -> {
+                        if (this.animTicks > 32) {
+                            this.resetAnimState();
+                        }
+                    }
                 }
             }
         }
@@ -385,6 +396,8 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.sideSlamAnimationState.animateWhen(animstate == 5, this.tickCount);
 
         this.clicksAnimationState.animateWhen(animstate == 6, this.tickCount);
+        this.yawnAnimationState.animateWhen(animstate == 7, this.tickCount);
+        this.napAnimationState.animateWhen(this.isNapping(), this.tickCount);
         this.sitAnimationState.animateWhen(this.isSitting() && !this.isDancing(), this.tickCount);
         this.danceAnimationState.animateWhen(this.isDancing(), this.tickCount);
     }
@@ -484,8 +497,12 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     @Override
     public void playIdle() {
-        this.setAnimState(6);
-        this.playSound(HBSounds.MURK_CLICKS.get(), 1 - (this.getRandom().nextFloat() / 2), 1 - (this.getRandom().nextFloat() / 4));
+        if (this.getRandom().nextBoolean()) {
+            this.setAnimState(6);
+            this.playSound(HBSounds.MURK_CLICKS.get(), 1 - (this.getRandom().nextFloat() / 2), 1 - (this.getRandom().nextFloat() / 4));
+        } else {
+            this.setAnimState(7);
+        }
     }
 
     @Override

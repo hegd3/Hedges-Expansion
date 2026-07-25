@@ -53,7 +53,7 @@ public class SleepParticle extends TextureSheetParticle {
             this.yd += 0.006;
 
             if (this.alpha > 0.00F) {
-                this.quadSize-=0.01f;
+                this.quadSize-=0.005f;
                 this.alpha -= 0.05F;
             }
         }

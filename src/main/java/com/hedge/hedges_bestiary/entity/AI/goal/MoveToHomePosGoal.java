@@ -2,6 +2,7 @@ package com.hedge.hedges_bestiary.entity.AI.goal;
 
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.util.AirRandomPos;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
@@ -35,6 +36,9 @@ public class MoveToHomePosGoal extends Goal {
 
     @Override
     public boolean canUse() {
+        if (this.mob.hasControllingPassenger()) {
+            return false;
+        }
         if (this.mob.getHomePos() == BlockPos.ZERO) return false;
         this.closeToHomeTryTicks = Math.max(this.closeToHomeTryTicks - 1, 0);
         if (this.closeToHomeTryTicks == 0) {
@@ -49,6 +53,9 @@ public class MoveToHomePosGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
+        if (this.mob.hasControllingPassenger()) {
+            return false;
+        }
         return !this.mob.getHomePos().closerToCenterThan(this.mob.position(), this.stopDist); //&& !this.mob.getNavigation().isDone();
     }
 
@@ -71,9 +78,17 @@ public class MoveToHomePosGoal extends Goal {
 
     protected boolean moveToHome() {
 
-        BlockPos pos = this.mob.getHomePos();
-        this.mob.getNavigation().setMaxVisitedNodesMultiplier(10.0F);
-        this.mob.getNavigation().moveTo(pos.getX(), pos.getY(), pos.getZ(), this.speedModifier);
+        BlockPos pos = this.mob.getHomePos().above();
+
+        double dx = Mth.clamp(pos.getX() - this.mob.getX(), -16, 16);
+        double dy = pos.getY() - this.mob.getY();
+        double dz = Mth.clamp(pos.getZ() - this.mob.getZ(), -16, 16);
+        double x = this.mob.getX() + dx;
+        double y = this.mob.getY() + dy;
+        double z = this.mob.getZ() + dz;
+
+        this.mob.getNavigation().moveTo(x,y,z, this.speedModifier);
+
         return this.mob.getNavigation().getPath() != null && this.mob.getNavigation().getPath().canReach();
 
     }

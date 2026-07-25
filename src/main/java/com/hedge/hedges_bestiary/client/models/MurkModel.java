@@ -32,13 +32,13 @@ public class MurkModel extends HBModel<MurkEntity> {
 	private final ModelPart head;
 	private final ModelPart jaw;
 	private final ModelPart leftleg;
-	private final ModelPart leftlegpos;
-	private final ModelPart rightleg;
-	private final ModelPart rightlegpos;
+	private final ModelPart leftfoot;
 	private final ModelPart leftleg2;
-	private final ModelPart leftlegpos2;
+	private final ModelPart leftfoot2;
+	private final ModelPart rightleg;
+	private final ModelPart rightfoot;
 	private final ModelPart rightleg2;
-	private final ModelPart rightlegpos2;
+	private final ModelPart rightfoot2;
 	public MurkModel(ModelPart root) {
 		super(0.5f, 24);
 
@@ -60,13 +60,13 @@ public class MurkModel extends HBModel<MurkEntity> {
 		this.head = this.neck.getChild("head");
 		this.jaw = this.head.getChild("jaw");
 		this.leftleg = this.swimcontrol.getChild("leftleg");
-		this.leftlegpos = this.leftleg.getChild("leftlegpos");
-		this.rightleg = this.swimcontrol.getChild("rightleg");
-		this.rightlegpos = this.rightleg.getChild("rightlegpos");
+		this.leftfoot = this.leftleg.getChild("leftfoot");
 		this.leftleg2 = this.swimcontrol.getChild("leftleg2");
-		this.leftlegpos2 = this.leftleg2.getChild("leftlegpos2");
+		this.leftfoot2 = this.leftleg2.getChild("leftfoot2");
+		this.rightleg = this.swimcontrol.getChild("rightleg");
+		this.rightfoot = this.rightleg.getChild("rightfoot");
 		this.rightleg2 = this.swimcontrol.getChild("rightleg2");
-		this.rightlegpos2 = this.rightleg2.getChild("rightlegpos2");
+		this.rightfoot2 = this.rightleg2.getChild("rightfoot2");
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -77,7 +77,7 @@ public class MurkModel extends HBModel<MurkEntity> {
 
 		PartDefinition swimcontrol = root.addOrReplaceChild("swimcontrol", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
 
-		PartDefinition wholebody = swimcontrol.addOrReplaceChild("wholebody", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
+		PartDefinition wholebody = swimcontrol.addOrReplaceChild("wholebody", CubeListBuilder.create(), PartPose.offset(0.0F, -9.0F, 0.0F));
 
 		PartDefinition body = wholebody.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-14.5F, -12.5F, -18.0F, 29.0F, 25.0F, 36.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 1.5F, 1.0F));
 
@@ -128,31 +128,21 @@ public class MurkModel extends HBModel<MurkEntity> {
 		PartDefinition jaw = head.addOrReplaceChild("jaw", CubeListBuilder.create().texOffs(0, 86).addBox(-12.5F, 0.0F, -22.0F, 25.0F, 3.0F, 22.0F, new CubeDeformation(0.0F))
 				.texOffs(130, 39).addBox(-9.5F, -2.0F, -20.0F, 19.0F, 2.0F, 13.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 1.5F, -4.0F));
 
-		PartDefinition leftleg = swimcontrol.addOrReplaceChild("leftleg", CubeListBuilder.create(), PartPose.offset(15.0F, 12.0F, -13.0F));
+		PartDefinition leftleg = swimcontrol.addOrReplaceChild("leftleg", CubeListBuilder.create().texOffs(9, 116).addBox(-2.0F, 0.0F, -7.0F, 11.0F, 15.0F, 12.0F, new CubeDeformation(0.0F)), PartPose.offset(12.0F, -4.0F, -13.0F));
 
-		PartDefinition leftlegpos = leftleg.addOrReplaceChild("leftlegpos", CubeListBuilder.create().texOffs(0, 111).addBox(-0.5F, -2.0F, -8.0F, 23.0F, 4.0F, 16.0F, new CubeDeformation(0.01F))
-				.texOffs(78, 111).addBox(22.5F, -2.0F, -7.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F))
-				.texOffs(78, 111).addBox(22.5F, -2.0F, -2.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F))
-				.texOffs(78, 119).addBox(13.5F, -2.0F, -12.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+		PartDefinition leftfoot = leftleg.addOrReplaceChild("leftfoot", CubeListBuilder.create().texOffs(88, 164).addBox(-8.5F, 0.0F, -15.0F, 17.0F, 4.0F, 14.0F, new CubeDeformation(0.01F)), PartPose.offset(3.5F, 14.0F, 0.0F));
 
-		PartDefinition rightleg = swimcontrol.addOrReplaceChild("rightleg", CubeListBuilder.create(), PartPose.offset(-15.0F, 12.0F, -13.0F));
+		PartDefinition leftleg2 = swimcontrol.addOrReplaceChild("leftleg2", CubeListBuilder.create().texOffs(9, 116).addBox(-2.0F, 0.0F, -7.0F, 11.0F, 15.0F, 12.0F, new CubeDeformation(0.0F)), PartPose.offset(12.0F, -4.0F, 17.0F));
 
-		PartDefinition rightlegpos = rightleg.addOrReplaceChild("rightlegpos", CubeListBuilder.create().texOffs(0, 111).mirror().addBox(-22.5F, -2.0F, -8.0F, 23.0F, 4.0F, 16.0F, new CubeDeformation(0.01F)).mirror(false)
-				.texOffs(78, 111).mirror().addBox(-26.5F, -2.0F, -7.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false)
-				.texOffs(78, 111).mirror().addBox(-26.5F, -2.0F, -2.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false)
-				.texOffs(78, 119).mirror().addBox(-17.5F, -2.0F, -12.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(0.0F, 0.0F, 0.0F));
+		PartDefinition leftfoot2 = leftleg2.addOrReplaceChild("leftfoot2", CubeListBuilder.create().texOffs(90, 190).addBox(-6.5F, -1.0F, 0.0F, 13.0F, 4.0F, 14.0F, new CubeDeformation(0.01F)), PartPose.offset(3.5F, 15.0F, -3.0F));
 
-		PartDefinition leftleg2 = swimcontrol.addOrReplaceChild("leftleg2", CubeListBuilder.create(), PartPose.offset(15.0F, 12.0F, 14.0F));
+		PartDefinition rightleg = swimcontrol.addOrReplaceChild("rightleg", CubeListBuilder.create().texOffs(9, 116).mirror().addBox(-9.0F, 0.0F, -7.0F, 11.0F, 15.0F, 12.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-12.0F, -4.0F, -13.0F));
 
-		PartDefinition leftlegpos2 = leftleg2.addOrReplaceChild("leftlegpos2", CubeListBuilder.create().texOffs(0, 131).addBox(-0.5F, -2.0F, -7.0F, 14.0F, 4.0F, 13.0F, new CubeDeformation(0.01F))
-				.texOffs(54, 146).addBox(7.5F, -2.0F, 6.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F))
-				.texOffs(78, 111).addBox(13.5F, -2.0F, -1.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+		PartDefinition rightfoot = rightleg.addOrReplaceChild("rightfoot", CubeListBuilder.create().texOffs(88, 164).mirror().addBox(-8.5F, -1.0F, -15.0F, 17.0F, 4.0F, 14.0F, new CubeDeformation(0.01F)).mirror(false), PartPose.offset(-3.5F, 15.0F, 0.0F));
 
-		PartDefinition rightleg2 = swimcontrol.addOrReplaceChild("rightleg2", CubeListBuilder.create(), PartPose.offset(-15.0F, 12.0F, 14.0F));
+		PartDefinition rightleg2 = swimcontrol.addOrReplaceChild("rightleg2", CubeListBuilder.create().texOffs(9, 116).mirror().addBox(-9.0F, 0.0F, -7.0F, 11.0F, 15.0F, 12.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-12.0F, -4.0F, 17.0F));
 
-		PartDefinition rightlegpos2 = rightleg2.addOrReplaceChild("rightlegpos2", CubeListBuilder.create().texOffs(0, 131).mirror().addBox(-13.5F, -2.0F, -7.0F, 14.0F, 4.0F, 13.0F, new CubeDeformation(0.01F)).mirror(false)
-				.texOffs(78, 111).mirror().addBox(-17.5F, -2.0F, -1.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false)
-				.texOffs(54, 146).mirror().addBox(-11.5F, -2.0F, 6.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(0.0F, 0.0F, 0.0F));
+		PartDefinition rightfoot2 = rightleg2.addOrReplaceChild("rightfoot2", CubeListBuilder.create().texOffs(90, 190).mirror().addBox(-6.5F, -1.0F, 0.0F, 13.0F, 4.0F, 14.0F, new CubeDeformation(0.01F)).mirror(false), PartPose.offset(-3.5F, 15.0F, -3.0F));
 
 		return LayerDefinition.create(meshdefinition, 256, 256);
 	}
@@ -186,7 +176,7 @@ public class MurkModel extends HBModel<MurkEntity> {
 
 
 		} else {
-			this.animateWalk(MurkBasicsAnimation.WALK, limbSwing, limbSwingAmount, 1.7f, 2.5f);
+			this.animateWalk(MurkBasicsAnimation.WALK, limbSwing, limbSwingAmount, 1.4f, 2.5f);
 			this.animate(entity.idleAnimationState, MurkBasicsAnimation.IDLE, ageInTicks, 0.5f);
 			this.animate(entity.roarAnimationState, MurkAttacksAnimation.ROAR_LAND, ageInTicks, 1f);
 
@@ -194,10 +184,12 @@ public class MurkModel extends HBModel<MurkEntity> {
 
 
 		}
-		this.animate(entity.biteAnimationState, MurkBasicsAnimation.BITE, ageInTicks, 1f);
+		this.animate(entity.biteAnimationState, MurkAttacksAnimation.BITE, ageInTicks, 1f);
 		this.animate(entity.breathAnimationState, entity.swingingLeft() ? MurkAttacksAnimation.BREATH_LEFT : MurkAttacksAnimation.BREATH_RIGHT, ageInTicks, 1f);
 		this.animate(entity.sideSlamAnimationState, entity.swingingLeft() ? MurkAttacksAnimation.SIDE_SLAM_LEFT : MurkAttacksAnimation.SIDE_SLAM_RIGHT, ageInTicks, 1f);
 		this.animateSmooth(entity.clicksAnimationState, MurkBasicsAnimation.CLICKS, ageInTicks, 1f);
+		this.animateSmooth(entity.yawnAnimationState, MurkBasicsAnimation.YAWN, ageInTicks, 1f);
+		this.animateSmooth(entity.napAnimationState, MurkBasicsAnimation.SLEEP, ageInTicks, 1f);
 		this.animateSmooth(entity.sitAnimationState, MurkBasicsAnimation.SIT, ageInTicks, 1f);
 		this.animateSmooth(entity.danceAnimationState, MurkBasicsAnimation.DANCE, ageInTicks, 1f);
 

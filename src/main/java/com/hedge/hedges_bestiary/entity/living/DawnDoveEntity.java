@@ -74,11 +74,11 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         int i = 0;
         this.goalSelector.addGoal(i, new FloatGoal(this));
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this, false));
-        this.goalSelector.addGoal(i++, new FlyerFollowOwnerGoal(this, 1.2D, 1.6D, 8.0f, 5.0f));
-        this.goalSelector.addGoal(i++, new FlyerMoveToHomePosGoal(this, 1.2D, 64, 4d));
+        this.goalSelector.addGoal(i++, new FlyerFollowOwnerGoal(this, 1.2D, 1.6D, 8.0f, 8.0f));
+        this.goalSelector.addGoal(i++, new FlyerMoveToHomePosGoal(this, 1.0D, 32, 4d));
         this.goalSelector.addGoal(i++, new NapGoal(this, NapGoal.SleepType.MATUTINAL, false));
         this.goalSelector.addGoal(i++, new RandomlySitGoal(this));
-        this.goalSelector.addGoal(i++, new SemiFlyerFlyingGoal<>(this, 1.0f, 45, 25, 200, 800));
+        this.goalSelector.addGoal(i++, new SemiFlyerFlyingGoal<>(this, 1.0f, 45, 25, 60, 800));
         this.goalSelector.addGoal(i++, new WaterAvoidingRandomStrollGoal(this, 1.0));
         this.goalSelector.addGoal(i++, new LookAtPlayerGoal(this, LivingEntity.class, 10));
         this.goalSelector.addGoal(i++, new RandomLookAroundGoal(this));
@@ -129,7 +129,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     @Override
     protected void tickRidden(Player pPlayer, Vec3 pTravelVector) {
         super.tickRidden(pPlayer, pTravelVector);
-        float turnSpeed = 4.0F;
+        float turnSpeed = 5.0F;
         float currentYaw = this.getYRot();
         float targetYaw = pPlayer.getYRot();
         float deltaYaw = Mth.wrapDegrees(targetYaw - currentYaw);
@@ -202,7 +202,10 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
 
     }
 
-
+    @Override
+    public boolean fireImmune() {
+        return true;
+    }
 
     @Override
     public LivingEntity getControllingPassenger() {
@@ -242,7 +245,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     @Override
     public void tick() {
         super.tick();
-        this.yBodyRot = Mth.approachDegrees(this.yBodyRotO, yBodyRot, 10);
+        this.yBodyRot = Mth.approachDegrees(this.yBodyRotO, yBodyRot, 5);
         if (this.level().isClientSide()) {
             this.setUpAnimStates();
             this.tickTrailYaw();
@@ -330,7 +333,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     @Override
     protected void switchNav(boolean flying) {
         if (flying) {
-            this.moveControl = new FlyingMoveControl(this, 45, 8, 1.6f);
+            this.moveControl = new FlyingMoveControl(this, 45, 16, 1.6f);
             this.lookControl = new SmoothSwimmingLookControl(this, 30);
             this.navigation = new FlyingPathNavigation(this, this.level());
         } else {
