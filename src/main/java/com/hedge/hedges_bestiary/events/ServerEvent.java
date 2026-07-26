@@ -32,7 +32,6 @@ public class ServerEvent {
         event.put(HBEntities.GILD_GLIDER.get(), GildGliderEntity.bakeAttributes().build());
         event.put(HBEntities.CHUB.get(), ChubEntity.bakeAttributes().build());
         event.put(HBEntities.FEROCETUS.get(), FerocetusEntity.bakeAttributes().build());
-        event.put(HBEntities.GLIM.get(), GlimEntity.bakeAttributes().build());
         event.put(HBEntities.BANSHEE.get(), BansheeEntity.bakeAttributes().build());
         event.put(HBEntities.DAWN_DOVE.get(), DawnDoveEntity.bakeAttributes().build());
 
@@ -44,7 +43,6 @@ public class ServerEvent {
         event.register(HBEntities.CHUB.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ChubEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.OR);
         event.register(HBEntities.TEARACUDA.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, TearacudaEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.OR);
         event.register(HBEntities.FEROCETUS.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, FerocetusEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.OR);
-        event.register(HBEntities.GLIM.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, GlimEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.OR);
 
     }
 

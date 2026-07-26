@@ -168,7 +168,7 @@ public class MurkModel extends HBModel<MurkEntity> {
 		}
 		if (entity.isInFluidType()) {
 			this.swimcontrol.xRot = headPitch * 0.6f;
-			this.animateWalk(MurkBasicsAnimation.SWIM, limbSwing, limbSwingAmount, 1.2f, 2.5f);
+			this.animateWalk(MurkBasicsAnimation.SWIM, limbSwing, limbSwingAmount, 1.5f, 2.5f);
 			this.animate(entity.idleAnimationState, MurkBasicsAnimation.SWIM_IDLE, ageInTicks, 0.5f);
 			this.animate(entity.multiBiteAnimationState, entity.swingingLeft() ? MurkAttacksAnimation.MULTI_BITE_LEFT: MurkAttacksAnimation.MULTI_BITE_RIGHT, ageInTicks, 1);
 
@@ -176,7 +176,7 @@ public class MurkModel extends HBModel<MurkEntity> {
 
 
 		} else {
-			this.animateWalk(MurkBasicsAnimation.WALK, limbSwing, limbSwingAmount, 1.4f, 2.5f);
+			this.animateWalk(MurkBasicsAnimation.WALK, limbSwing, limbSwingAmount, 1.8f, 2.5f);
 			this.animate(entity.idleAnimationState, MurkBasicsAnimation.IDLE, ageInTicks, 0.5f);
 			this.animate(entity.roarAnimationState, MurkAttacksAnimation.ROAR_LAND, ageInTicks, 1f);
 

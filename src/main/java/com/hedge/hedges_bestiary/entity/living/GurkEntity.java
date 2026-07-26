@@ -103,12 +103,14 @@ public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer 
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(0, new HBSitWhenOrderedGoal(this));
-        this.goalSelector.addGoal(1, new PanicGoal(this, 1.2));
-        this.goalSelector.addGoal(2, new HBFollowOwnerGoal(this, 1.2, 1.3, 4.0f, 2.0f));
-        this.goalSelector.addGoal(3, new RandomlySitGoal(this));
-        this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, LivingEntity.class, 5));
-        this.goalSelector.addGoal(5, new RandomStrollGoal(this, 1.0) {
+        int i = 0;
+        this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this));
+        this.goalSelector.addGoal(i++, new PanicGoal(this, 1.2));
+        this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2, 1.3, 4.0f, 2.0f));
+        this.goalSelector.addGoal(i++, new RandomlySitGoal(this));
+        this.goalSelector.addGoal(i++, new LookAtPlayerGoal(this, LivingEntity.class, 5));
+        this.goalSelector.addGoal(i++, new CustomSwimGoal(this, 1.0, 10, 4, 4, true));
+        this.goalSelector.addGoal(i++, new RandomStrollGoal(this, 1.0) {
             @Override
             public boolean canUse() {
                 return !this.mob.isInWaterOrBubble() && super.canUse();
@@ -119,9 +121,8 @@ public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer 
                 return !this.mob.isInWaterOrBubble() && super.canContinueToUse();
             }
         });
-        this.goalSelector.addGoal(5, new CustomSwimGoal(this, 1.0, 10, 4, 4, true));
-        this.goalSelector.addGoal(6, new DancingGoal(this));
-        this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(i++, new DancingGoal(this));
+        this.goalSelector.addGoal(i, new RandomLookAroundGoal(this));
     }
 
     @Override

@@ -40,7 +40,6 @@ public class ClientEvent {
         event.registerLayerDefinition(EntityLayers.CHUB_LAYER, ChubModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.FEROCETUS_LAYER, FerocetusModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.WAVE_LAYER, WaveModel::createBodyLayer);
-        event.registerLayerDefinition(EntityLayers.GLIM_LAYER, GlimModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.BANSHEE_LAYER, BansheeModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.DAWN_DOVE_LAYER, DawnDoveModel::createBodyLayer);
 
@@ -61,7 +60,6 @@ public class ClientEvent {
         EntityRenderers.register(HBEntities.CHUB.get(), ChubRenderer::new);
         EntityRenderers.register(HBEntities.FEROCETUS.get(), FerocetusRenderer::new);
         EntityRenderers.register(HBEntities.WAVE.get(), WaveRenderer::new);
-        EntityRenderers.register(HBEntities.GLIM.get(), GlimRenderer::new);
         EntityRenderers.register(HBEntities.BANSHEE.get(), BansheeRenderer::new);
         EntityRenderers.register(HBEntities.BANSHEE_SCREAM.get(), ModellessProjectileRenderer::new);
         EntityRenderers.register(HBEntities.DAWN_DOVE.get(), DawnDoveRenderer::new);

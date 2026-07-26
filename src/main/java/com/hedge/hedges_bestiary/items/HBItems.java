@@ -81,8 +81,6 @@ public class HBItems {
 
     public static final RegistryObject<Item> FEROCETUS_SPAWN_EGG = createEgg("ferocetus", HBEntities.FEROCETUS, 0x75604C, 0xC7A169);
 
-    public static final RegistryObject<Item> GLIM_SPAWN_EGG = createEgg("glim", HBEntities.GLIM, 0x252329, 0xBD9E73);
-
     public static final RegistryObject<Item> BANSHEE_SPAWN_EGG = createEgg("banshee", HBEntities.BANSHEE, 0xC484C4, 0x8EE695);
 
     public static final RegistryObject<Item> DAWN_DOVE_SPAWN_EGG = createEgg("dawn_dove", HBEntities.DAWN_DOVE, 0x61523d, 0x2c261c);

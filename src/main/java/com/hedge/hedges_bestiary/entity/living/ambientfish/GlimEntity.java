@@ -88,27 +88,6 @@ public class GlimEntity extends HBSchoolingMob {
     }
 
 
-    @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
-
-
-        if ((pReason == MobSpawnType.CHUNK_GENERATION || pReason == MobSpawnType.NATURAL)) {
-            int groupSize = (int) (this.getMaxGroupSize() * this.getRandom().nextFloat());
-            if (groupSize > 0 && !this.level().isClientSide()) {
-                for (int i = 0; i < groupSize; i++) {
-                    Vec3 rand = EntityHelpers.getRandomVec3(4);
-                    GlimEntity entity = new GlimEntity(HBEntities.GLIM.get(), this.level());
-                    entity.moveTo(this.getX() + rand.x, this.getY() + rand.y, this.getZ() + rand.z);
-                    entity.startFollowing(this);
-                    this.level().addFreshEntity(entity);
-                }
-            }
-        }
-
-        return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
-
-    }
-
 
 
 }

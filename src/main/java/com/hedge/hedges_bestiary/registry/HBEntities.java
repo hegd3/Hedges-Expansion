@@ -68,10 +68,6 @@ public class HBEntities {
             ENTITY_TYPES.register("wave", () -> EntityType.Builder.of(WaveEntity::new, MobCategory.MISC)
                     .sized(1.4f, 1.3f).build("wave"));
 
-    public static final RegistryObject<EntityType<GlimEntity>> GLIM =
-            ENTITY_TYPES.register("glim", () -> EntityType.Builder.of(GlimEntity::new, MobCategory.WATER_CREATURE)
-                    .sized(0.625f, 0.375f).build("glim"));
-
     public static final RegistryObject<EntityType<BansheeEntity>> BANSHEE =
             ENTITY_TYPES.register("banshee", () -> EntityType.Builder.of(BansheeEntity::new, MobCategory.MONSTER)
                     .sized(1.9f, 1.05f).build("banshee"));

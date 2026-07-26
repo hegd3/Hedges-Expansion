@@ -57,7 +57,6 @@ public class HBCreativeTab {
                         output.accept(HBItems.GILD_GLIDER_SPAWN_EGG.get());
                         output.accept(HBItems.SMARM_SPAWN_EGG.get());
                         output.accept(HBItems.FEROCETUS_SPAWN_EGG.get());
-                        output.accept(HBItems.GLIM_SPAWN_EGG.get());
                         output.accept(HBItems.BANSHEE_SPAWN_EGG.get());
                         output.accept(HBItems.DAWN_DOVE_SPAWN_EGG.get());
 

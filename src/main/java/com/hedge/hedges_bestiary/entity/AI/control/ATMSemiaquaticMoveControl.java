@@ -50,7 +50,7 @@ public class ATMSemiaquaticMoveControl<E extends Mob & AdvancedTurningMob> exten
                     this.mob.zza = f6 * f1;
                     this.mob.yya = -f4 * f1;
 
-                    double y = Mth.clamp(f1 * d1 * 0.01D, f1 * -0.1D, f1 * 0.1D);
+                    double y = Mth.clamp(f1 * d1 * 0.02D, f1 * -0.2D, f1 * 0.2D);
                     this.mob.setDeltaMovement(this.mob.getDeltaMovement().add(0.0D, y, 0.0D));
                 }
             }

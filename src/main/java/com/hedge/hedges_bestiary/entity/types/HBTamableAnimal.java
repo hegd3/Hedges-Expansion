@@ -27,6 +27,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.Optional;
 
 public abstract class HBTamableAnimal extends TamableAnimal implements AnimStateMob, IdleAnimMob {
@@ -56,7 +57,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     public boolean isAlliedTo(Entity pEntity) {
         if (this.isTame()) {
             if (pEntity instanceof OwnableEntity e) {
-                if (e.getOwnerUUID() == this.getOwnerUUID() || e.getOwner() == this.getOwner()) {
+                if (Objects.equals(e.getOwnerUUID(), this.getOwnerUUID())) {
                     return true;
                 }
             }
@@ -82,7 +83,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
                 if (this.getCommand() == 3) {
                     this.setCommand(0);
                 }
-                player.displayClientMessage(Component.translatable("entity.hedges_expansion.all.command_" + this.getCommand(), this.getName()), true);
+                player.displayClientMessage(Component.translatable("entity.hedges_bestiary.all.command_" + this.getCommand(), this.getName()), true);
                 this.setOrderedToSit(this.getCommand() == 1);
                 return InteractionResult.SUCCESS;
             } else if (this.canOwnerMount(player)) {

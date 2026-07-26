@@ -332,23 +332,29 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     private void powerBite() {
         Vec3 v = EntityHelpers.bodyAngle(this).scale(1.5);
-        List<LivingEntity> hit;
         if (this.isCharged()) {
             this.level().broadcastEntityEvent(this, (byte)40);
-            hit = AttackHelpers.zoneHitbox(this, v, 2, 2, 2, 8);
+            List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, v, 2, 2, 2, 8);
+
             for (LivingEntity entity : hit) {
-                AttackHelpers.betterHurt(this, entity, 1.8f, 1.5f);
+                if (!AttackHelpers.blockBreak(this, entity)) {
+                    AttackHelpers.betterHurt(this, entity, 1.8f, 1.5f);
+                } else {
+                    AttackHelpers.betterHurt(this, entity, 0.8f, 0.8f);
+                }
             }
         } else {
-            hit = AttackHelpers.zoneHitbox(this, v, 2, 2, 2, 8);
-        }
-        for (LivingEntity entity : hit) {
-            AttackHelpers.betterHurt(this, entity, 1.5f, 1.4f);
+            List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, v, 2, 2, 2, 8);
+            for (LivingEntity entity : hit) {
+                if (!AttackHelpers.blockBreak(this, entity)) {
+                    AttackHelpers.betterHurt(this, entity, 1.8f, 1.5f);
+                }
+            }
         }
     }
 
     private void spawnImpactParticle() {
-        Vec3 v = this.getEyePosition().add(this.getLookAngle().scale(1.5));
+        Vec3 v = this.getEyePosition().add(this.getLookAngle().scale(3));
         this.level().addParticle(HBParticles.MURK_IMPACT.get(),
                 v.x, v.y, v.z, 0, 0, 0);
     }
@@ -487,7 +493,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     @Override
     public float getTurnSpeed() {
-        return 45f;
+        return 90f;
     }
 
     @Override

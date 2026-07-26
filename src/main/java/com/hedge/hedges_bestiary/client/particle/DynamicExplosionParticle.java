@@ -6,12 +6,35 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class DynamicExplosionParticle extends HugeExplosionParticle {
-    public DynamicExplosionParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pQuadSizeMultiplier, SpriteSet pSprites, int lifetime, float size) {
-        super(pLevel, pX, pY, pZ, pQuadSizeMultiplier, pSprites);
+public class DynamicExplosionParticle extends TextureSheetParticle {
+    private final SpriteSet sprites;
+
+    public DynamicExplosionParticle(ClientLevel pLevel, double pX, double pY, double pZ, SpriteSet pSprites, int lifetime, float size) {
+        super(pLevel, pX, pY, pZ, 0.0, 0.0, 0.0);
+        this.sprites = pSprites;
         this.lifetime = lifetime;
         this.quadSize = size;
-        this.setSpriteFromAge(pSprites);
+        this.setSpriteFromAge(sprites);
+    }
+
+    public void tick() {
+        this.xo = this.x;
+        this.yo = this.y;
+        this.zo = this.z;
+        if (this.age++ >= this.lifetime) {
+            this.remove();
+        } else {
+            this.setSpriteFromAge(this.sprites);
+        }
+    }
+
+    public int getLightColor(float pPartialTick) {
+        return 15728880;
+    }
+
+
+    public ParticleRenderType getRenderType() {
+        return ParticleRenderType.PARTICLE_SHEET_LIT;
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -23,7 +46,7 @@ public class DynamicExplosionParticle extends HugeExplosionParticle {
         }
 
         public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
-            return new DynamicExplosionParticle(pLevel, pX, pY, pZ, pXSpeed, this.sprites, 14, 6);
+            return new DynamicExplosionParticle(pLevel, pX, pY, pZ, this.sprites, 14, 6);
         }
     }
 
@@ -35,7 +58,7 @@ public class DynamicExplosionParticle extends HugeExplosionParticle {
             this.sprites = pSprites;
         }
         public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
-            return new DynamicExplosionParticle(pLevel, pX, pY, pZ, pXSpeed, this.sprites, 5, 2.5f);
+            return new DynamicExplosionParticle(pLevel, pX, pY, pZ, this.sprites, 4, 2f);
         }
     }
 }
