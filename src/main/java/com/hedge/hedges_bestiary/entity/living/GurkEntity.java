@@ -1,6 +1,6 @@
 package com.hedge.hedges_bestiary.entity.living;
 
-import com.hedge.hedges_bestiary.blocks.HEBlocks;
+import com.hedge.hedges_bestiary.blocks.HBBlocks;
 import com.hedge.hedges_bestiary.entity.AI.control.SemiaquaticLookControl;
 import com.hedge.hedges_bestiary.entity.AI.control.SemiaquaticMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.*;
@@ -107,6 +107,7 @@ public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer 
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this));
         this.goalSelector.addGoal(i++, new PanicGoal(this, 1.2));
         this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2, 1.3, 4.0f, 2.0f));
+        this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
         this.goalSelector.addGoal(i++, new RandomlySitGoal(this));
         this.goalSelector.addGoal(i++, new LookAtPlayerGoal(this, LivingEntity.class, 5));
         this.goalSelector.addGoal(i++, new CustomSwimGoal(this, 1.0, 10, 4, 4, true));
@@ -217,6 +218,6 @@ public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer 
 
     @Override
     public BlockState getEgg() {
-        return HEBlocks.GURK_EGG.get().defaultBlockState();
+        return HBBlocks.GURK_EGG.get().defaultBlockState();
     }
 }

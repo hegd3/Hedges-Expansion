@@ -1,12 +1,13 @@
 package com.hedge.hedges_bestiary;
 
-import com.hedge.hedges_bestiary.blocks.HEBlocks;
+import com.hedge.hedges_bestiary.blocks.HBBlocks;
 import com.hedge.hedges_bestiary.client.ClientProxy;
 import com.hedge.hedges_bestiary.client.HBSounds;
 import com.hedge.hedges_bestiary.items.HBCreativeTab;
 import com.hedge.hedges_bestiary.items.HBItems;
 import com.hedge.hedges_bestiary.message.DanceJukeboxMessage;
-import com.hedge.hedges_bestiary.message.MountedEntityKeyMessage;
+import com.hedge.hedges_bestiary.message.EntityKeyMessage;
+import com.hedge.hedges_bestiary.message.OpenTamableScreenMessage;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.mojang.logging.LogUtils;
@@ -49,7 +50,7 @@ public class HedgesBestiary
         MinecraftForge.EVENT_BUS.register(this);
         HBEntities.register(modEventBus);
         HBItems.register(modEventBus);
-        HEBlocks.registerBlocks(modEventBus);
+        HBBlocks.registerBlocks(modEventBus);
         HBParticles.register(modEventBus);
         HBSounds.register(modEventBus);
         HBCreativeTab.register(modEventBus);
@@ -65,7 +66,8 @@ public class HedgesBestiary
     {
         int packetsRegistered = 0;
         NETWORK_WRAPPER.registerMessage(packetsRegistered++, DanceJukeboxMessage.class, DanceJukeboxMessage::write, DanceJukeboxMessage::read, DanceJukeboxMessage::handle);
-        NETWORK_WRAPPER.registerMessage(packetsRegistered++, MountedEntityKeyMessage.class, MountedEntityKeyMessage::write, MountedEntityKeyMessage::read, MountedEntityKeyMessage::handle);
+        NETWORK_WRAPPER.registerMessage(packetsRegistered++, EntityKeyMessage.class, EntityKeyMessage::write, EntityKeyMessage::read, EntityKeyMessage::handle);
+        NETWORK_WRAPPER.registerMessage(packetsRegistered++, OpenTamableScreenMessage.class, OpenTamableScreenMessage::write, OpenTamableScreenMessage::read, OpenTamableScreenMessage::handle);
 
     }
 

@@ -1,14 +1,19 @@
 package com.hedge.hedges_bestiary.entity.living;
 
-import com.hedge.hedges_bestiary.blocks.HEBlocks;
+import com.hedge.hedges_bestiary.blocks.HBBlocks;
 import com.hedge.hedges_bestiary.client.HBSounds;
-import com.hedge.hedges_bestiary.entity.AI.control.ATMBodyRotControl;
-import com.hedge.hedges_bestiary.entity.AI.control.ATMSemiaquaticMoveControl;
+import com.hedge.hedges_bestiary.entity.AI.control.ATMMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.control.ATMSwimLookControl;
+import com.hedge.hedges_bestiary.entity.AI.control.ATMSwimMoveControl;
+import com.hedge.hedges_bestiary.entity.AI.control.AdvancedTurner;
 import com.hedge.hedges_bestiary.entity.AI.goal.*;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.MurkAttackGoal;
+import com.hedge.hedges_bestiary.entity.AI.navigation.FluidPathNavigation;
 import com.hedge.hedges_bestiary.entity.AI.navigation.HBAmphibiousPathNavigator;
+import com.hedge.hedges_bestiary.entity.AI.navigation.MMPathNavigatorGround;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
+import com.hedge.hedges_bestiary.entity.AI.targeting.TargetMonstersGoal;
+import com.hedge.hedges_bestiary.entity.AI.targeting.TargetPlayersGoal;
 import com.hedge.hedges_bestiary.entity.projectile.MurkSmoke;
 import com.hedge.hedges_bestiary.entity.types.*;
 import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
@@ -26,11 +31,11 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
@@ -44,7 +49,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class MurkEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurningMob, EggLayer {
+public class MurkEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurner, EggLayer {
     private static final EntityDataAccessor<Boolean> CHARGED = SynchedEntityData.defineId(MurkEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> LEFT = SynchedEntityData.defineId(MurkEntity.class, EntityDataSerializers.BOOLEAN);
 
@@ -59,6 +64,8 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     public final SmoothAnimationState yawnAnimationState = new SmoothAnimationState();
     public final SmoothAnimationState sitAnimationState = new SmoothAnimationState();
 
+
+    private TurnType turnType = TurnType.NORMAL;
     private int attackCD = 0;
     private int multiBiteCD = 0;
     private int roarCD = 0;
@@ -72,9 +79,8 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     public MurkEntity(EntityType<? extends MurkEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        this.moveControl = new ATMSemiaquaticMoveControl<>(this, 40, 0.3f);
-        this.lookControl = new ATMSwimLookControl<>(this, 30);
-
+        this.lookControl = new ATMSwimLookControl<>(this, 30, 90);
+        this.moveControl = new ATMSwimMoveControl<>(this, 45, 0.4f, 1.0f, 90);
 
         this.setPathfindingMalus(BlockPathTypes.WATER, 0.0f);
         this.setPathfindingMalus(BlockPathTypes.WATER_BORDER, 0.0f);
@@ -128,8 +134,9 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this, false));
         this.goalSelector.addGoal(i++, new MurkAttackGoal(this));
         this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2, 1.6, 7.0f, 4.0f));
+        this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
         this.goalSelector.addGoal(i++, new NapGoal(this, NapGoal.SleepType.CATHERMAL, false));
-        this.goalSelector.addGoal(i++, new CustomSwimGoal(this, 1.0, 10, 4, 7, false));
+        this.goalSelector.addGoal(i++, new CustomSwimGoal(this, 1.0, 10, 4, 7, true));
         this.goalSelector.addGoal(i++, new RandomStrollGoal(this, 1.0) {
             @Override
             public boolean canUse() {
@@ -147,9 +154,11 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.goalSelector.addGoal(i++, new IdleAnimationGoal<>(this));
         this.goalSelector.addGoal(i, new DancingGoal(this));
 
-        this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this, true, TamableAnimal.class));
-        this.targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
-        this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
+        this.targetSelector.addGoal(0, new OwnerHurtTargetGoal(this));
+        this.targetSelector.addGoal(1, new HBHurtByTargetGoal(this, true, TamableAnimal.class));
+        this.targetSelector.addGoal(2, new OwnerHurtByTargetGoal(this));
+        this.targetSelector.addGoal(3, new TargetPlayersGoal(this));
+        this.targetSelector.addGoal(4, new TargetMonstersGoal(this));
 
     }
 
@@ -174,6 +183,9 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
             this.moveRelative(this.getSpeed(), pTravelVector);
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
+            if (this.jumping) {
+                this.setDeltaMovement(this.getDeltaMovement().add(0, 0.3, 0));
+            }
         } else {
             super.travel(pTravelVector);
         }
@@ -188,18 +200,19 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     @Override
     public void tick() {
         super.tick();
-        if (!this.shouldInstantTurn()) {
-            this.yBodyRot = Mth.approachDegrees(this.yBodyRotO, yBodyRot, 10);
-        }
+        this.yBodyRot = Mth.approachDegrees(this.yBodyRotO, yBodyRot, 10);
         if (this.level().isClientSide()) {
             this.setUpAnimStates();
             if (this.isCharged()) {
                 Vec3 rand = EntityHelpers.getRandomVec3(1.2);
-                this.level().addParticle(HBParticles.MURK_CHARGE.get(), this.getX() + rand.x + rand.x,
+                this.level().addParticle(HBParticles.MURK_CHARGE.get(), this.getX() + rand.x,
                         this.getY() + rand.y + 0.5, this.getZ() + rand.z, rand.x, rand.y + 0.2, rand.z);
             }
             this.tickTrailYaw();
         } else {
+            if (this.isInWaterOrBubble()) {
+                if (this.navigation instanceof MMPathNavigatorGround) this.switchNav(true);
+            } else if (this.navigation instanceof HBAmphibiousPathNavigator) this.switchNav(false);
             this.attackCD = Math.max(this.attackCD - 1, 0);
             this.projCD = Math.max(this.projCD - 1, 0);
             this.multiBiteCD = Math.max(this.multiBiteCD - 1, 0);
@@ -353,6 +366,8 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         }
     }
 
+
+
     private void spawnImpactParticle() {
         Vec3 v = this.getEyePosition().add(this.getLookAngle().scale(3));
         this.level().addParticle(HBParticles.MURK_IMPACT.get(),
@@ -388,6 +403,9 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.roarCD+=5;
         this.projCD+=5;
         this.multiBiteCD +=5;
+        if (this.turnType != TurnType.NORMAL) {
+            this.turnType = TurnType.NORMAL;
+        }
     }
 
     @Override
@@ -438,7 +456,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.setLeft(!this.swingingLeft());
         this.projectileRot = this.swingingLeft() ? -10 : 10;
         this.setAnimState(2);
-
+        this.setTurnType(TurnType.WHOLE_BODY);
     }
 
 
@@ -470,36 +488,6 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     }
 
-    @Override
-    public boolean shouldTurnWholeBody() {
-        return this.getAnimState() == 5;
-    }
-
-    @Override
-    public boolean shouldLockAngle() {
-        return switch (this.getAnimState()) {
-            case 3, 5 -> this.animTicks > 15;
-            default -> false;
-        };
-    }
-
-    @Override
-    public boolean shouldInstantTurn() {
-        return switch (this.getAnimState()) {
-            case 2, 3 -> true;
-            default -> false;
-        };
-    }
-
-    @Override
-    public float getTurnSpeed() {
-        return 90f;
-    }
-
-    @Override
-    protected BodyRotationControl createBodyControl() {
-        return new ATMBodyRotControl<>(this);
-    }
 
     @Override
     public void playIdle() {
@@ -518,7 +506,30 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     @Override
     public BlockState getEgg() {
-        return HEBlocks.MURK_EGG.get().defaultBlockState();
+        return HBBlocks.MURK_EGG.get().defaultBlockState();
+    }
+
+    @Override
+    public void setTurnType(TurnType turnType) {
+        this.turnType = turnType;
+    }
+
+    @Override
+    public TurnType getTurnType() {
+        return this.turnType;
+    }
+
+
+
+    private void switchNav(boolean inWater) {
+        if (inWater) {
+            this.moveControl = new ATMSwimMoveControl<>(this, 90, 0.4f, 1.0f, 90);
+            this.createNavigation(this.level());
+        } else {
+            this.moveControl = new ATMMoveControl<>(this, 90);
+            this.navigation = new MMPathNavigatorGround(this, this.level());
+
+        }
     }
 }
 

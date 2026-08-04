@@ -21,7 +21,7 @@ public class MoveToHomePosGoal extends Goal {
 
 
     public MoveToHomePosGoal(HBTamableAnimal mob) {
-        this(mob, 1.0, 64D, 4D);
+        this(mob, 1.0, 16D, 4D);
     }
 
     public MoveToHomePosGoal(HBTamableAnimal mob, double speedModifier, double startDist, double stopDist) {
@@ -36,10 +36,9 @@ public class MoveToHomePosGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        if (this.mob.hasControllingPassenger()) {
+        if (!this.mob.hasHome() || this.mob.hasControllingPassenger() || this.mob.getCommand() == 2) {
             return false;
         }
-        if (this.mob.getHomePos() == BlockPos.ZERO) return false;
         this.closeToHomeTryTicks = Math.max(this.closeToHomeTryTicks - 1, 0);
         if (this.closeToHomeTryTicks == 0) {
             this.closeToHomeTryTicks = 100 + this.mob.getRandom().nextInt(100);
@@ -53,7 +52,7 @@ public class MoveToHomePosGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        if (this.mob.hasControllingPassenger()) {
+        if (this.mob.hasControllingPassenger() || this.mob.getCommand() == 2) {
             return false;
         }
         return !this.mob.getHomePos().closerToCenterThan(this.mob.position(), this.stopDist); //&& !this.mob.getNavigation().isDone();
@@ -79,17 +78,21 @@ public class MoveToHomePosGoal extends Goal {
     protected boolean moveToHome() {
 
         BlockPos pos = this.mob.getHomePos().above();
+        if (this.mob.isTame() && !pos.closerToCenterThan(this.mob.position(), this.startDist * 3)) {
+            this.mob.moveTo(pos.getX(), pos.getY(), pos.getZ());
+            return false;
+        } else {
+            double dx = Mth.clamp(pos.getX() - this.mob.getX(), -16, 16);
+            double dy = pos.getY() - this.mob.getY();
+            double dz = Mth.clamp(pos.getZ() - this.mob.getZ(), -16, 16);
+            double x = this.mob.getX() + dx;
+            double y = this.mob.getY() + dy;
+            double z = this.mob.getZ() + dz;
 
-        double dx = Mth.clamp(pos.getX() - this.mob.getX(), -16, 16);
-        double dy = pos.getY() - this.mob.getY();
-        double dz = Mth.clamp(pos.getZ() - this.mob.getZ(), -16, 16);
-        double x = this.mob.getX() + dx;
-        double y = this.mob.getY() + dy;
-        double z = this.mob.getZ() + dz;
+            this.mob.getNavigation().moveTo(x, y, z, this.speedModifier);
 
-        this.mob.getNavigation().moveTo(x,y,z, this.speedModifier);
-
-        return this.mob.getNavigation().getPath() != null && this.mob.getNavigation().getPath().canReach();
+            return this.mob.getNavigation().getPath() != null && this.mob.getNavigation().getPath().canReach();
+        }
 
     }
 

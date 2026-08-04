@@ -1,36 +1,35 @@
 package com.hedge.hedges_bestiary.entity.types;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
-import com.hedge.hedges_bestiary.entity.living.PlomboEntity;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
+import com.hedge.hedges_bestiary.menu.HBTamableMenu;
 import com.hedge.hedges_bestiary.message.DanceJukeboxMessage;
+import com.hedge.hedges_bestiary.message.OpenTamableScreenMessage;
 import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.util.datafix.fixes.BlockEntityJukeboxFix;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
-import java.util.Optional;
 
-public abstract class HBTamableAnimal extends TamableAnimal implements AnimStateMob, IdleAnimMob {
+public abstract class HBTamableAnimal extends TamableAnimal implements AnimStateMob, IdleAnimMob, KeybindUsing {
     public final SmoothAnimationState sitAnimationState = new SmoothAnimationState(0.25f);
     public final SmoothAnimationState napAnimationState = new SmoothAnimationState(0.1f);
     public final SmoothAnimationState idleAnimationState = new SmoothAnimationState();
@@ -42,6 +41,8 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     protected static final EntityDataAccessor<Boolean> IS_SITTING = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.BOOLEAN);
     protected static final EntityDataAccessor<Boolean> IS_DANCING = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.BOOLEAN);
     protected static final EntityDataAccessor<Boolean> IS_NAPPING = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.BOOLEAN);
+    protected static final EntityDataAccessor<Boolean> HAS_HOME = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.BOOLEAN);
+    protected static final EntityDataAccessor<Integer> AUTO_TARGET_TYPE = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.INT);
 
     protected int animTicks = 0;
 
@@ -79,12 +80,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
         ItemStack itemstack = player.getItemInHand(hand);
         if (this.isTame() && this.isOwnedBy(player) && !this.isFood(itemstack)) {
             if (this.canOwnerCommand(player)) {
-                this.setCommand(this.getCommand() + 1);
-                if (this.getCommand() == 3) {
-                    this.setCommand(0);
-                }
-                player.displayClientMessage(Component.translatable("entity.hedges_bestiary.all.command_" + this.getCommand(), this.getName()), true);
-                this.setOrderedToSit(this.getCommand() == 1);
+                this.openCustomInventoryScreen(player);
                 return InteractionResult.SUCCESS;
             } else if (this.canOwnerMount(player)) {
                 if (!level().isClientSide && player.startRiding(this)) {
@@ -94,6 +90,19 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
             }
         }
         return InteractionResult.PASS;
+    }
+
+    public void openCustomInventoryScreen(Player player) {
+        if (!this.level().isClientSide && player instanceof ServerPlayer serverPlayer) {
+            if (serverPlayer.containerMenu != serverPlayer.inventoryMenu) serverPlayer.closeContainer();
+            serverPlayer.nextContainerCounter();
+            serverPlayer.containerMenu = new HBTamableMenu(serverPlayer.containerCounter,this);
+
+            HedgesBestiary.sendMSGToServer(new OpenTamableScreenMessage(this.getId(), serverPlayer.containerCounter));
+
+            serverPlayer.initMenu(serverPlayer.containerMenu);
+            MinecraftForge.EVENT_BUS.post(new PlayerContainerEvent.Open(serverPlayer, serverPlayer.containerMenu));
+        }
     }
 
 
@@ -122,6 +131,8 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
         this.entityData.define(IS_SITTING, false);
         this.entityData.define(IS_DANCING, false);
         this.entityData.define(IS_NAPPING, false);
+        this.entityData.define(HAS_HOME, false);
+        this.entityData.define(AUTO_TARGET_TYPE, 0);
         this.entityData.define(TAME_COMMAND, 0);
     }
 
@@ -130,11 +141,18 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
         super.readAdditionalSaveData(pCompound);
         this.setSitting(pCompound.getBoolean("Is_Sitting"));
         this.setNapping(pCompound.getBoolean("Is_Napping"));
-        this.setCommand(pCompound.getInt("Tame_Command"));
-        int i = pCompound.getInt("HomePosX");
-        int j = pCompound.getInt("HomePosY");
-        int k = pCompound.getInt("HomePosZ");
-        this.setHomePos(new BlockPos(i, j, k));
+        this.setHasHome(pCompound.getBoolean("Has_Home"));
+        if (this.hasHome()) {
+            int i = pCompound.getInt("HomePosX");
+            int j = pCompound.getInt("HomePosY");
+            int k = pCompound.getInt("HomePosZ");
+            this.setHomePos(new BlockPos(i, j, k));
+        }
+        if (this.isTame()) {
+            this.setCommand(pCompound.getInt("Tame_Command"));
+            this.setAutoTargetType(pCompound.getInt("Auto_Target_Type"));
+        }
+
     }
 
     @Override
@@ -142,10 +160,16 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
         super.addAdditionalSaveData(pCompound);
         pCompound.putBoolean("Is_Sitting", this.isSitting());
         pCompound.putBoolean("Is_Napping", this.isNapping());
-        pCompound.putInt("Tame_Command", this.getCommand());
-        pCompound.putInt("HomePosX", this.getHomePos().getX());
-        pCompound.putInt("HomePosY", this.getHomePos().getY());
-        pCompound.putInt("HomePosZ", this.getHomePos().getZ());
+        pCompound.putBoolean("Has_Home", this.hasHome());
+        if (this.hasHome()) {
+            pCompound.putInt("HomePosX", this.getHomePos().getX());
+            pCompound.putInt("HomePosY", this.getHomePos().getY());
+            pCompound.putInt("HomePosZ", this.getHomePos().getZ());
+        }
+        if (this.isTame()) {
+            pCompound.putInt("Tame_Command", this.getCommand());
+            pCompound.putInt("Auto_Target_Type", this.getAutoTargetType());
+        }
     }
 
     @Override
@@ -277,6 +301,22 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
         this.entityData.set(IS_NAPPING, b);
     }
 
+    public int getAutoTargetType() {
+        return this.entityData.get(AUTO_TARGET_TYPE);
+    }
+
+    public void setAutoTargetType(int i) {
+        this.entityData.set(AUTO_TARGET_TYPE, i);
+    }
+
+    public boolean hasHome() {
+        return this.entityData.get(HAS_HOME);
+    }
+
+    public void setHasHome(boolean b) {
+        this.entityData.set(HAS_HOME, b);
+    }
+
     public void setHomePos(BlockPos pos) {
         this.entityData.set(HOME_POS, pos);
     }
@@ -288,6 +328,26 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     @Override
     public boolean canPlayIdle() {
         return this.getTarget() == null && this.getAnimState() == 0;
+    }
+
+    @Override
+    public void onKeyPacket(Entity keyPresser, int type) {
+
+        switch (type) {
+            case 0 -> {
+                this.setCommand(this.getCommand() == 2 ? 0 : this.getCommand() + 1);
+                this.setOrderedToSit(this.getCommand() == 1);
+            }
+            case 1 -> {
+                if (this.hasHome()) {
+                    this.setHasHome(false);
+                } else {
+                    this.setHasHome(true);
+                    this.setHomePos(keyPresser.blockPosition());
+                }
+            }
+            case 2 -> this.setAutoTargetType(this.getAutoTargetType() == 3 ? 0 : this.getAutoTargetType() + 1);
+        }
     }
 
 }

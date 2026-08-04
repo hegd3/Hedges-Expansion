@@ -19,7 +19,7 @@ public class IdleInPlaceGoal<E extends PathfinderMob & IdleAnimMob> extends Idle
 
     @Override
     public void start() {
-        super.start();
+        this.resetCD();
         this.mob.getNavigation().stop();
     }
 }

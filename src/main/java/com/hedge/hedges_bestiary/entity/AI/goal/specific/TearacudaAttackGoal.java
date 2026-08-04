@@ -39,8 +39,8 @@ public class TearacudaAttackGoal extends GenericMeleeGoal<TearacudaEntity> {
                 Vec3 towardTarget = livingentity.position().subtract(this.mob.position()).normalize();
                 Vec3 dashVector = new Vec3(towardTarget.x, 0.67, towardTarget.z).normalize().scale(1.2);
                 this.mob.setDeltaMovement(dashVector);
-                float yaw = (float)(Mth.atan2(dashVector.z, dashVector.x) * (180F / Math.PI)) - 90.0F;
-                float pitch = (float)(-(Mth.atan2(dashVector.y, Mth.sqrt((float)(dashVector.x * dashVector.x + dashVector.z * dashVector.z))) * (180F / Math.PI))) * 0.5f;
+                float yaw = (float)(Mth.atan2(dashVector.z, dashVector.x) * (Mth.RAD_TO_DEG)) - 90.0F;
+                float pitch = (float)(-(Mth.atan2(dashVector.y, Mth.sqrt((float)(dashVector.x * dashVector.x + dashVector.z * dashVector.z))) * (Mth.RAD_TO_DEG))) * 0.5f;
 
                 this.mob.setYHeadRot(yaw);
                 this.mob.setYRot(yaw);

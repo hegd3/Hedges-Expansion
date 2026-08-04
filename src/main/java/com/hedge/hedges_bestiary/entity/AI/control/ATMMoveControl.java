@@ -1,6 +1,5 @@
 package com.hedge.hedges_bestiary.entity.AI.control;
 
-import com.hedge.hedges_bestiary.entity.types.AdvancedTurningMob;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
@@ -11,11 +10,13 @@ import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class ATMMoveControl<E extends Mob & AdvancedTurningMob> extends MoveControl {
+public class ATMMoveControl<E extends Mob & AdvancedTurner> extends MoveControl {
     protected final E entity;
-    public ATMMoveControl(E pMob) {
+    protected final float turnSpeed;
+    public ATMMoveControl(E pMob, float turnSpeed) {
         super(pMob);
         this.entity = pMob;
+        this.turnSpeed = turnSpeed;
     }
 
     @Override
@@ -42,13 +43,12 @@ public class ATMMoveControl<E extends Mob & AdvancedTurningMob> extends MoveCont
             }
 
             float f9 = (float)(Mth.atan2(d1, d0) * (double)(180F / (float)Math.PI)) - 90.0F;
-            if (!this.entity.shouldLockAngle()) {
-                float turnSpeed = this.entity.getTurnSpeed();
-                if (this.entity.shouldInstantTurn()) {
+            if (this.entity.getTurnType() != AdvancedTurner.TurnType.LOCK) {
+                if (this.entity.getTurnType() == AdvancedTurner.TurnType.INSTANT) {
                     this.mob.setYRot(f9);
                     this.mob.yBodyRot = f9;
                     this.mob.yHeadRot = f9;
-                } else if (entity.shouldTurnWholeBody()) {
+                } else if (this.entity.getTurnType() == AdvancedTurner.TurnType.WHOLE_BODY) {
                     this.mob.setYRot(this.rotlerp(this.mob.getYRot(), f9, turnSpeed));
                     this.mob.yBodyRot = this.mob.getYRot();
                     this.mob.yHeadRot = this.mob.getYRot();
@@ -76,4 +76,5 @@ public class ATMMoveControl<E extends Mob & AdvancedTurningMob> extends MoveCont
         }
 
     }
+
 }

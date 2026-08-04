@@ -1,10 +1,12 @@
 package com.hedge.hedges_bestiary.entity.living;
 
-import com.hedge.hedges_bestiary.blocks.HEBlocks;
+import com.hedge.hedges_bestiary.blocks.HBBlocks;
 import com.hedge.hedges_bestiary.entity.AI.control.FlyingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.*;
 import com.hedge.hedges_bestiary.entity.AI.navigation.MMPathNavigatorGround;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
+import com.hedge.hedges_bestiary.entity.AI.targeting.TargetMonstersGoal;
+import com.hedge.hedges_bestiary.entity.AI.targeting.TargetPlayersGoal;
 import com.hedge.hedges_bestiary.entity.types.*;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.registry.HBEntities;
@@ -84,10 +86,12 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new HBSitWhenOrderedGoal(this, false));
-        this.goalSelector.addGoal(2, new FlyerFollowOwnerGoal(this, 1.2D, 1.6D, 8.0f, 5.0f));
-        this.goalSelector.addGoal(3, new FlockingGoal<>(this) {
+        int i = 0;
+        this.goalSelector.addGoal(i++, new FloatGoal(this));
+        this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this, false));
+        this.goalSelector.addGoal(i++, new FlyerFollowOwnerGoal(this, 1.2D, 1.6D, 8.0f, 5.0f));
+        this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
+        this.goalSelector.addGoal(i++, new FlockingGoal<>(this) {
             @Override
             public boolean canUse() {
                 return !this.mob.isTame() &&  super.canUse();
@@ -98,14 +102,17 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
                 return !this.mob.isTame() && super.canContinueToUse();
             }
         });
-        this.goalSelector.addGoal(4, new SemiFlyerFlyingGoal<>(this, 1.0f, 25, 10, 20, 1600));
-        this.goalSelector.addGoal(5, new RandomStrollGoal(this, 1.0));
-        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, LivingEntity.class, 10));
-        this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
-        this.goalSelector.addGoal(8, new IdleAnimationGoal<>(this));
-        this.goalSelector.addGoal(9, new DancingGoal(this));
+        this.goalSelector.addGoal(i++, new SemiFlyerFlyingGoal<>(this, 1.0f, 25, 10, 20, 1600));
+        this.goalSelector.addGoal(i++, new RandomStrollGoal(this, 1.0));
+        this.goalSelector.addGoal(i++, new LookAtPlayerGoal(this, LivingEntity.class, 10));
+        this.goalSelector.addGoal(i++, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(i++, new IdleAnimationGoal<>(this));
+        this.goalSelector.addGoal(i, new DancingGoal(this));
 
         this.targetSelector.addGoal(2, new HBHurtByTargetGoal(this, true, TamableAnimal.class));
+        this.targetSelector.addGoal(3, new TargetPlayersGoal(this));
+        this.targetSelector.addGoal(4, new TargetMonstersGoal(this));
+
     }
 
     @Override
@@ -330,6 +337,6 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
 
     @Override
     public BlockState getEgg() {
-        return HEBlocks.ZAPPET_EGG.get().defaultBlockState();
+        return HBBlocks.ZAPPET_EGG.get().defaultBlockState();
     }
 }

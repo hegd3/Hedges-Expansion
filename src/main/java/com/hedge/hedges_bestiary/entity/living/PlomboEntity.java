@@ -1,14 +1,15 @@
 package com.hedge.hedges_bestiary.entity.living;
 
-import com.hedge.hedges_bestiary.entity.AI.control.ATMBodyRotControl;
 import com.hedge.hedges_bestiary.entity.AI.control.ATMLookControl;
 import com.hedge.hedges_bestiary.entity.AI.control.ATMMoveControl;
+import com.hedge.hedges_bestiary.entity.AI.control.AdvancedTurner;
 import com.hedge.hedges_bestiary.entity.AI.goal.*;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.PlomboAttackGoal;
 import com.hedge.hedges_bestiary.entity.AI.navigation.MMPathNavigatorGround;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
+import com.hedge.hedges_bestiary.entity.AI.targeting.TargetMonstersGoal;
+import com.hedge.hedges_bestiary.entity.AI.targeting.TargetPlayersGoal;
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
-import com.hedge.hedges_bestiary.entity.types.AdvancedTurningMob;
 import com.hedge.hedges_bestiary.entity.types.AttackStateMob;
 import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
@@ -29,7 +30,6 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
@@ -49,7 +49,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumSet;
 import java.util.List;
 
-public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurningMob {
+public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurner {
 
     private static final EntityDataAccessor<Boolean> LEFT = SynchedEntityData.defineId(PlomboEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> SCRATCHING = SynchedEntityData.defineId(PlomboEntity.class, EntityDataSerializers.BOOLEAN);
@@ -65,12 +65,12 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
 
     private int attackCD = 0;
     private int multiAttackCD = 0;
-
+    private TurnType turnType = TurnType.NORMAL;
 
     public PlomboEntity(EntityType<? extends PlomboEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        this.lookControl = new ATMLookControl<>(this);
-        this.moveControl = new ATMMoveControl<>(this);
+        this.lookControl = new ATMLookControl<>(this, 90);
+        this.moveControl = new ATMMoveControl<>(this, 90);
         this.setMaxUpStep(1.0f);
     }
 
@@ -125,10 +125,11 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
         this.goalSelector.addGoal(i++, new IdleAnimationGoal<>(this, 50));
         this.goalSelector.addGoal(i, new DancingGoal(this));
 
-        this.targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
-        this.targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
-        this.targetSelector.addGoal(2, new HBHurtByTargetGoal(this, true, TamableAnimal.class));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Monster.class, true));
+        this.targetSelector.addGoal(0, new OwnerHurtTargetGoal(this));
+        this.targetSelector.addGoal(1, new HBHurtByTargetGoal(this, true, TamableAnimal.class));
+        this.targetSelector.addGoal(2, new OwnerHurtByTargetGoal(this));
+        this.targetSelector.addGoal(3, new TargetPlayersGoal(this));
+        this.targetSelector.addGoal(4, new TargetMonstersGoal(this));
     }
 
     @Override
@@ -139,9 +140,7 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
     @Override
     public void tick() {
         super.tick();
-        if (!this.shouldTurnWholeBody()) {
-            this.yBodyRot = Mth.approachDegrees(this.yBodyRotO, yBodyRot, 10);
-        }
+        this.yBodyRot = Mth.approachDegrees(this.yBodyRotO, yBodyRot, 10);
         if (this.level().isClientSide()) {
             this.setUpAnimStates();
         } else {
@@ -235,6 +234,7 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
     public @NotNull SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @javax.annotation.Nullable SpawnGroupData pSpawnData, @javax.annotation.Nullable CompoundTag pDataTag) {
 
         if (!this.level().isClientSide()) {
+            this.setHasHome(true);
             this.setHomePos(this.blockPosition());
             if (pReason == MobSpawnType.CHUNK_GENERATION || pReason == MobSpawnType.NATURAL) {
                 long dayTime = this.level().getDayTime();
@@ -260,31 +260,6 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
         this.multiAttackCD += 5;
     }
 
-    @Override
-    public boolean shouldTurnWholeBody() {
-        if (this.isScratching()) {
-            return true;
-        }
-        return switch(this.getAnimState()) {
-            case 2 -> true;
-            default -> false;
-        };
-    }
-
-    @Override
-    public boolean shouldLockAngle() {
-        return false;
-    }
-
-    @Override
-    public boolean shouldInstantTurn() {
-        return false;
-    }
-
-    @Override
-    public float getTurnSpeed() {
-        return 25;
-    }
 
     @Override
     public void setAttacking() {
@@ -326,11 +301,6 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
     }
 
     @Override
-    protected BodyRotationControl createBodyControl() {
-        return new ATMBodyRotControl<>(this);
-    }
-
-    @Override
     public void playIdle() {
         this.setAnimState(this.getRandom().nextInt(3) + 3);
     }
@@ -338,6 +308,16 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
     @Override
     public @Nullable AgeableMob getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
         return HBEntities.PLOMBO.get().create(level);
+    }
+
+    @Override
+    public void setTurnType(TurnType turnType) {
+        this.turnType = turnType;
+    }
+
+    @Override
+    public TurnType getTurnType() {
+        return this.turnType;
     }
 
     static class PlomboScratchLeavesGoal extends MoveToBlockGoal {

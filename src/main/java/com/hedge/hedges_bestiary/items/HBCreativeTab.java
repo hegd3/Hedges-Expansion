@@ -1,7 +1,7 @@
 package com.hedge.hedges_bestiary.items;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
-import com.hedge.hedges_bestiary.blocks.HEBlocks;
+import com.hedge.hedges_bestiary.blocks.HBBlocks;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -20,10 +20,10 @@ public class HBCreativeTab {
                     .title(Component.translatable("creativetab.hedges_bestiary_tab"))
                     .displayItems((itemDisplayParameters, output) -> {
                         // blocks
-                        output.accept(HEBlocks.GURK_EGG.get());
-                        output.accept(HEBlocks.ZAPPET_EGG.get());
-                        output.accept(HEBlocks.DAWN_DOVE_EGG.get());
-                        output.accept(HEBlocks.MURK_EGG.get());
+                        output.accept(HBBlocks.GURK_EGG.get());
+                        output.accept(HBBlocks.ZAPPET_EGG.get());
+                        output.accept(HBBlocks.DAWN_DOVE_EGG.get());
+                        output.accept(HBBlocks.MURK_EGG.get());
 
                         // crafting items
                         output.accept(HBItems.MURK_CLAW.get());

@@ -1,12 +1,11 @@
 package com.hedge.hedges_bestiary.entity.AI.control;
 
-import com.hedge.hedges_bestiary.entity.types.AdvancedTurningMob;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 
-public class ATMSwimMoveControl<E extends Mob & AdvancedTurningMob> extends MoveControl {
+public class ATMSwimMoveControl<E extends Mob & AdvancedTurner> extends MoveControl {
 
     private final E entity;
     private static final float FULL_SPEED_TURN_THRESHOLD = 10.0F;
@@ -14,9 +13,10 @@ public class ATMSwimMoveControl<E extends Mob & AdvancedTurningMob> extends Move
     private final int maxTurnX;
     private final float inWaterSpeedModifier;
     private final float outsideWaterSpeedModifier;
-
-    public ATMSwimMoveControl(E pMob, int pMaxTurnX, float pInWaterSpeedModifier, float pOutsideWaterSpeedModifier) {
+    private final float turnSpeed;
+    public ATMSwimMoveControl(E pMob, int pMaxTurnX, float pInWaterSpeedModifier, float pOutsideWaterSpeedModifier, float turnSpeed) {
         super(pMob);
+        this.turnSpeed = turnSpeed;
         this.entity = pMob;
         this.maxTurnX = pMaxTurnX;
         this.inWaterSpeedModifier = pInWaterSpeedModifier;
@@ -35,8 +35,8 @@ public class ATMSwimMoveControl<E extends Mob & AdvancedTurningMob> extends Move
                 this.mob.setZza(0.0F);
             } else {
                 float f = (float)(Mth.atan2(d2, d0) * (double)(180F / (float)Math.PI)) - 90.0F;
-                if (!this.entity.shouldLockAngle()) {
-                    this.mob.setYRot(this.entity.shouldInstantTurn() ? f : this.rotlerp(this.mob.getYRot(), f, this.entity.getTurnSpeed()));
+                if (this.entity.getTurnType() != AdvancedTurner.TurnType.LOCK) {
+                    this.mob.setYRot(this.entity.getTurnType() == AdvancedTurner.TurnType.INSTANT ? f : this.rotlerp(this.mob.getYRot(), f, turnSpeed));
                     this.mob.yBodyRot = this.mob.getYRot();
                     this.mob.yHeadRot = this.mob.getYRot();
                 }
@@ -44,7 +44,7 @@ public class ATMSwimMoveControl<E extends Mob & AdvancedTurningMob> extends Move
                 if (this.mob.isInWaterOrBubble()) {
                     this.mob.setSpeed(f1 * this.inWaterSpeedModifier);
                     double d4 = Math.sqrt(d0 * d0 + d2 * d2);
-                    if ((!this.entity.shouldLockAngle()) && (Math.abs(d1) > (double)1.0E-5F || Math.abs(d4) > (double)1.0E-5F)) {
+                    if ((this.entity.getTurnType() != AdvancedTurner.TurnType.LOCK) && (Math.abs(d1) > (double)1.0E-5F || Math.abs(d4) > (double)1.0E-5F)) {
                         float f3 = -((float)(Mth.atan2(d1, d4) * (double)(180F / (float)Math.PI)));
                         f3 = Mth.clamp(Mth.wrapDegrees(f3), (float)(-this.maxTurnX), (float)this.maxTurnX);
                         this.mob.setXRot(this.rotlerp(this.mob.getXRot(), f3, 5.0F));
@@ -55,7 +55,7 @@ public class ATMSwimMoveControl<E extends Mob & AdvancedTurningMob> extends Move
                     this.mob.zza = f6 * f1;
                     this.mob.yya = -f4 * f1;
 
-                    double y = Mth.clamp(f1 * d1 * 0.02D, f1 * -0.2D, f1 * 0.2D);
+                    double y = Mth.clamp(f1 * d1 * 0.01D, f1 * -0.1D, f1 * 0.1D);
                     this.mob.setDeltaMovement(this.mob.getDeltaMovement().add(0.0D, y, 0.0D));
 
                 } else {

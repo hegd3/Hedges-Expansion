@@ -1,14 +1,15 @@
 package com.hedge.hedges_bestiary.entity.living;
 
-import com.hedge.hedges_bestiary.entity.AI.control.ATMBodyRotControl;
+import com.hedge.hedges_bestiary.entity.AI.control.AdvancedTurner;
 import com.hedge.hedges_bestiary.entity.AI.goal.*;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.BurodonAttackGoal;
 import com.hedge.hedges_bestiary.entity.AI.control.ATMLookControl;
 import com.hedge.hedges_bestiary.entity.AI.control.ATMMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.navigation.MMPathNavigatorGround;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
+import com.hedge.hedges_bestiary.entity.AI.targeting.TargetMonstersGoal;
+import com.hedge.hedges_bestiary.entity.AI.targeting.TargetPlayersGoal;
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
-import com.hedge.hedges_bestiary.entity.types.AdvancedTurningMob;
 import com.hedge.hedges_bestiary.entity.types.AttackStateMob;
 import com.hedge.hedges_bestiary.items.TreatItem;
 import com.hedge.hedges_bestiary.registry.HBEntities;
@@ -21,12 +22,12 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NonTameRandomTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -39,7 +40,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurningMob {
+public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurner {
 
     public final SmoothAnimationState biteAnimationState = new SmoothAnimationState();
     public final SmoothAnimationState jumpAnimationState = new SmoothAnimationState();
@@ -51,7 +52,7 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
     public final SmoothAnimationState airAnimationState = new SmoothAnimationState();
 
 
-
+    private TurnType turnType;
     private boolean jumpAway = false;
     private Vec3 jumpVector;
     public int inAirTimer = 0;
@@ -68,8 +69,8 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
 
     public BurodonEntity(EntityType<? extends BurodonEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        this.moveControl = new ATMMoveControl<>(this);
-        this.lookControl = new ATMLookControl<>(this);
+        this.moveControl = new ATMMoveControl<>(this, 90);
+        this.lookControl = new ATMLookControl<>(this, 90);
         this.setMaxUpStep(1);
     }
 
@@ -111,24 +112,29 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new HBSitWhenOrderedGoal(this));
-        this.goalSelector.addGoal(2, new AvoidTargetWhenLowGoal(this, 1.6D, 20, 15, 16, 7));
-        this.goalSelector.addGoal(3, new BurodonAttackGoal(this));
-        this.goalSelector.addGoal(4, new HBFollowOwnerGoal(this, 1.2D, 1.6D, 7.0f, 4.0f));
-        this.goalSelector.addGoal(5, new NapGoal(this));
-        this.goalSelector.addGoal(6, new RandomlySitGoal(this));
-        this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, LivingEntity.class, 7));
-        this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 1.0, 20));
-        this.goalSelector.addGoal(9, new IdleAnimationGoal<>(this));
-        this.goalSelector.addGoal(10, new DancingGoal(this));
-        this.goalSelector.addGoal(11, new RandomLookAroundGoal(this));
+        int i = 0;
+        this.goalSelector.addGoal(i++, new FloatGoal(this));
+        this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this));
+        this.goalSelector.addGoal(i++, new AvoidTargetWhenLowGoal(this, 1.6D, 20, 15, 16, 7));
+        this.goalSelector.addGoal(i++, new BurodonAttackGoal(this));
+        this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2D, 1.6D, 7.0f, 4.0f));
+        this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
+        this.goalSelector.addGoal(i++, new NapGoal(this));
+        this.goalSelector.addGoal(i++, new RandomlySitGoal(this));
+        this.goalSelector.addGoal(i++, new LookAtPlayerGoal(this, LivingEntity.class, 7));
+        this.goalSelector.addGoal(i++, new WaterAvoidingRandomStrollGoal(this, 1.0, 20));
+        this.goalSelector.addGoal(i++, new IdleAnimationGoal<>(this));
+        this.goalSelector.addGoal(i++, new DancingGoal(this));
+        this.goalSelector.addGoal(i++, new RandomLookAroundGoal(this));
 
-        this.targetSelector.addGoal(0, new OwnerHurtByTargetGoal(this));
-        this.targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
-        this.targetSelector.addGoal(2, new HBHurtByTargetGoal(this, true, TamableAnimal.class));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Sheep.class, true));
-        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this,Player.class, true));
+        this.targetSelector.addGoal(0, new OwnerHurtTargetGoal(this));
+        this.targetSelector.addGoal(1, new HBHurtByTargetGoal(this, true, TamableAnimal.class));
+        this.targetSelector.addGoal(2, new OwnerHurtByTargetGoal(this));
+        this.targetSelector.addGoal(3, new TargetPlayersGoal(this));
+        this.targetSelector.addGoal(4, new TargetMonstersGoal(this));
+        this.targetSelector.addGoal(5, new NonTameRandomTargetGoal<>(this, Sheep.class, true, null));
+        this.targetSelector.addGoal(6, new NonTameRandomTargetGoal<>(this, Player.class, true, null));
+
     }
 
 
@@ -243,6 +249,12 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
     }
 
     @Override
+    public void resetAnimState() {
+        super.resetAnimState();
+        this.turnType = TurnType.NORMAL;
+    }
+
+    @Override
     public void playIdle() {
         this.setAnimState(this.getRandom().nextInt(3) + YAWN_ANIM);
     }
@@ -329,36 +341,19 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
         return this.hasLineOfSight(entity) && this.getAttackReachSqr(entity) >= this.distanceToSqr(entity);
     }
 
-    @Override
-    public boolean shouldTurnWholeBody() {
-        return switch (this.getAnimState()) {
-            case 2, 3 -> true;
-            default -> false;
-        };
-    }
-
-    @Override
-    public boolean shouldLockAngle() {
-        return false;
-    }
-
-    @Override
-    public boolean shouldInstantTurn() {
-        return false;
-    }
-
-    @Override
-    public float getTurnSpeed() {
-        return 90;
-    }
-
-    @Override
-    protected BodyRotationControl createBodyControl() {
-        return new ATMBodyRotControl<>(this);
-    }
 
     @Override
     public @Nullable AgeableMob getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
         return HBEntities.BURODON.get().create(level);
+    }
+
+    @Override
+    public void setTurnType(TurnType turnType) {
+        this.turnType = turnType;
+    }
+
+    @Override
+    public TurnType getTurnType() {
+        return this.turnType;
     }
 }

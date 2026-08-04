@@ -1,7 +1,20 @@
 {
-  "entity.hedges_bestiary.all.command_0": "%s is wandering",
-  "entity.hedges_bestiary.all.command_1": "%s is staying",
-  "entity.hedges_bestiary.all.command_2": "%s is following",
+  "entity.hedges_bestiary.tamable_menu.display_command": "Currently:",
+  "entity.hedges_bestiary.tamable_menu.command_0": "Wandering",
+  "entity.hedges_bestiary.tamable_menu.command_1": "Sitting",
+  "entity.hedges_bestiary.tamable_menu.command_2": "Following",
+
+
+  "entity.hedges_bestiary.tamable_menu.auto_targets": "Auto-Target:",
+  "entity.hedges_bestiary.tamable_menu.auto_targets_type_1": "Monsters",
+  "entity.hedges_bestiary.tamable_menu.auto_targets_type_2": "Players",
+  "entity.hedges_bestiary.tamable_menu.auto_targets_type_3": "Both",
+
+  "entity.hedges_bestiary.tamable_menu.home": "Home:",
+  "entity.hedges_bestiary.tamable_menu.null": "None",
+  "entity.hedges_bestiary.tamable_menu.true": "True",
+  "entity.hedges_bestiary.tamable_menu.false": "False",
+
   "entity.hedges_bestiary.banshee": "Banshee",
   "entity.hedges_bestiary.burodon": "Burodon",
   "entity.hedges_bestiary.chub": "Chub",

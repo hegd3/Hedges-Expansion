@@ -33,7 +33,7 @@ public class IdleAnimationGoal<E extends PathfinderMob & IdleAnimMob> extends Go
         return false;
     }
 
-    private void resetCD() {
+    protected void resetCD() {
         this.animCD = this.cooldown + this.mob.getRandom().nextInt(this.cooldown) * 2;
     }
 }

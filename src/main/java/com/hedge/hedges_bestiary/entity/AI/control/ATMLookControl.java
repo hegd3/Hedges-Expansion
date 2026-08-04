@@ -1,22 +1,22 @@
 package com.hedge.hedges_bestiary.entity.AI.control;
 
-import com.hedge.hedges_bestiary.entity.types.AdvancedTurningMob;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.control.LookControl;
 
-public class ATMLookControl<E extends Mob & AdvancedTurningMob> extends LookControl {
+public class ATMLookControl<E extends Mob & AdvancedTurner> extends LookControl {
     private final E entity;
+    protected final float turnSpeed;
 
-
-    public ATMLookControl(E pMob) {
+    public ATMLookControl(E pMob, float turnSpeed) {
         super(pMob);
         this.entity = pMob;
+        this.turnSpeed = turnSpeed;
     }
 
     public void tick() {
-        if (!entity.shouldLockAngle()) {
-            this.yMaxRotSpeed = entity.getTurnSpeed();
-            if (entity.shouldInstantTurn()) {
+        if (this.entity.getTurnType() != AdvancedTurner.TurnType.LOCK) {
+            this.yMaxRotSpeed = this.turnSpeed;
+            if (entity.getTurnType() == AdvancedTurner.TurnType.INSTANT) {
                 float targetYRot = this.getYRotD().orElse(this.mob.getYRot());
                 float targetXRot = this.getXRotD().orElse(this.mob.getXRot());
 
@@ -31,7 +31,7 @@ public class ATMLookControl<E extends Mob & AdvancedTurningMob> extends LookCont
             this.mob.xRotO = targetXRot;
 
              */
-            } else if (entity.shouldTurnWholeBody()) {
+            } else if (entity.getTurnType() == AdvancedTurner.TurnType.WHOLE_BODY) {
                 float targetYRot = this.getYRotD().orElse(this.mob.getYRot());
                 float targetXRot = this.getXRotD().orElse(this.mob.getXRot());
 

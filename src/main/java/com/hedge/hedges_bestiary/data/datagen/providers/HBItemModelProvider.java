@@ -1,7 +1,7 @@
 package com.hedge.hedges_bestiary.data.datagen.providers;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
-import com.hedge.hedges_bestiary.blocks.HEBlocks;
+import com.hedge.hedges_bestiary.blocks.HBBlocks;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -18,7 +18,7 @@ public class HBItemModelProvider extends ItemModelProvider {
 
     @Override
     protected void registerModels() {
-        simpleBlock(HEBlocks.GURK_EGG);
+        simpleBlock(HBBlocks.GURK_EGG);
     }
 
     private ItemModelBuilder simpleItem(RegistryObject<Item> item){

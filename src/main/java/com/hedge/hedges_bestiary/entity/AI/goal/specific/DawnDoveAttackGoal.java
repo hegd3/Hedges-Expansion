@@ -1,0 +1,119 @@
+package com.hedge.hedges_bestiary.entity.AI.goal.specific;
+
+import com.hedge.hedges_bestiary.entity.AI.goal.GenericMeleeGoal;
+import com.hedge.hedges_bestiary.entity.living.DawnDoveEntity;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+
+public class DawnDoveAttackGoal extends GenericMeleeGoal<DawnDoveEntity> {
+
+    private boolean randomFlying;
+    private boolean reachedDropPos;
+    private int phaseTicks;
+    public DawnDoveAttackGoal(DawnDoveEntity pMob) {
+        super(pMob, 1.2f);
+    }
+
+    @Override
+    protected void tickPath(LivingEntity livingentity) {
+        if (this.randomFlying) {
+            if (this.attackReach * 20 < this.dist) {
+                if (!this.mob.getNavigation().isDone()) {
+                    double dx = this.mob.getX() + Mth.clamp((livingentity.getX() - this.mob.getX()), 8, -8);
+                    double dz = this.mob.getX() + Mth.clamp((livingentity.getX() - this.mob.getX()), 8, -8);
+                    this.mob.lookAt(livingentity, 30.0F, 30.0F);
+                    this.mob.getLookControl().setLookAt(livingentity, 30.0F, 30.0F);
+                    this.mob.getNavigation().moveTo(dx, livingentity.getY() + 2, dz, 1.2);
+                }
+
+                if (this.mob.getAnimState() == 0 && this.mob.canShoot(livingentity, attackReach, dist)) {
+                    this.mob.setAnimState(2);
+                }
+            } else {
+                if (this.phaseTicks++ > 100) {
+                    this.randomFlying = false;
+                    this.mob.getNavigation().stop();
+                    this.phaseTicks = 0;
+                } else if (this.mob.getNavigation().isDone()) {
+                    Vec3 pos = this.findFlightPos(livingentity);
+                    this.mob.getNavigation().moveTo(pos.x, pos.y, pos.z, 1.3);
+                }
+
+            }
+        } else {
+            super.tickPath(livingentity);
+            if (this.phaseTicks > 3) {
+                this.randomFlying = true;
+                this.phaseTicks = 0;
+            }
+        }
+    }
+
+    private Vec3 findFlightPos(LivingEntity target) {
+        Vec3 heightAdjusted = target.position().add(mob.getRandom().nextInt(35 * 2) - 35, 10 + mob.getRandom().nextInt(6), mob.getRandom().nextInt(35 * 2) - 35);
+        BlockHitResult result = mob.level().clip(new ClipContext(mob.getEyePosition(), heightAdjusted, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mob));
+        if (result.getType() == HitResult.Type.MISS) {
+            return heightAdjusted;
+        } else {
+            return result.getLocation();
+        }
+    }
+
+
+    @Override
+    public void start() {
+        super.start();
+        if (!this.mob.isFlying()) {
+            this.mob.setFlying(true);
+        }
+        this.randomFlying = false;
+        this.reachedDropPos = false;
+        this.phaseTicks = 0;
+    }
+
+    @Override
+    public void tick() {
+
+        if (this.mob.isGrabbing()) {
+            if (!this.reachedDropPos) {
+                Vec3 pos = this.findFlightPos(this.mob).add(0, 10, 0);
+                this.mob.getNavigation().moveTo(pos.x, pos.y, pos.z, 1.2f);
+                this.reachedDropPos = true;
+            } else if (this.mob.getNavigation().isDone()) {
+                this.mob.releaseGrab();
+                if (!this.randomFlying) this.randomFlying = true;
+            }
+        } else {
+            LivingEntity livingentity = this.mob.getTarget();
+            if (livingentity != null) {
+                this.attackReach = this.mob.getAttackReachSqr(livingentity);
+                this.dist = this.mob.distanceToSqr(livingentity);
+                this.tickPath(livingentity);
+                if (!this.randomFlying && this.mob.getAnimState() == 0) {
+                    if (this.mob.canShoot(livingentity, attackReach, dist)) {
+                        this.mob.setAnimState(2);
+                        this.phaseTicks++;
+                    } else if (this.mob.canUseAttack(livingentity, attackReach, dist)) {
+                        if (this.mob.getRandom().nextInt(4) == 0) {
+                            this.mob.setAnimState(3);
+                        } else {
+                            this.mob.setAttacking();
+                        }
+                        this.phaseTicks++;
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean canUse() {
+        return !this.mob.isBaby() && super.canUse();
+    }
+
+
+}

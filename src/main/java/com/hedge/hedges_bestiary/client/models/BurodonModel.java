@@ -5,6 +5,8 @@ import com.hedge.hedges_bestiary.client.animations.GenericPosesAnimation;
 import com.hedge.hedges_bestiary.client.animations.BurodonAnimation;
 import com.hedge.hedges_bestiary.client.layer.EntityLayers;
 import com.hedge.hedges_bestiary.entity.living.BurodonEntity;
+import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
+import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -12,6 +14,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 
 public class BurodonModel extends HBModel<BurodonEntity> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
@@ -148,7 +151,6 @@ public class BurodonModel extends HBModel<BurodonEntity> {
 		this.animateSmooth(entity.yawnAnimationState, BurodonAnimation.YAWN, ageInTicks, 1f);
 		this.animateSmooth(entity.sighAnimationState, BurodonAnimation.SIGH, ageInTicks, 1f);
 		this.animateSmooth(entity.tailFlickAnimationState, BurodonAnimation.TAIL_FLICK, ageInTicks, 1f);
-
 
 	}
 

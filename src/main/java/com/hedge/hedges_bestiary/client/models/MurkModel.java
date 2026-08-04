@@ -176,8 +176,8 @@ public class MurkModel extends HBModel<MurkEntity> {
 
 
 		} else {
-			this.animateWalk(MurkBasicsAnimation.WALK, limbSwing, limbSwingAmount, 1.8f, 2.5f);
-			this.animate(entity.idleAnimationState, MurkBasicsAnimation.IDLE, ageInTicks, 0.5f);
+			this.animateWalk(MurkBasicsAnimation.WALK, limbSwing, limbSwingAmount, 1.5f, 2.5f);
+			this.animate(entity.idleAnimationState, MurkBasicsAnimation.IDLE, ageInTicks, 0.33f);
 			this.animate(entity.roarAnimationState, MurkAttacksAnimation.ROAR_LAND, ageInTicks, 1f);
 
 			this.animate(entity.multiBiteAnimationState, entity.swingingLeft() ? MurkAttacksAnimation.MULTIBITE_LEFT_LAND : MurkAttacksAnimation.MULTIBITE_RIGHT_LAND, ageInTicks, 1);
