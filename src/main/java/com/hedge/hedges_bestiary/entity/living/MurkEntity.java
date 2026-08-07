@@ -79,8 +79,8 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     public MurkEntity(EntityType<? extends MurkEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        this.lookControl = new ATMSwimLookControl<>(this, 30, 90);
-        this.moveControl = new ATMSwimMoveControl<>(this, 45, 0.4f, 1.0f, 90);
+        this.lookControl = new ATMSwimLookControl<>(this, 45, 90);
+        this.moveControl = new ATMSwimMoveControl<>(this, 999, 0.4f, 1.0f, 15);
 
         this.setPathfindingMalus(BlockPathTypes.WATER, 0.0f);
         this.setPathfindingMalus(BlockPathTypes.WATER_BORDER, 0.0f);
@@ -132,10 +132,10 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     protected void registerGoals() {
         int i = 0;
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this, false));
-        this.goalSelector.addGoal(i++, new MurkAttackGoal(this));
         this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2, 1.6, 7.0f, 4.0f));
+        this.goalSelector.addGoal(i++, new MurkAttackGoal(this));
         this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
-        this.goalSelector.addGoal(i++, new NapGoal(this, NapGoal.SleepType.CATHERMAL, false));
+        this.goalSelector.addGoal(i++, new NapGoal(this, false));
         this.goalSelector.addGoal(i++, new CustomSwimGoal(this, 1.0, 10, 4, 7, true));
         this.goalSelector.addGoal(i++, new RandomStrollGoal(this, 1.0) {
             @Override
@@ -192,6 +192,8 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     }
 
+
+
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
         return new HBAmphibiousPathNavigator(this, pLevel);
@@ -201,6 +203,13 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     public void tick() {
         super.tick();
         this.yBodyRot = Mth.approachDegrees(this.yBodyRotO, yBodyRot, 10);
+        final boolean landNav = this.navigation instanceof MMPathNavigatorGround;
+        if (this.isInWaterOrBubble() && landNav) {
+            this.switchNav(true);
+        }
+        if (!this.isInWaterOrBubble() && !landNav) {
+            this.switchNav(false);
+        }
         if (this.level().isClientSide()) {
             this.setUpAnimStates();
             if (this.isCharged()) {
@@ -210,9 +219,6 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
             }
             this.tickTrailYaw();
         } else {
-            if (this.isInWaterOrBubble()) {
-                if (this.navigation instanceof MMPathNavigatorGround) this.switchNav(true);
-            } else if (this.navigation instanceof HBAmphibiousPathNavigator) this.switchNav(false);
             this.attackCD = Math.max(this.attackCD - 1, 0);
             this.projCD = Math.max(this.projCD - 1, 0);
             this.multiBiteCD = Math.max(this.multiBiteCD - 1, 0);
@@ -232,7 +238,10 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                 this.animTicks++;
                 switch (this.getAnimState()) {
                     case 1 -> {
-                        if (this.animTicks == 10) {
+                        if (this.animTicks == 5) {
+                            this.turnType = TurnType.WHOLE_BODY;
+                        }
+                        else if (this.animTicks == 10) {
                             List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, this.getLookAngle().scale(2.2), 1.8, 1.5, 1.8, 3);
                             for (LivingEntity entity : hit) {
                                 this.doHurtTarget(entity);
@@ -244,7 +253,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                     case 2 -> {
                         this.getNavigation().stop();
                         if (this.animTicks < 10 && target != null) {
-                            this.lookAt(target, 30f, 30f);
+                       //     this.lookAt(target, 30f, 30f);
                             this.getLookControl().setLookAt(target, 30f, 30f);
                         }
                         else if (this.animTicks >= 16 && this.animTicks <= 24 && this.animTicks % 2 == 0) {
@@ -267,7 +276,6 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                         this.getNavigation().stop();
                         if (this.animTicks % 5 == 0 && this.animTicks < 18) {
                             if (target != null) {
-                                this.lookAt(target, 15f, 30f);
                                 this.getLookControl().setLookAt(target, 15f, 30f);
                             }
                             this.addDeltaMovement(EntityHelpers.bodyAngle(this).scale(this.isInFluidType() ? 0.1 : 0.25));
@@ -276,6 +284,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                             this.multiBiteCD = 120;
                         } else {
                             switch (this.animTicks) {
+                                case 18 -> this.turnType = TurnType.LOCK;
                                 case 19, 36, 54 -> {
                                     this.powerBite();
                                     this.addDeltaMovement(EntityHelpers.bodyAngle(this).scale(0.4));
@@ -301,10 +310,11 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                     case 5 -> {
                         this.getNavigation().stop();
                         if (this.animTicks < 15 && target != null) {
-                            this.lookAt(target, 30f, 30f);
+                //            this.lookAt(target, 30f, 30f);
                             this.getLookControl().setLookAt(target, 30f, 30f);
 
                         } else if (this.animTicks == 20) {
+                            this.turnType = TurnType.LOCK;
                             Vec3 v = EntityHelpers.bodyAngle(this);
                             this.addDeltaMovement(v.scale(0.8));
                             if (this.isCharged()) {
@@ -312,7 +322,9 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                             }
                             List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, v, 3, 3, 3, 8);
                             for (LivingEntity entity : hit) {
-                                AttackHelpers.betterHurt(this, entity, 1.2f, 1.4f);
+                                if (!AttackHelpers.blockBreak(this, entity)) {
+                                    AttackHelpers.betterHurt(this, entity, 1.2f, 1.4f);
+                                }
                             }
                         } else if (this.animTicks >= 44) {
                             this.resetAnimState();
@@ -519,14 +531,17 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         return this.turnType;
     }
 
-
+    @Override
+    public SleepType getSleepType() {
+        return SleepType.CATHERMAL;
+    }
 
     private void switchNav(boolean inWater) {
         if (inWater) {
-            this.moveControl = new ATMSwimMoveControl<>(this, 90, 0.4f, 1.0f, 90);
-            this.createNavigation(this.level());
+            this.moveControl = new ATMSwimMoveControl<>(this, 999, 0.4f, 1.0f, 15);
+            this.navigation = this.createNavigation(this.level());
         } else {
-            this.moveControl = new ATMMoveControl<>(this, 90);
+            this.moveControl = new ATMMoveControl<>(this, 45);
             this.navigation = new MMPathNavigatorGround(this, this.level());
 
         }

@@ -1,0 +1,13 @@
+{
+  "type": "hedges_bestiary:dawn_dove_nest",
+  "cannot_spawn_in_liquid": true,
+  "biomes": "minecraft:savanna",
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin",
+  "project_start_to_heightmap": "MOTION_BLOCKING_NO_LEAVES",
+  "liquid_settings": "ignore_waterlogging",
+  "start_height": {
+    "absolute": 0
+  },
+  "spawn_overrides": {}
+}

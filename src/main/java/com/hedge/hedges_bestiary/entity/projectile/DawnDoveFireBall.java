@@ -25,7 +25,7 @@ public class DawnDoveFireBall extends GenericProjectile {
     protected void onHitEntity(EntityHitResult hit) {
         super.onHitEntity(hit);
         Entity entity = hit.getEntity();
-        if (this.getOwner() != null && this.getOwner().isAlliedTo(entity))  {
+        if ((this.getOwner() != null && this.getOwner().isAlliedTo(entity)) || entity == this.getOwner())  {
             return;
         }
         entity.setRemainingFireTicks(60);
@@ -42,6 +42,7 @@ public class DawnDoveFireBall extends GenericProjectile {
         this.explode();
         this.discard();
     }
+
 
     @Override
     protected void onMaxAge() {

@@ -27,7 +27,7 @@ public class DawnDoveModel extends HBModel<DawnDoveEntity> {
 	private final ModelPart leftwing2;
 	private final ModelPart rightwing;
 	private final ModelPart rightwing2;
-	private final ModelPart leftleg;
+	public final ModelPart leftleg;
 	private final ModelPart rightleg;
 
 	public DawnDoveModel(ModelPart root) {
@@ -46,17 +46,22 @@ public class DawnDoveModel extends HBModel<DawnDoveEntity> {
 		this.rightwing2 = this.rightwing.getChild("rightwing2");
 		this.leftleg = this.flycontrol.getChild("leftleg");
 		this.rightleg = this.flycontrol.getChild("rightleg");
+
 	}
 
 	public static LayerDefinition createBodyLayer() {
 		MeshDefinition meshdefinition = new MeshDefinition();
 		PartDefinition partdefinition = meshdefinition.getRoot();
 
-		PartDefinition root = partdefinition.addOrReplaceChild("root", CubeListBuilder.create(), PartPose.offset(0.0F, -16.0F, 0.0F));
+		PartDefinition root = partdefinition.addOrReplaceChild("root", CubeListBuilder.create(), PartPose.offset(0.0F, -3.0F, 0.0F));
 
-		PartDefinition flycontrol = root.addOrReplaceChild("flycontrol", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
+		PartDefinition flycontrol = root.addOrReplaceChild("flycontrol", CubeListBuilder.create(), PartPose.offset(0.0F, -13.0F, 0.0F));
 
 		PartDefinition body = flycontrol.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-12.5F, -28.0F, -23.0F, 25.0F, 28.0F, 33.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 28.0F, 7.0F));
+
+		PartDefinition spikes_r1 = body.addOrReplaceChild("spikes_r1", CubeListBuilder.create().texOffs(131, 173).mirror().addBox(0.0F, -6.0F, -13.0F, 0.0F, 6.0F, 13.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offsetAndRotation(-4.5F, -28.0F, 4.0F, 0.0F, 0.0F, -0.6109F));
+
+		PartDefinition spikes_r2 = body.addOrReplaceChild("spikes_r2", CubeListBuilder.create().texOffs(131, 173).addBox(0.0F, -6.0F, -13.0F, 0.0F, 6.0F, 13.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(5.5F, -28.0F, 4.0F, 0.0F, 0.0F, 0.6109F));
 
 		PartDefinition neck = body.addOrReplaceChild("neck", CubeListBuilder.create().texOffs(60, 113).addBox(-6.5F, -6.0F, -12.0F, 13.0F, 18.0F, 12.0F, new CubeDeformation(0.01F)), PartPose.offset(0.0F, -14.0F, -23.0F));
 
@@ -93,14 +98,18 @@ public class DawnDoveModel extends HBModel<DawnDoveEntity> {
 				.texOffs(0, 61).mirror().addBox(-29.0F, 0.0F, -5.0F, 29.0F, 0.0F, 25.0F, new CubeDeformation(0.01F)).mirror(false), PartPose.offset(-26.0F, -1.0F, 0.0F));
 
 		PartDefinition leftleg = flycontrol.addOrReplaceChild("leftleg", CubeListBuilder.create().texOffs(116, 19).addBox(-4.5F, 0.0F, -7.0F, 9.0F, 12.0F, 13.0F, new CubeDeformation(0.0F))
-				.texOffs(60, 105).addBox(0.5F, 9.0F, -11.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
-				.texOffs(60, 105).addBox(-3.5F, 9.0F, -11.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+				.texOffs(62, 107).addBox(0.5F, 9.0F, -11.0F, 3.0F, 3.0F, 2.0F, new CubeDeformation(0.0F))
+				.texOffs(62, 107).addBox(-3.5F, 9.0F, -11.0F, 3.0F, 3.0F, 2.0F, new CubeDeformation(0.0F))
+				.texOffs(53, 111).addBox(-3.5F, 9.0F, -9.0F, 3.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
+				.texOffs(53, 111).addBox(0.5F, 9.0F, -9.0F, 3.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
 				.texOffs(74, 105).addBox(-1.5F, 10.0F, 6.0F, 3.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(6.0F, 28.0F, 7.0F));
 
 		PartDefinition rightleg = flycontrol.addOrReplaceChild("rightleg", CubeListBuilder.create().texOffs(116, 19).mirror().addBox(-4.5F, 0.0F, -7.0F, 9.0F, 12.0F, 13.0F, new CubeDeformation(0.0F)).mirror(false)
-				.texOffs(60, 105).mirror().addBox(-3.5F, 9.0F, -11.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false)
+				.texOffs(62, 107).mirror().addBox(-3.5F, 9.0F, -11.0F, 3.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)).mirror(false)
+				.texOffs(53, 111).mirror().addBox(-3.5F, 9.0F, -9.0F, 3.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).mirror(false)
+				.texOffs(53, 111).mirror().addBox(0.5F, 9.0F, -9.0F, 3.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).mirror(false)
 				.texOffs(74, 105).mirror().addBox(-1.5F, 10.0F, 6.0F, 3.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)).mirror(false)
-				.texOffs(60, 105).mirror().addBox(0.5F, 9.0F, -11.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-6.0F, 28.0F, 7.0F));
+				.texOffs(62, 107).mirror().addBox(0.5F, 9.0F, -11.0F, 3.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-6.0F, 28.0F, 7.0F));
 
 		return LayerDefinition.create(meshdefinition, 256, 256);
 	}
@@ -136,14 +145,14 @@ public class DawnDoveModel extends HBModel<DawnDoveEntity> {
 
 
 			this.flycontrol.xRot = entity.getFlightPitch(partialTicks) / 57.295776F * flyProgress / 2;
-			this.flycontrol.zRot = entity.getFlightRoll(partialTicks) / 57.295776F * flyProgress / 4;
+			this.flycontrol.zRot = entity.getFlightRoll(partialTicks) / 57.295776F * flyProgress / 3;
 
 		} else {
 			this.animateWalk(DawnDoveAnimation.WALK, limbSwing, limbSwingAmount, 1.5f, 2.5f);
 		}
 		float tailYaw = entity.getTrailYaw(ageInTicks - entity.tickCount);
-		this.tail.yRot += Mth.lerp(0.3F, this.tail.yRot, tailYaw * 0.25F);
-		this.tail2.yRot += Mth.lerp(0.3F, this.tail2.yRot, tailYaw * 0.2F);
+		this.tail.yRot += Mth.lerp(0.3F, this.tail.yRot, tailYaw * 0.27F);
+		this.tail2.yRot += Mth.lerp(0.3F, this.tail2.yRot, tailYaw * 0.23F);
 
 		this.head.yRot += netHeadYaw;
 		this.head.xRot += headPitch;

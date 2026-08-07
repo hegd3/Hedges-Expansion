@@ -208,6 +208,8 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
                         }
                     } else if (this.animTicks >= 45) {
                         this.resetAnimState();
+                    } else {
+                        this.setXRot(Mth.approachDegrees(this.getXRot(), 0, 10));
                     }
                 }
                 case 3 -> {

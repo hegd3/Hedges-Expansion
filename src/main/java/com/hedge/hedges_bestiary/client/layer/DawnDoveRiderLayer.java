@@ -23,8 +23,8 @@ public class DawnDoveRiderLayer extends RenderLayer<DawnDoveEntity, DawnDoveMode
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource bufferIn, int packedLightIn, DawnDoveEntity entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-        float bodyYaw = entity.yBodyRotO + (entity.yBodyRot - entity.yBodyRotO) * partialTicks;
         if (entity.isVehicle()) {
+            float bodyYaw = entity.yBodyRotO + (entity.yBodyRot - entity.yBodyRotO) * partialTicks;
             for (Entity passenger : entity.getPassengers()) {
                 if (passenger == Minecraft.getInstance().player && Minecraft.getInstance().options.getCameraType().isFirstPerson()) {
                     continue;
@@ -34,7 +34,7 @@ public class DawnDoveRiderLayer extends RenderLayer<DawnDoveEntity, DawnDoveMode
                 this.getParentModel().root().translateAndRotate(poseStack);
                 this.getParentModel().flycontrol.translateAndRotate(poseStack);
                 this.getParentModel().body.translateAndRotate(poseStack);
-                poseStack.translate(0, -1.2, entity.getPassengers().indexOf(passenger) == 0 ? -1 : 0.25);
+                poseStack.translate(0, passenger.getBbHeight() / -1.66f, entity.getPassengers().indexOf(passenger) == 0 ? -1 : 0.25f);
                 poseStack.mulPose(Axis.XN.rotationDegrees(180F));
                 poseStack.mulPose(Axis.YN.rotationDegrees(360F - bodyYaw));
 
@@ -42,6 +42,24 @@ public class DawnDoveRiderLayer extends RenderLayer<DawnDoveEntity, DawnDoveMode
                 poseStack.popPose();
                 HedgesBestiary.PROXY.blockRenderingEntity(passenger.getUUID());
             }
+
+        }
+        if (entity.isGrabbing()) {
+            Entity grabbed = entity.getGrabbedEntity();
+            if (grabbed == Minecraft.getInstance().player && Minecraft.getInstance().options.getCameraType().isFirstPerson()) {
+                return;
+            }
+            HedgesBestiary.PROXY.releaseRenderingEntity(grabbed.getUUID());
+            poseStack.pushPose();
+            this.getParentModel().root().translateAndRotate(poseStack);
+            this.getParentModel().flycontrol.translateAndRotate(poseStack);
+            this.getParentModel().leftleg.translateAndRotate(poseStack);
+            poseStack.translate(-0.3f, grabbed.getBbHeight() * 1.41f, entity.getBbWidth() / -6);
+            poseStack.mulPose(Axis.XN.rotationDegrees(180F));
+            //poseStack.mulPose(Axis.YN.rotationDegrees(360F - bodyYaw));
+            renderPassenger(grabbed, 0, 0, 0, 0, partialTicks, poseStack, bufferIn, packedLightIn);
+            poseStack.popPose();
+            HedgesBestiary.PROXY.blockRenderingEntity(grabbed.getUUID());
 
         }
     }

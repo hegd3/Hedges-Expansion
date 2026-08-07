@@ -29,6 +29,7 @@ public abstract class GenericProjectile extends Projectile {
     @Override
     public boolean isAlliedTo(Entity pEntity) {
         if (this.getOwner() != null) {
+            if (pEntity == this.getOwner()) return true;
             return this.getOwner().isAlliedTo(pEntity);
         }
         return super.isAlliedTo(pEntity);

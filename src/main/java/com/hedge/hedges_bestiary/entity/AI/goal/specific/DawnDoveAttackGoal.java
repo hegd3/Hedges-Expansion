@@ -2,6 +2,8 @@ package com.hedge.hedges_bestiary.entity.AI.goal.specific;
 
 import com.hedge.hedges_bestiary.entity.AI.goal.GenericMeleeGoal;
 import com.hedge.hedges_bestiary.entity.living.DawnDoveEntity;
+import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
+import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ClipContext;
@@ -19,22 +21,26 @@ public class DawnDoveAttackGoal extends GenericMeleeGoal<DawnDoveEntity> {
     }
 
     @Override
+    public boolean canUse() {
+        return !this.mob.isBaby() && !this.mob.hasControllingPassenger() && super.canUse();
+    }
+
+    @Override
+    public boolean canContinueToUse() {
+        return !this.mob.hasControllingPassenger() && super.canContinueToUse();
+    }
+
+    @Override
     protected void tickPath(LivingEntity livingentity) {
         if (this.randomFlying) {
             if (this.attackReach * 20 < this.dist) {
-                if (!this.mob.getNavigation().isDone()) {
-                    double dx = this.mob.getX() + Mth.clamp((livingentity.getX() - this.mob.getX()), 8, -8);
-                    double dz = this.mob.getX() + Mth.clamp((livingentity.getX() - this.mob.getX()), 8, -8);
-                    this.mob.lookAt(livingentity, 30.0F, 30.0F);
-                    this.mob.getLookControl().setLookAt(livingentity, 30.0F, 30.0F);
-                    this.mob.getNavigation().moveTo(dx, livingentity.getY() + 2, dz, 1.2);
-                }
-
+                super.tickPath(livingentity);
                 if (this.mob.getAnimState() == 0 && this.mob.canShoot(livingentity, attackReach, dist)) {
+                    this.mob.lookAt(livingentity, 90.0F, 90.0F);
                     this.mob.setAnimState(2);
                 }
             } else {
-                if (this.phaseTicks++ > 100) {
+                if (this.phaseTicks++ > 80) {
                     this.randomFlying = false;
                     this.mob.getNavigation().stop();
                     this.phaseTicks = 0;
@@ -46,7 +52,7 @@ public class DawnDoveAttackGoal extends GenericMeleeGoal<DawnDoveEntity> {
             }
         } else {
             super.tickPath(livingentity);
-            if (this.phaseTicks > 3) {
+            if (this.phaseTicks > 2 && this.attackReach * 20 >= this.dist) {
                 this.randomFlying = true;
                 this.phaseTicks = 0;
             }
@@ -54,7 +60,7 @@ public class DawnDoveAttackGoal extends GenericMeleeGoal<DawnDoveEntity> {
     }
 
     private Vec3 findFlightPos(LivingEntity target) {
-        Vec3 heightAdjusted = target.position().add(mob.getRandom().nextInt(35 * 2) - 35, 10 + mob.getRandom().nextInt(6), mob.getRandom().nextInt(35 * 2) - 35);
+        Vec3 heightAdjusted = target.position().add(mob.getRandom().nextInt(25 * 2) - 25, 10 + mob.getRandom().nextInt(6), mob.getRandom().nextInt(25 * 2) - 25);
         BlockHitResult result = mob.level().clip(new ClipContext(mob.getEyePosition(), heightAdjusted, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mob));
         if (result.getType() == HitResult.Type.MISS) {
             return heightAdjusted;
@@ -70,49 +76,50 @@ public class DawnDoveAttackGoal extends GenericMeleeGoal<DawnDoveEntity> {
         if (!this.mob.isFlying()) {
             this.mob.setFlying(true);
         }
-        this.randomFlying = false;
+        this.randomFlying = true;
         this.reachedDropPos = false;
         this.phaseTicks = 0;
     }
 
+
     @Override
     public void tick() {
 
-        if (this.mob.isGrabbing()) {
+        LivingEntity livingentity = this.mob.getTarget();
+        if (this.mob.isGrabbing() && this.mob.getGrabbedEntity() == livingentity) {
+            phaseTicks++;
+            if (phaseTicks % 20 == 0) {
+                AttackHelpers.betterHurt(this.mob, livingentity, 0.4f);
+            }
             if (!this.reachedDropPos) {
                 Vec3 pos = this.findFlightPos(this.mob).add(0, 10, 0);
                 this.mob.getNavigation().moveTo(pos.x, pos.y, pos.z, 1.2f);
                 this.reachedDropPos = true;
-            } else if (this.mob.getNavigation().isDone()) {
+            } else if (this.mob.getNavigation().isDone() || phaseTicks > 400) {
                 this.mob.releaseGrab();
+                this.phaseTicks = 0;
                 if (!this.randomFlying) this.randomFlying = true;
             }
         } else {
-            LivingEntity livingentity = this.mob.getTarget();
             if (livingentity != null) {
                 this.attackReach = this.mob.getAttackReachSqr(livingentity);
                 this.dist = this.mob.distanceToSqr(livingentity);
                 this.tickPath(livingentity);
                 if (!this.randomFlying && this.mob.getAnimState() == 0) {
                     if (this.mob.canShoot(livingentity, attackReach, dist)) {
+                        this.mob.lookAt(livingentity, 90.0F, 90.0F);
                         this.mob.setAnimState(2);
                         this.phaseTicks++;
+                    } else if (this.mob.canUseClawAttack(livingentity, attackReach, dist)) {
+                        this.mob.setAnimState(3);
+                        this.phaseTicks+=2;
                     } else if (this.mob.canUseAttack(livingentity, attackReach, dist)) {
-                        if (this.mob.getRandom().nextInt(4) == 0) {
-                            this.mob.setAnimState(3);
-                        } else {
-                            this.mob.setAttacking();
-                        }
-                        this.phaseTicks++;
+                        this.mob.setAttacking();
+                        this.phaseTicks+=2;
                     }
                 }
             }
         }
-    }
-
-    @Override
-    public boolean canUse() {
-        return !this.mob.isBaby() && super.canUse();
     }
 
 

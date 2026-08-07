@@ -350,4 +350,39 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
         }
     }
 
+    public SleepType getSleepType() {
+        return SleepType.DIURNAL;
+    }
+
+
+    public enum SleepType {
+        DIURNAL {
+            public boolean canSleep(long dayTime) {
+                return dayTime > 13000 && dayTime < 23992;
+            }
+        },
+        NOCTURNAL {
+            public boolean canSleep(long dayTime) {
+                return dayTime < 13000 || dayTime > 23000;
+            }
+        },
+        CATHERMAL {
+            public boolean canSleep(long dayTime) {
+                return (dayTime < 12000 || dayTime > 18000) && dayTime < 23000 && dayTime > 8000;
+            }
+        },
+        MATUTINAL {
+            public boolean canSleep(long dayTime) {
+                return dayTime < 23000 && dayTime > 1000;
+            }
+        },
+        VESPERTINE {
+            public boolean canSleep(long dayTime) {
+                return dayTime < 12000 || dayTime > 18000;
+            }
+        };
+
+        public abstract boolean canSleep(long dayTime);
+    }
+
 }

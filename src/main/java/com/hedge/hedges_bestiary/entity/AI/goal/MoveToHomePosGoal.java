@@ -72,6 +72,9 @@ public class MoveToHomePosGoal extends Goal {
 
     @Override
     public void stop() {
+        if (this.mob.getSleepType().canSleep(mob.level().getDayTime() % 24000)) {
+            this.mob.setNapping(true);
+        }
         this.closeToHomeTryTicks = 100 + this.mob.getRandom().nextInt(100);
     }
 

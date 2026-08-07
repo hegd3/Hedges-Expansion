@@ -13,8 +13,6 @@ import javax.annotation.Nullable;
 public class MurkAttackGoal extends GenericMeleeGoal<MurkEntity> {
 
     private boolean shouldPathAway;
-    @Nullable
-    protected Path path;
     private int pathTicks;
 
 
@@ -47,10 +45,10 @@ public class MurkAttackGoal extends GenericMeleeGoal<MurkEntity> {
                 if (!this.shouldPathAway) {
                     Vec3 vec3 = DefaultRandomPos.getPosAway(this.mob, 6, 6, livingentity.position());
                     if (vec3 != null) {
-                        this.path = this.mob.getNavigation().createPath(vec3.x, vec3.y, vec3.z, 0);
-                        if (this.path != null) {
+                        Path path = this.mob.getNavigation().createPath(vec3.x, vec3.y, vec3.z, 0);
+                        if (path != null) {
                             this.shouldPathAway = true;
-                            this.mob.getNavigation().moveTo(this.path, this.getSpeedModifier());
+                            this.mob.getNavigation().moveTo(path, this.getSpeedModifier());
                         }
 
                     }
@@ -59,7 +57,7 @@ public class MurkAttackGoal extends GenericMeleeGoal<MurkEntity> {
             } else if (this.attackReach < this.dist) {
                 super.tickPath(livingentity);
             } else {
-                this.mob.lookAt(livingentity, 30f, 30f);
+                //this.mob.lookAt(livingentity, 30f, 30f);
                 this.mob.getLookControl().setLookAt(livingentity, 30f, 30f);
             }
         }

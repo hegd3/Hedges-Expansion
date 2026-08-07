@@ -33,6 +33,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntity>, EggLayer {
@@ -46,8 +47,8 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
     private ZappetEntity leader;
     private int groupSize = 1;
 
-    private float prevGlowProgress = 0.5f;
-    private float glowProgress = 0.5f;
+    private float prevGlowProgress = 1.0f;
+    private float glowProgress = 1.0f;
     private boolean pulse = false;
 
 
@@ -90,7 +91,7 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         this.goalSelector.addGoal(i++, new FloatGoal(this));
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this, false));
         this.goalSelector.addGoal(i++, new FlyerFollowOwnerGoal(this, 1.2D, 1.6D, 8.0f, 5.0f));
-        this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
+        this.goalSelector.addGoal(i++, new FlyerMoveToHomePosGoal(this, 1.0D, 32, 4d));
         this.goalSelector.addGoal(i++, new FlockingGoal<>(this) {
             @Override
             public boolean canUse() {
@@ -117,7 +118,7 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
 
     @Override
     public boolean isAlliedTo(Entity pEntity) {
-        if (pEntity instanceof ZappetEntity zappet && zappet.getOwnerUUID() == this.getOwnerUUID()) {
+        if (pEntity instanceof ZappetEntity zappet && Objects.equals(zappet.getOwnerUUID(), this.getOwnerUUID())) {
             return true;
         }
         return super.isAlliedTo(pEntity);
@@ -176,7 +177,7 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
                 this.pulse = false;
             }
         } else {
-            if (this.glowProgress > 0.5F) {
+            if (this.glowProgress > 1.0F) {
                 this.glowProgress -= 0.5f;
             } else if (this.pulse) {
                 this.pulse = false;

@@ -8,18 +8,16 @@ import java.util.EnumSet;
 public class NapGoal extends Goal {
 
     private final HBTamableAnimal mob;
-    private final SleepType sleepType;
     private final boolean sleepsInWater;
     private int napCD;
 
     public NapGoal(HBTamableAnimal mob) {
-        this(mob, SleepType.DIURNAL, false);
+        this(mob, false);
     }
 
-    public NapGoal(HBTamableAnimal mob, SleepType sleepType, boolean sleepsInWater) {
+    public NapGoal(HBTamableAnimal mob, boolean sleepsInWater) {
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK, Flag.JUMP));
         this.mob = mob;
-        this.sleepType = sleepType;
         this.sleepsInWater = sleepsInWater;
         this.resetNapCD();
     }
@@ -75,25 +73,11 @@ public class NapGoal extends Goal {
     private boolean canSleep() {
         this.resetNapCD();
         long dayTime = this.mob.level().getDayTime() % 24000;
-        return switch (this.sleepType) {
-            case DIURNAL -> dayTime > 13000 && dayTime < 23992;
-            case NOCTURNAL -> dayTime < 13000 || dayTime > 23000;
-            case CATHERMAL -> (dayTime < 12000 || dayTime > 18000) && dayTime < 23000 && dayTime > 8000; // active "randomly"
-            case MATUTINAL -> dayTime < 23000 && dayTime > 1000; // active at sunrise
-            case VESPERTINE -> dayTime < 12000 || dayTime > 18000; //active sunset
-        };
+        return this.mob.getSleepType().canSleep(dayTime);
     }
 
     private void resetNapCD() {
         this.napCD = 60 + this.mob.getRandom().nextInt(120);
     }
 
-    public enum SleepType {
-        DIURNAL,
-        NOCTURNAL,
-        CATHERMAL,
-        MATUTINAL,
-        VESPERTINE
-
-    }
 }

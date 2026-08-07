@@ -10,6 +10,8 @@ import com.hedge.hedges_bestiary.message.EntityKeyMessage;
 import com.hedge.hedges_bestiary.message.OpenTamableScreenMessage;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.registry.HBParticles;
+import com.hedge.hedges_bestiary.registry.HBStructurePieces;
+import com.hedge.hedges_bestiary.registry.HBStructures;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -53,6 +55,8 @@ public class HedgesBestiary
         HBBlocks.registerBlocks(modEventBus);
         HBParticles.register(modEventBus);
         HBSounds.register(modEventBus);
+        HBStructures.register(modEventBus);
+        HBStructurePieces.register(modEventBus);
         HBCreativeTab.register(modEventBus);
         PROXY.init();
 

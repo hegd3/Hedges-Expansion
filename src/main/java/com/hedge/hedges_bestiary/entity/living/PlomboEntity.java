@@ -112,12 +112,12 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
         int i = 0;
         this.goalSelector.addGoal(i++, new FloatGoal(this));
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this));
+        this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.1D, 1.3D, 7.0f, 4.0f));
         this.goalSelector.addGoal(i++, new AvoidTargetWhenLowGoal(this, 1.3f, 20, 30, 20, 3));
         this.goalSelector.addGoal(i++, new PlomboAttackGoal(this));
-        this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.1D, 1.3D, 7.0f, 4.0f));
         this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this, 1.2d, 16, 4d));
         this.goalSelector.addGoal(i++, new PlomboScratchLeavesGoal(this));
-        this.goalSelector.addGoal(i++, new NapGoal(this, NapGoal.SleepType.CATHERMAL, false));
+        this.goalSelector.addGoal(i++, new NapGoal(this, false));
         this.goalSelector.addGoal(i++, new RandomlySitGoal(this, 200, 400));
         this.goalSelector.addGoal(i++, new WaterAvoidingRandomStrollGoal(this, 1));
         this.goalSelector.addGoal(i++, new LookAtPlayerGoal(this, LivingEntity.class, 8));
@@ -168,7 +168,6 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
                 case 2 -> {
                     this.getNavigation().stop();
                     if (this.animTicks < 10 && target != null) {
-                        this.lookAt(target, 15f, 30f);
                         this.getLookControl().setLookAt(target, 15f, 30f);
                     } else if (this.animTicks == 15 || this.animTicks == 24 || this.animTicks == 44) {
                         this.addDeltaMovement(EntityHelpers.bodyAngle(this).scale(0.4));
@@ -313,6 +312,11 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
     @Override
     public void setTurnType(TurnType turnType) {
         this.turnType = turnType;
+    }
+
+    @Override
+    public SleepType getSleepType() {
+        return SleepType.CATHERMAL;
     }
 
     @Override

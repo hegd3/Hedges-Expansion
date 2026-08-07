@@ -99,6 +99,7 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
                     if (!player.getAbilities().instabuild) {
                         itemStack.shrink(1);
                     }
+
                     this.level().broadcastEntityEvent(this, (byte) 7);
                     this.tame(player);
                     this.heal(this.getMaxHealth());
@@ -116,8 +117,8 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
         this.goalSelector.addGoal(i++, new FloatGoal(this));
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this));
         this.goalSelector.addGoal(i++, new AvoidTargetWhenLowGoal(this, 1.6D, 20, 15, 16, 7));
-        this.goalSelector.addGoal(i++, new BurodonAttackGoal(this));
         this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2D, 1.6D, 7.0f, 4.0f));
+        this.goalSelector.addGoal(i++, new BurodonAttackGoal(this));
         this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
         this.goalSelector.addGoal(i++, new NapGoal(this));
         this.goalSelector.addGoal(i++, new RandomlySitGoal(this));
@@ -202,10 +203,8 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
                     if (this.getAnimTicks() < 5) {
                         if (target != null) {
                             if (this.jumpAway && jumpVector != null) {
-                                this.lookAt(EntityAnchorArgument.Anchor.EYES, jumpVector);
                                 this.getLookControl().setLookAt(jumpVector);
                             } else {
-                                this.lookAt(target, 30f, 30f);
                                 this.getLookControl().setLookAt(target, 30f, 30f);
                             }
                         }

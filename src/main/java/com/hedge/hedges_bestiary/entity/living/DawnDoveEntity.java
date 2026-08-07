@@ -9,24 +9,28 @@ import com.hedge.hedges_bestiary.entity.AI.navigation.MMPathNavigatorGround;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.TargetMonstersGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.TargetPlayersGoal;
+import com.hedge.hedges_bestiary.entity.AI.targeting.TargetWhenAwakeGoal;
 import com.hedge.hedges_bestiary.entity.projectile.DawnDoveFireBall;
 import com.hedge.hedges_bestiary.entity.types.AttackStateMob;
 import com.hedge.hedges_bestiary.entity.types.EggLayer;
 import com.hedge.hedges_bestiary.entity.types.TamableFlyer;
 import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
 import com.hedge.hedges_bestiary.entity.util.MathHelpers;
+import com.hedge.hedges_bestiary.items.TreatItem;
 import com.hedge.hedges_bestiary.message.EntityKeyMessage;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.registry.HBKeyMappings;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
-import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -39,16 +43,17 @@ import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+
 
 public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStateMob {
 
@@ -70,19 +75,19 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     private int attackCD;
     private int shootCD;
 
-    private Entity grabbedEntity = null;
-
+    private int tameAttempts = 3;
+    private Entity grabbedEntity;
     public DawnDoveEntity(EntityType<? extends DawnDoveEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
     }
 
     public static AttributeSupplier.Builder bakeAttributes(){
         return Animal.createLivingAttributes()
-                .add(Attributes.MAX_HEALTH, 60.0D)
+                .add(Attributes.MAX_HEALTH, 80.0D)
                 .add(Attributes.ATTACK_DAMAGE, 6.0D)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.2D)
-                .add(Attributes.KNOCKBACK_RESISTANCE, 0.4)
-                .add(Attributes.FOLLOW_RANGE, 35F)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 0.6)
+                .add(Attributes.FOLLOW_RANGE, 60F)
                 .add(Attributes.MOVEMENT_SPEED, 0.15F);
     }
 
@@ -91,10 +96,10 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         int i = 0;
         this.goalSelector.addGoal(i, new FloatGoal(this));
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this, false));
-        this.goalSelector.addGoal(i++, new DawnDoveAttackGoal(this));
         this.goalSelector.addGoal(i++, new FlyerFollowOwnerGoal(this, 1.2D, 1.6D, 8.0f, 8.0f));
-        this.goalSelector.addGoal(i++, new FlyerMoveToHomePosGoal(this, 1.0D, 32, 4d));
-        this.goalSelector.addGoal(i++, new NapGoal(this, NapGoal.SleepType.MATUTINAL, false));
+        this.goalSelector.addGoal(i++, new DawnDoveAttackGoal(this));
+        this.goalSelector.addGoal(i++, new FlyerMoveToHomePosGoal(this, 1.0D, 32, 2d));
+        this.goalSelector.addGoal(i++, new NapGoal(this, false));
         this.goalSelector.addGoal(i++, new RandomlySitGoal(this));
         this.goalSelector.addGoal(i++, new SemiFlyerFlyingGoal<>(this, 1.0f, 45, 25, 60, 800));
         this.goalSelector.addGoal(i++, new WaterAvoidingRandomStrollGoal(this, 1.0));
@@ -107,7 +112,8 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         this.targetSelector.addGoal(2, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(3, new TargetPlayersGoal(this));
         this.targetSelector.addGoal(4, new TargetMonstersGoal(this));
-
+        this.targetSelector.addGoal(5, new TargetWhenAwakeGoal<>(this, Cow.class,null)
+        );
     }
 
     @Override
@@ -117,11 +123,18 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     }
 
     @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        if (pKey == GRABBED_ENTITY_ID && this.level().isClientSide() && this.getGrabbedEntityID() == -1) {
+            this.grabbedEntity = null;
+        }
+        super.onSyncedDataUpdated(pKey);
+    }
+
+    @Override
     public void travel(Vec3 vec3d) {
 
 
         if (isControlledByLocalInstance() && getControllingPassenger() != null && getControllingPassenger() instanceof Player rider) {
-            boolean flag = this.isFlying();
             float speed = (float) this.getAttributeValue(Attributes.MOVEMENT_SPEED);
 
 
@@ -129,25 +142,28 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
 
                 if (Minecraft.getInstance().options.keyJump.isDown()) {
                     this.setDeltaMovement(this.getDeltaMovement().add(0, 0.03, 0));
-                    if (!flag) {
+                    if (!this.isFlying()) {
                         this.setFlying(true);
+                        HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 3));
                     }
 
-                } else if (Minecraft.getInstance().options.keySprint.isDown() && flag) {
+                } else if (Minecraft.getInstance().options.keySprint.isDown() && this.isFlying()) {
                     this.setDeltaMovement(this.getDeltaMovement().add(0, -0.03, 0));
                 }
 
                 if (this.getAnimState() == 0) {
-                    if (HBKeyMappings.MOUNT_ABILITY_KEY.isDown()) {
+                    if (Minecraft.getInstance().options.keyAttack.isDown()) {
                         HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 4));
-                    } else if (Minecraft.getInstance().options.keyAttack.isDown()) {
-                        HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 3));
+                    } else if (HBKeyMappings.MOUNT_ABILITY_KEY.isDown()) {
+                        HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 5));
+                    } else if (Minecraft.getInstance().options.keyUse.isDown() && this.isFlying()) {
+                        HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 6));
                     }
                 }
 
 
-                this.setSpeed(flag ? speed * 8 : speed);
-            } else if (rider instanceof Player) {
+                this.setSpeed(this.isFlying() ? speed * 8 : speed);
+            } else if (rider instanceof Player && this.getAnimState() != 3) {
                 setDeltaMovement(Vec3.ZERO);
                 return;
             }
@@ -169,11 +185,39 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         this.setXRot(Mth.clamp(pPlayer.getXRot(), -45, 45));
         if (this.isFlying()) {
             this.setDeltaMovement(this.getDeltaMovement().add(0, -0.004, 0));
-            if (this.onGround()) {
+            if (this.onGround() && !this.level().isClientSide()) {
                 this.setFlying(false);
             }
         }
     }
+
+    @Override
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        ItemStack itemStack = player.getItemInHand(hand);
+        InteractionResult type = super.mobInteract(player, hand);
+        if (!this.isTame() && this.grabbedEntity == player) {
+            if (itemStack.getItem() instanceof TreatItem treat && treat.getTier() > 0) {
+                if (!this.level().isClientSide) {
+                    this.releaseGrab();
+                    if (!player.getAbilities().instabuild) {
+                        itemStack.shrink(1);
+                    }
+                    this.tameAttempts--;
+                    if (tameAttempts == 0 && !ForgeEventFactory.onAnimalTame(this, player)) {
+                        this.level().broadcastEntityEvent(this, (byte) 7);
+                        this.tame(player);
+                        this.heal(this.getMaxHealth());
+                    } else {
+                        this.level().broadcastEntityEvent(this, (byte)6);
+                    }
+                }
+                this.playSound(SoundEvents.GENERIC_EAT);
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
+            }
+        }
+        return type;
+    }
+
 
 
 
@@ -274,7 +318,18 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         return super.getDismountLocationForPassenger(pPassenger);
     }
 
-
+    @Override
+    protected void removePassenger(Entity pPassenger) {
+        if (this.getControllingPassenger() == pPassenger) {
+            if (this.isGrabbing()) {
+                this.releaseGrab();
+            }
+            if (this.isOrderedToSit() && this.isFlying()) {
+                this.setFlying(false);
+            }
+        }
+        super.removePassenger(pPassenger);
+    }
 
     @Override
     protected boolean canOwnerMount(Player player) {
@@ -289,13 +344,12 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     @Override
     public void tick() {
         super.tick();
-        this.yBodyRot = Mth.approachDegrees(this.yBodyRotO, yBodyRot, 5);
+        this.yBodyRot = Mth.approachDegrees(this.yBodyRotO, yBodyRot, 8);
+        if (this.getGrabbedEntityID() != -1 && this.grabbedEntity == null) {
+            this.grabbedEntity = this.level().getEntity(this.getGrabbedEntityID());
+        }
         if (this.isGrabbing()) {
-            if (!this.isFlying() && !this.level().isClientSide()) {
-                this.releaseGrab();
-            } else {
-                this.tickGrab();
-            }
+            this.tickGrab();
         }
         if (this.level().isClientSide()) {
             this.setUpAnimStates();
@@ -329,18 +383,32 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
                         }
                     } case 3 -> {
                         if (animTicks == 10) {
-                            this.setDeltaMovement(this.getLookAngle().scale(0.5f));
+                            this.addDeltaMovement(this.getLookAngle().scale(1.2f));
                         } else if (animTicks == 12) {
                             List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, this.getLookAngle().scale(1.2), 2, 2, 2, 5);
-                            for (LivingEntity e : hit) {
-                                if (e == this.getTarget() && this.canGrab(e)) {
-                                    this.grab(e);
-                                } else {
-                                    AttackHelpers.betterHurt(this, e, 1.5f);
+                            if (this.hasControllingPassenger()) {
+                                for (LivingEntity e : hit) {
+                                    if (this.canGrab(e)) {
+                                        this.grab(e);
+                                        break;
+                                    }
+                                }
+                            } else {
+                                for (LivingEntity e : hit) {
+                                    if (e == this.getTarget() && this.canGrab(e)) {
+                                        if (!AttackHelpers.blockBreak(this, e)) {
+                                            this.grab(e);
+                                        }
+                                    } else {
+                                        AttackHelpers.betterHurt(this, e, 1.7f);
+                                    }
                                 }
                             }
                         } else if (animTicks > 35) {
                             this.resetAnimState();
+                            this.clawAttackCD = 60;
+                        } else {
+                            this.setDeltaMovement(this.getDeltaMovement().scale(0.8));
                         }
                     }
                 }
@@ -348,17 +416,12 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         }
     }
 
-    @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
-        if (pKey == GRABBED_ENTITY_ID) {
-            this.grabbedEntity = this.level().getEntity(this.getGrabbedEntityID());
-        }
-        super.onSyncedDataUpdated(pKey);
-    }
+
+
 
     @Override
     public boolean isPushable() {
-        if (this.getAnimState() == 3) {
+        if (this.isGrabbing() || this.getAnimState() == 3) {
             return false;
         }
         return super.isPushable();
@@ -401,16 +464,20 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         this.clawAttackAnimationState.animateWhen(this.getAnimState() == 3, this.tickCount);
     }
 
-    private boolean canGrab(LivingEntity entity) {
-        return entity.getBbHeight() < this.getBbHeight() && entity.getBbWidth() < this.getBbWidth() * 0.75f;
+    public boolean canGrab(Entity entity) {
+        return entity.getBbHeight() < this.getBbHeight() * 1.2f && entity.getBbWidth() < this.getBbWidth() * 0.5f;
     }
 
-    public void grab(LivingEntity entity) {
+    public void grab(Entity entity) {
         this.setGrabbedEntityID(entity.getId());
     }
 
     public boolean isGrabbing() {
-        return this.grabbedEntity != null && this.grabbedEntity.isAlive();
+        return this.grabbedEntity != null;
+    }
+
+    public Entity getGrabbedEntity() {
+        return this.grabbedEntity;
     }
 
     public int getGrabbedEntityID() {
@@ -422,15 +489,16 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     }
 
     private void tickGrab() {
-        this.grabbedEntity.setPos(this.getX(), this.getY() - grabbedEntity.getBbHeight(), this.getZ());
+        this.grabbedEntity.setDeltaMovement(this.getX() - grabbedEntity.getX(), this.getY() - grabbedEntity.getY() - grabbedEntity.getBbHeight(), this.getZ() - grabbedEntity.getZ());
+        //this.grabbedEntity.setPos(this.getX(), this.onGround() ? this.getY() : this.getY() - grabbedEntity.getBbHeight(), this.getZ());
         this.grabbedEntity.fallDistance = 0.0F;
 
     }
 
     public void releaseGrab() {
         this.grabbedEntity.setDeltaMovement(Vec3.ZERO);
-        this.grabbedEntity = null;
         this.setGrabbedEntityID(-1);
+        this.grabbedEntity = null;
     }
 
     @Override
@@ -438,14 +506,8 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
 
     }
 
-    @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
-        if (!this.level().isClientSide()) {
-            this.setHasHome(true);
-            this.setHomePos(this.blockPosition());
-        }
-        return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
-    }
+
+
 
     @Override
     protected void switchNav(boolean flying) {
@@ -471,6 +533,11 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     }
 
     @Override
+    protected void playStepSound(BlockPos pPos, BlockState pState) {
+        if (!this.isFlying()) super.playStepSound(pPos, pState);
+    }
+
+    @Override
     public void setAttacking() {
         this.setAnimState(1);
     }
@@ -485,18 +552,40 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         return this.shootCD == 0 && attackReach <= dist && this.hasLineOfSight(entity);
     }
 
+    public boolean canUseClawAttack(LivingEntity entity, double attackReach, double dist) {
+        return this.clawAttackCD == 0 && attackReach * 2 >= dist && this.hasLineOfSight(entity);
+    }
+
     @Override
     public double getAttackReachSqr(LivingEntity entity) {
         return this.getBbWidth() * 2 * this.getBbWidth() * 2 + entity.getBbWidth();
     }
 
     @Override
+    public SleepType getSleepType() {
+        return SleepType.MATUTINAL;
+    }
+
+    @Override
     public void onKeyPacket(Entity keyPresser, int type) {
-        if (type == 3 && this.attackCD == 0) {
-            this.setAnimState(1);
-        } else if (type == 4 && this.shootCD == 0) {
-            this.setAnimState(2);
+        switch (type) {
+            case 3 -> this.setFlying(true);
+            case 4 -> {
+                if (attackCD == 0) this.setAnimState(1);
+            }
+            case 5 -> {
+                if (shootCD == 0) this.setAnimState(2);
+            }
+            case 6 -> {
+                if (this.attackCD == 0) {
+                    if (!this.isGrabbing()) this.setAnimState(3);
+                    else {
+                        this.releaseGrab();
+                        this.attackCD = 10;
+                    }
+                }
+            }
+            default -> super.onKeyPacket(keyPresser, type);
         }
-        super.onKeyPacket(keyPresser, type);
     }
 }
