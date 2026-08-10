@@ -38,7 +38,8 @@ import java.util.stream.Stream;
 
 public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntity>, EggLayer {
 
-    public static final EntityDataAccessor<Boolean> FLYING = SynchedEntityData.defineId(ZappetEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> HAS_EGG = SynchedEntityData.defineId(ZappetEntity.class, EntityDataSerializers.BOOLEAN);
+
     public final AnimationState idleAnimationState = new AnimationState();
     public final SmoothAnimationState shootAnimationState = new SmoothAnimationState();
     public final SmoothAnimationState callAnimationState = new SmoothAnimationState();
@@ -82,7 +83,7 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(FLYING, false);
+        this.entityData.define(HAS_EGG, false);
     }
 
     @Override
@@ -91,7 +92,6 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         this.goalSelector.addGoal(i++, new FloatGoal(this));
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this, false));
         this.goalSelector.addGoal(i++, new FlyerFollowOwnerGoal(this, 1.2D, 1.6D, 8.0f, 5.0f));
-        this.goalSelector.addGoal(i++, new FlyerMoveToHomePosGoal(this, 1.0D, 32, 4d));
         this.goalSelector.addGoal(i++, new FlockingGoal<>(this) {
             @Override
             public boolean canUse() {
@@ -103,6 +103,8 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
                 return !this.mob.isTame() && super.canContinueToUse();
             }
         });
+        this.goalSelector.addGoal(i++, new FlyerMoveToHomePosGoal(this, 1.0D, 32, 2d));
+        this.goalSelector.addGoal(i++, new RandomlySitGoal(this));
         this.goalSelector.addGoal(i++, new SemiFlyerFlyingGoal<>(this, 1.0f, 25, 10, 20, 1600));
         this.goalSelector.addGoal(i++, new RandomStrollGoal(this, 1.0));
         this.goalSelector.addGoal(i++, new LookAtPlayerGoal(this, LivingEntity.class, 10));
@@ -339,5 +341,25 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
     @Override
     public BlockState getEgg() {
         return HBBlocks.ZAPPET_EGG.get().defaultBlockState();
+    }
+
+    @Override
+    public boolean hasEgg() {
+        return this.entityData.get(HAS_EGG);
+    }
+
+    @Override
+    public void setHasEgg(boolean b) {
+        this.entityData.set(HAS_EGG, b);
+    }
+
+    @Override
+    public boolean laysMultipleEggs() {
+        return true;
+    }
+
+    @Override
+    public SleepType getSleepType() {
+        return SleepType.RESTLESS;
     }
 }

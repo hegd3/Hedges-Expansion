@@ -1,0 +1,13 @@
+{
+  "__comment": "all entities naturally targeted by the dawn dove.",
+  "values": [
+    "minecraft:cow",
+    "minecraft:sheep",
+    "minecraft:pig",
+    "minecraft:mule",
+    "minecraft:horse",
+    "minecraft:donkey",
+    "minecraft:villager",
+    "hedges_bestiary:zappet"
+  ]
+}

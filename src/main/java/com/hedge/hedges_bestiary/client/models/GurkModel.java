@@ -104,8 +104,10 @@ public class GurkModel extends HBModel<GurkEntity> {
 			this.animateWalk(GurkAnimation.WALK, limbSwing, limbSwingAmount, 2f, 2.5f);
 			this.animate(entity.idleAnimationState, GurkAnimation.IDLE, ageInTicks, 0.5f);
 		}
-		this.animateSmooth(entity.sitAnimationState, entity.left() ? GurkAnimation.LAY_DOWN_LEFT : GurkAnimation.LAY_DOWN_RIGHT, ageInTicks, 1f);
+		this.animateSmooth(entity.sitAnimationState, GurkAnimation.SIT, ageInTicks, 1f);
+		this.animateSmooth(entity.napAnimationState, GurkAnimation.SLEEP, ageInTicks, 1f);
 		this.animateSmooth(entity.danceAnimationState, GurkAnimation.DANCE, ageInTicks, 1f);
+		this.animateSmooth(entity.standAnimationState, GurkAnimation.STAND_UP, ageInTicks, 1f);
 
 	}
 }

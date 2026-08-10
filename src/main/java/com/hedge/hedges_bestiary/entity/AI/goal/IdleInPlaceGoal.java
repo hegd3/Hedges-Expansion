@@ -19,7 +19,22 @@ public class IdleInPlaceGoal<E extends PathfinderMob & IdleAnimMob> extends Idle
 
     @Override
     public void start() {
+        this.mob.playStaticIdle();
         this.resetCD();
         this.mob.getNavigation().stop();
+    }
+
+    @Override
+    public boolean canUse() {
+        this.animCD = Math.max(this.animCD - 1, 0);
+        if (this.animCD == 0) {
+            return this.mob.canPlayStaticIdle();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean canContinueToUse() {
+        return this.mob.isStaticIdling();
     }
 }

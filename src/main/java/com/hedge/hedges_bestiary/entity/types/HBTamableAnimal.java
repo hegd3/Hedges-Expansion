@@ -8,19 +8,24 @@ import com.hedge.hedges_bestiary.message.OpenTamableScreenMessage;
 import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
@@ -78,7 +83,13 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
 
     public InteractionResult interactTameCommands(Player player, @NotNull InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
-        if (this.isTame() && this.isOwnedBy(player) && !this.isFood(itemstack)) {
+        if (!this.isTame() && player.isCreative() && !this.level().isClientSide() && itemstack.isEmpty()) {
+            this.level().broadcastEntityEvent(this, (byte) 7);
+            this.tame(player);
+            this.heal(this.getMaxHealth());
+            return InteractionResult.SUCCESS;
+        }
+        else if (this.isOwnedBy(player) && !this.isFood(itemstack)) {
             if (this.canOwnerCommand(player)) {
                 this.openCustomInventoryScreen(player);
                 return InteractionResult.SUCCESS;
@@ -117,9 +128,13 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     }
 
     protected void tickNap() {
-        if (this.isNapping() && this.level().isClientSide() && this.tickCount % 30 == 0) {
-            Vec3 rand = this.getEyePosition().add(EntityHelpers.getRandomVec3(0.6));
-            this.level().addParticle(HBParticles.SLEEP.get(), rand.x, rand.y + this.getBbHeight() / 2, rand.z, rand.x, 0.1, rand.z);
+        if (this.isNapping()) {
+            if (this.level().isClientSide() && this.tickCount % 30 == 0) {
+                Vec3 rand = this.getEyePosition().add(EntityHelpers.getRandomVec3(0.6));
+                this.level().addParticle(HBParticles.SLEEP.get(), rand.x, rand.y + this.getBbHeight() / 2, rand.z, rand.x, 0.1, rand.z);
+            } else if (this.getNavigation().isInProgress()) {
+                this.setNapping(false);
+            }
         }
     }
 
@@ -255,6 +270,11 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
         }
     }
 
+    @Override
+    public boolean canMate(Animal otherAnimal) {
+        return this.isTame() && super.canMate(otherAnimal);
+    }
+
     @Nullable
     public BlockPos getJukebox() {
         return this.jukebox;
@@ -331,6 +351,45 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     }
 
     @Override
+    public boolean canPlayStaticIdle() {
+        return this.canPlayIdle() && this.onGround();
+    }
+
+    @Override
+    public void playStaticIdle() {
+        this.setAnimState(1);
+    }
+
+    @Override
+    public boolean isStaticIdling() {
+        return this.getAnimState() == 1;
+    }
+
+    @Override
+    public void handleEntityEvent(byte pId) {
+
+        if (pId == 77) {
+            float radius = this.getBbWidth() * 0.55F;
+            float particleCount = (5 + random.nextInt(5)) * radius;
+            for (int i1 = 0; i1 < particleCount; i1++) {
+                double motionX = (getRandom().nextFloat() - 0.5F) * 0.7D;
+                double motionY = getRandom().nextFloat() * 0.7D + 0.8F;
+                double motionZ = (getRandom().nextFloat() - 0.5F) * 0.7D;
+                float angle = (0.01745329251F * (this.yBodyRot + (i1 / particleCount) * 360F));
+                double extraX = radius * Mth.sin((float) (Math.PI + angle));
+                double extraZ = radius * Mth.cos(angle);
+                BlockState groundState = this.level().getBlockState(this.blockPosition().below());
+                if (groundState.isSolid()) {
+                    if (level().isClientSide) {
+                        level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, groundState), true, this.getX() + extraX, this.getY(), this.getZ() + extraZ, motionX, motionY, motionZ);
+                    }
+                }
+            }
+        }
+        super.handleEntityEvent(pId);
+    }
+
+    @Override
     public void onKeyPacket(Entity keyPresser, int type) {
 
         switch (type) {
@@ -380,6 +439,12 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
             public boolean canSleep(long dayTime) {
                 return dayTime < 12000 || dayTime > 18000;
             }
+        },
+        RESTLESS {
+            public boolean canSleep(long dayTime) {
+                return false;
+            }
+
         };
 
         public abstract boolean canSleep(long dayTime);

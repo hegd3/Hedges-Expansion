@@ -26,7 +26,7 @@ public class HBBlocks {
 
     public static final RegistryObject<Block> DAWN_DOVE_EGG = registerBlock("dawn_dove_egg",
             () -> new EggBlock(BlockBehaviour.Properties.copy(Blocks.SNIFFER_EGG).randomTicks(),
-                    HBEntities.DAWN_DOVE, BlockTags.TERRACOTTA, EggBlock.LARGE_EGG));
+                    HBEntities.DAWN_DOVE, BlockTags.LOGS, EggBlock.LARGE_EGG));
 
     public static final RegistryObject<Block> GURK_EGG = registerBlock("gurk_egg",
             () -> new MultiEggBlock(BlockBehaviour.Properties.copy(Blocks.TURTLE_EGG).randomTicks(),

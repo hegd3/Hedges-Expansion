@@ -1,9 +1,11 @@
 package com.hedge.hedges_bestiary.worldgen.structure;
 
+import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.registry.HBStructures;
 import com.hedge.hedges_bestiary.worldgen.structure.piece.DawnDoveNestPiece;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePieceAccessor;
@@ -15,9 +17,15 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlac
 import java.util.Optional;
 
 public class DawnDoveNestStructure extends Structure {
+
+    private static final ResourceLocation NBT_0 = ResourceLocation.fromNamespaceAndPath(HedgesBestiary.MODID, "dawn_dove_nest_0");
+    private static final ResourceLocation NBT_1 = ResourceLocation.fromNamespaceAndPath(HedgesBestiary.MODID, "dawn_dove_nest_1");
+
+
+
     public static final Codec<DawnDoveNestStructure> CODEC = simpleCodec(DawnDoveNestStructure::new);
 
-    protected DawnDoveNestStructure(StructureSettings pSettings) {
+    public DawnDoveNestStructure(StructureSettings pSettings) {
         super(pSettings);
     }
 
@@ -31,7 +39,7 @@ public class DawnDoveNestStructure extends Structure {
 
     private static void generatePieces(StructurePiecesBuilder builder, Structure.GenerationContext context) {
         BlockPos blockpos = new BlockPos(context.chunkPos().getMinBlockX(), getLowestY(context, 11, 11), context.chunkPos().getMinBlockZ());
-        builder.addPiece(new DawnDoveNestPiece(context.structureTemplateManager(), new StructurePlaceSettings(), blockpos));
+        builder.addPiece(new DawnDoveNestPiece(context.structureTemplateManager(), context.random().nextBoolean() ? NBT_1 : NBT_0, new StructurePlaceSettings(), blockpos));
     }
 
     @Override

@@ -1,18 +1,18 @@
 package com.hedge.hedges_bestiary.blocks;
 
+import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
 import com.hedge.hedges_bestiary.util.BlockHelpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -101,9 +101,17 @@ public class EggBlock extends Block {
         Entity hatched = toHatch.get().create(level);
         Vec3 vec3 = pos.getCenter();
         hatched.moveTo(vec3.x(), vec3.y(), vec3.z(), Mth.wrapDegrees(level.random.nextFloat() * 360.0F), 0.0F);
-        if (hatched instanceof Animal baby) {
+        if (hatched instanceof HBTamableAnimal baby) {
             baby.setAge(-24000);
             baby.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.BREEDING, null, null);
+            if (!level.isClientSide()) {
+                Player closest = level.getNearestPlayer(pos.getX() + 0.5F, pos.getY() + 0.5F, pos.getZ() + 0.5F, 10, EntitySelector.NO_SPECTATORS);
+                if (closest != null) {
+                    baby.tame(closest);
+                    baby.setOrderedToSit(true);
+                    baby.setTame(true);
+                }
+            }
         }
         level.addFreshEntity(hatched);
     }
@@ -120,6 +128,7 @@ public class EggBlock extends Block {
 
         level.gameEvent(GameEvent.BLOCK_PLACE, pos, GameEvent.Context.of(state));
     }
+
 
     public boolean hatchBoost(BlockGetter level, BlockPos pos) {
         return level.getBlockState(pos.below()).is(this.preferredBlock);

@@ -6,8 +6,8 @@ import net.minecraft.world.entity.ai.goal.Goal;
 
 public class IdleAnimationGoal<E extends PathfinderMob & IdleAnimMob> extends Goal {
     protected final E mob;
-    private final int cooldown;
-    private int animCD;
+    protected final int cooldown;
+    protected int animCD;
 
     public IdleAnimationGoal(E pMob) {
         this(pMob, 100);

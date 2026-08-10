@@ -373,7 +373,7 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
                 return false;
             }
             if (this.plombo.isScratching()) {
-                if (this.ticksScratching > 60 && !blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance())) {
+                if (this.ticksScratching > 20 && !blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance())) {
                     return false;
                 }
                 return this.ticksScratching < 200 && this.isValidTarget(this.plombo.level(), this.blockPos);

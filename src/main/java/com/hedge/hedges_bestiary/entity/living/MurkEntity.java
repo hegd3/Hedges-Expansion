@@ -52,6 +52,7 @@ import java.util.List;
 public class MurkEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurner, EggLayer {
     private static final EntityDataAccessor<Boolean> CHARGED = SynchedEntityData.defineId(MurkEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> LEFT = SynchedEntityData.defineId(MurkEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> HAS_EGG = SynchedEntityData.defineId(MurkEntity.class, EntityDataSerializers.BOOLEAN);
 
     public final AnimationState idleAnimationState = new AnimationState();
     public final AnimationState biteAnimationState = new AnimationState();
@@ -114,7 +115,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         super.defineSynchedData();
         this.entityData.define(CHARGED, false);
         this.entityData.define(LEFT, false);
-
+        this.entityData.define(HAS_EGG, false);
     }
 
     public static AttributeSupplier.Builder bakeAttributes(){
@@ -132,6 +133,8 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     protected void registerGoals() {
         int i = 0;
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this, false));
+        this.goalSelector.addGoal(i++, new EggLayerBreedGoal<>(this, 1.0f));
+        this.goalSelector.addGoal(i++, new LayEggsGoal<>(this, 100, 1.0f));
         this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2, 1.6, 7.0f, 4.0f));
         this.goalSelector.addGoal(i++, new MurkAttackGoal(this));
         this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
@@ -519,6 +522,16 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     @Override
     public BlockState getEgg() {
         return HBBlocks.MURK_EGG.get().defaultBlockState();
+    }
+
+    @Override
+    public boolean hasEgg() {
+        return this.entityData.get(HAS_EGG);
+    }
+
+    @Override
+    public void setHasEgg(boolean b) {
+        this.entityData.set(HAS_EGG, b);
     }
 
     @Override

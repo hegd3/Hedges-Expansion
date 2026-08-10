@@ -10,7 +10,11 @@ import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
 import com.hedge.hedges_bestiary.entity.types.VariantMob;
 import com.hedge.hedges_bestiary.items.TreatItem;
 import com.hedge.hedges_bestiary.registry.HBEntities;
+import com.hedge.hedges_bestiary.util.SmoothAnimationState;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -18,6 +22,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -31,9 +36,11 @@ import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
@@ -43,8 +50,10 @@ import org.jetbrains.annotations.Nullable;
 public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer {
 
     private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(GurkEntity.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Boolean> LEFT = SynchedEntityData.defineId(GurkEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> HAS_EGG = SynchedEntityData.defineId(GurkEntity.class, EntityDataSerializers.BOOLEAN);
 
+
+    public final SmoothAnimationState standAnimationState = new SmoothAnimationState();
     public GurkEntity(EntityType<? extends GurkEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
 
@@ -72,7 +81,8 @@ public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer 
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(VARIANT, 0);
-        this.entityData.define(LEFT, false);
+        this.entityData.define(HAS_EGG, false);
+
     }
 
     @Override
@@ -106,8 +116,13 @@ public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer 
         int i = 0;
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this));
         this.goalSelector.addGoal(i++, new PanicGoal(this, 1.2));
+        this.goalSelector.addGoal(i++, new EggLayerBreedGoal<>(this, 1.0f));
+        this.goalSelector.addGoal(i++, new LayEggsGoal<>(this, 100, 1.0f));
+        this.goalSelector.addGoal(i++, new HBTemptGoal(this, 1.1f, Ingredient.of(Blocks.SEAGRASS.asItem()), false));
         this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2, 1.3, 4.0f, 2.0f));
         this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
+        this.goalSelector.addGoal(i++, new NapGoal(this));
+        this.goalSelector.addGoal(i++, new IdleInPlaceGoal<>(this));
         this.goalSelector.addGoal(i++, new RandomlySitGoal(this));
         this.goalSelector.addGoal(i++, new LookAtPlayerGoal(this, LivingEntity.class, 5));
         this.goalSelector.addGoal(i++, new CustomSwimGoal(this, 1.0, 10, 4, 4, true));
@@ -131,7 +146,20 @@ public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer 
         super.tick();
         if (this.level().isClientSide()) {
             this.setUpAnimStates();
+        } else {
+            if (this.getAnimState() == 1) {
+                this.animTicks++;
+                if (this.animTicks == 65 || this.getNavigation().isInProgress() || this.isNapping()) {
+                    this.resetAnimState();
+                }
+            }
         }
+    }
+
+    @Override
+    public void setUpAnimStates() {
+        super.setUpAnimStates();
+        this.standAnimationState.animateWhen(this.getAnimState() == 1, this.tickCount);
     }
 
     @Override
@@ -173,7 +201,7 @@ public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer 
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
 
-        if (this.getRandom().nextInt(20) == 0) {
+        if (this.getRandom().nextInt(40) == 0) {
             this.setVariant(3);
         } else {
             Holder<Biome> biome = pLevel.getBiome(this.blockPosition());
@@ -200,24 +228,39 @@ public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer 
     public void playIdle() {
     }
 
-    @Override
-    public void setSitting(boolean b) {
-        this.entityData.set(LEFT, this.getRandom().nextBoolean());
-        super.setSitting(b);
-    }
-
-    public boolean left() {
-        return this.entityData.get(LEFT);
-    }
 
     @Override
     public @Nullable AgeableMob getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
         return HBEntities.GURK.get().create(level);
     }
 
+    @Override
+    public boolean isFood(ItemStack stack) {
+        return this.isTame() && stack.is(Blocks.SEAGRASS.asItem());
+    }
 
     @Override
     public BlockState getEgg() {
         return HBBlocks.GURK_EGG.get().defaultBlockState();
+    }
+
+    @Override
+    public boolean hasEgg() {
+        return this.entityData.get(HAS_EGG);
+    }
+
+    @Override
+    public void setHasEgg(boolean b) {
+        this.entityData.set(HAS_EGG, b);
+    }
+
+    @Override
+    public boolean laysMultipleEggs() {
+        return true;
+    }
+
+    @Override
+    public boolean canPlayStaticIdle() {
+        return super.canPlayStaticIdle() && !this.isInFluidType() && !this.isNapping() && !this.isSitting();
     }
 }

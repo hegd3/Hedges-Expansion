@@ -20,6 +20,7 @@ import com.hedge.hedges_bestiary.items.TreatItem;
 import com.hedge.hedges_bestiary.message.EntityKeyMessage;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.registry.HBKeyMappings;
+import com.hedge.hedges_bestiary.registry.HBTags;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -46,19 +47,25 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 
 public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStateMob {
 
     public static final EntityDataAccessor<Integer> GRABBED_ENTITY_ID = SynchedEntityData.defineId(DawnDoveEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> HAS_EGG = SynchedEntityData.defineId(DawnDoveEntity.class, EntityDataSerializers.BOOLEAN);
 
+    private static final Predicate<LivingEntity> DAWN_DOVE_TARGETS = living -> living.getType().is(HBTags.DAWN_DOVE_TARGETS);
 
     public final SmoothAnimationState glideAnimationState = new SmoothAnimationState(0.1f);
     public final SmoothAnimationState flyUpAnimationState = new SmoothAnimationState(0.1f);
@@ -96,8 +103,12 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         int i = 0;
         this.goalSelector.addGoal(i, new FloatGoal(this));
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this, false));
+
+        this.goalSelector.addGoal(i++, new EggLayerBreedGoal<>(this, 1.0f));
+        this.goalSelector.addGoal(i++, new LayEggsGoal<>(this, 100, 1.0f));
         this.goalSelector.addGoal(i++, new FlyerFollowOwnerGoal(this, 1.2D, 1.6D, 8.0f, 8.0f));
         this.goalSelector.addGoal(i++, new DawnDoveAttackGoal(this));
+        this.goalSelector.addGoal(i++, new HBTemptGoal(this, 1.1f, Ingredient.of(Items.BEEF), false));
         this.goalSelector.addGoal(i++, new FlyerMoveToHomePosGoal(this, 1.0D, 32, 2d));
         this.goalSelector.addGoal(i++, new NapGoal(this, false));
         this.goalSelector.addGoal(i++, new RandomlySitGoal(this));
@@ -112,7 +123,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         this.targetSelector.addGoal(2, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(3, new TargetPlayersGoal(this));
         this.targetSelector.addGoal(4, new TargetMonstersGoal(this));
-        this.targetSelector.addGoal(5, new TargetWhenAwakeGoal<>(this, Cow.class,null)
+        this.targetSelector.addGoal(5, new TargetWhenAwakeGoal<>(this, LivingEntity.class,DAWN_DOVE_TARGETS)
         );
     }
 
@@ -120,6 +131,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(GRABBED_ENTITY_ID, -1);
+        this.entityData.define(HAS_EGG, false);
     }
 
     @Override
@@ -492,11 +504,14 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         this.grabbedEntity.setDeltaMovement(this.getX() - grabbedEntity.getX(), this.getY() - grabbedEntity.getY() - grabbedEntity.getBbHeight(), this.getZ() - grabbedEntity.getZ());
         //this.grabbedEntity.setPos(this.getX(), this.onGround() ? this.getY() : this.getY() - grabbedEntity.getBbHeight(), this.getZ());
         this.grabbedEntity.fallDistance = 0.0F;
-
+        if (!this.level().isClientSide() && !this.grabbedEntity.isAlive()) {
+            this.setGrabbedEntityID(-1);
+            this.grabbedEntity = null;
+        }
     }
 
     public void releaseGrab() {
-        this.grabbedEntity.setDeltaMovement(Vec3.ZERO);
+        this.grabbedEntity.setDeltaMovement(this.getDeltaMovement().scale(0.7));
         this.setGrabbedEntityID(-1);
         this.grabbedEntity = null;
     }
@@ -530,6 +545,21 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     @Override
     public BlockState getEgg() {
         return HBBlocks.DAWN_DOVE_EGG.get().defaultBlockState();
+    }
+
+    @Override
+    public boolean hasEgg() {
+        return this.entityData.get(HAS_EGG);
+    }
+
+    @Override
+    public void setHasEgg(boolean b) {
+        this.entityData.set(HAS_EGG, b);
+    }
+
+    @Override
+    public boolean isFood(ItemStack pStack) {
+        return this.isTame() && pStack.is(Items.BEEF);
     }
 
     @Override

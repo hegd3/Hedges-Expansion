@@ -44,9 +44,10 @@ public class DawnDoveAttackGoal extends GenericMeleeGoal<DawnDoveEntity> {
                     this.randomFlying = false;
                     this.mob.getNavigation().stop();
                     this.phaseTicks = 0;
-                } else if (this.mob.getNavigation().isDone()) {
+                } else if (this.mob.getNavigation().isDone() || !this.reachedDropPos) {
                     Vec3 pos = this.findFlightPos(livingentity);
                     this.mob.getNavigation().moveTo(pos.x, pos.y, pos.z, 1.3);
+                    this.reachedDropPos = true;
                 }
 
             }
@@ -112,6 +113,7 @@ public class DawnDoveAttackGoal extends GenericMeleeGoal<DawnDoveEntity> {
                         this.phaseTicks++;
                     } else if (this.mob.canUseClawAttack(livingentity, attackReach, dist)) {
                         this.mob.setAnimState(3);
+                        this.reachedDropPos = false;
                         this.phaseTicks+=2;
                     } else if (this.mob.canUseAttack(livingentity, attackReach, dist)) {
                         this.mob.setAttacking();

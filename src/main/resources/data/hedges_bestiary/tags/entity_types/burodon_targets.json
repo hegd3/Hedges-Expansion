@@ -1,0 +1,8 @@
+{
+  "__comment": "all entities naturally targeted by the burodon.",
+  "values": [
+    "minecraft:cow",
+    "minecraft:sheep",
+    "minecraft:pig"
+  ]
+}

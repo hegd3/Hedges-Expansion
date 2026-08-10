@@ -9,10 +9,12 @@ import com.hedge.hedges_bestiary.entity.AI.navigation.MMPathNavigatorGround;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.TargetMonstersGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.TargetPlayersGoal;
+import com.hedge.hedges_bestiary.entity.AI.targeting.TargetWhenAwakeGoal;
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
 import com.hedge.hedges_bestiary.entity.types.AttackStateMob;
 import com.hedge.hedges_bestiary.items.TreatItem;
 import com.hedge.hedges_bestiary.registry.HBEntities;
+import com.hedge.hedges_bestiary.registry.HBTags;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.server.level.ServerLevel;
@@ -40,7 +42,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Predicate;
+
 public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurner {
+
+
+    private static final Predicate<LivingEntity> BURODON_TARGETS = living -> living.getType().is(HBTags.BURODON_TARGETS);
 
     public final SmoothAnimationState biteAnimationState = new SmoothAnimationState();
     public final SmoothAnimationState jumpAnimationState = new SmoothAnimationState();
@@ -126,15 +133,15 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
         this.goalSelector.addGoal(i++, new WaterAvoidingRandomStrollGoal(this, 1.0, 20));
         this.goalSelector.addGoal(i++, new IdleAnimationGoal<>(this));
         this.goalSelector.addGoal(i++, new DancingGoal(this));
-        this.goalSelector.addGoal(i++, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(i, new RandomLookAroundGoal(this));
 
         this.targetSelector.addGoal(0, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(1, new HBHurtByTargetGoal(this, true, TamableAnimal.class));
         this.targetSelector.addGoal(2, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(3, new TargetPlayersGoal(this));
         this.targetSelector.addGoal(4, new TargetMonstersGoal(this));
-        this.targetSelector.addGoal(5, new NonTameRandomTargetGoal<>(this, Sheep.class, true, null));
-        this.targetSelector.addGoal(6, new NonTameRandomTargetGoal<>(this, Player.class, true, null));
+        this.targetSelector.addGoal(5, new TargetWhenAwakeGoal<>(this, LivingEntity.class, BURODON_TARGETS));
+        this.targetSelector.addGoal(6, new TargetWhenAwakeGoal<>(this, Player.class, null));
 
     }
 

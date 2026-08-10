@@ -29,7 +29,7 @@ public class DawnDoveFireBall extends GenericProjectile {
             return;
         }
         entity.setRemainingFireTicks(60);
-        if (entity.hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), this.getDamage())) {
+        if (entity.hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), entity.fireImmune() ? this.getDamage() / 2 : this.getDamage())) {
             this.explode();
             this.discard();
         }

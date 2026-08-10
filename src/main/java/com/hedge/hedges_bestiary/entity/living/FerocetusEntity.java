@@ -193,8 +193,9 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
                     if (this.animTicks <= 10) {
                         LivingEntity target = this.getTarget();
                         if (target != null) {
-                            this.lookAt(target, 15f, 30f);
-                            this.getLookControl().setLookAt(target, 15f, 30f);
+                            this.getLookControl().setLookAt(target, 15f, 0f);
+                            this.xRotO = 0;
+                            this.setXRot(0);
                         }
                     }
                     else if (this.animTicks == 20) {
@@ -352,5 +353,20 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
     @Override
     public boolean canPlayIdle() {
         return this.tickCount % 20 == 0 && this.getTarget() == null && this.getAnimState() == 0 && this.isInFluidType();
+    }
+
+    @Override
+    public void playStaticIdle() {
+
+    }
+
+    @Override
+    public boolean canPlayStaticIdle() {
+        return false;
+    }
+
+    @Override
+    public boolean isStaticIdling() {
+        return false;
     }
 }
