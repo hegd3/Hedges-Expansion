@@ -196,7 +196,7 @@ public class MurkModel extends HBModel<MurkEntity> {
 		this.tail.yRot = Mth.lerp(0.3F, this.tail.yRot, tailYaw * 0.25F);
 		this.tail2.yRot = Mth.lerp(0.3F, this.tail2.yRot, tailYaw * 0.2F);
 
-		this.neck.yRot += netHeadYaw / 2;
+		this.neck.yRot += netHeadYaw;
 		this.head.yRot += netHeadYaw;
 		this.head.xRot += headPitch;
 

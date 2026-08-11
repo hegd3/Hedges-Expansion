@@ -30,7 +30,7 @@ public class FlyingWanderGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        if (mob.isVehicle() || (mob.getTarget() != null && mob.getTarget().isAlive()) || mob.isPassenger()) {
+        if (mob.isVehicle() || mob.isPassenger()) {
             return false;
         }
         Vec3 target = this.findFlightPos();

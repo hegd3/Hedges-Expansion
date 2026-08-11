@@ -248,7 +248,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
 
     @Override
     public void setUpAnimStates() {
-        this.idleAnimationState.animateWhen(this.isAlive(), this.tickCount);
+        this.idleAnimationState.animateWhen(true, this.tickCount);
         this.sitAnimationState.animateWhen(this.isSitting() && !this.isDancing(), this.tickCount);
         this.napAnimationState.animateWhen(this.isNapping(), this.tickCount);
         this.danceAnimationState.animateWhen(this.isDancing(), this.tickCount);

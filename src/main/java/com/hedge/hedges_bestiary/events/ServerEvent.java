@@ -4,8 +4,8 @@ import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.client.particle.*;
 import com.hedge.hedges_bestiary.entity.living.*;
 import com.hedge.hedges_bestiary.entity.living.ambientfish.GildGliderEntity;
-import com.hedge.hedges_bestiary.entity.living.ambientfish.GlimEntity;
 import com.hedge.hedges_bestiary.entity.living.ambientfish.ChubEntity;
+import com.hedge.hedges_bestiary.entity.living.ambientfish.SkibEntity;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.registry.HBParticles;
 import net.minecraft.world.entity.SpawnPlacements;
@@ -32,8 +32,9 @@ public class ServerEvent {
         event.put(HBEntities.GILD_GLIDER.get(), GildGliderEntity.bakeAttributes().build());
         event.put(HBEntities.CHUB.get(), ChubEntity.bakeAttributes().build());
         event.put(HBEntities.FEROCETUS.get(), FerocetusEntity.bakeAttributes().build());
-        event.put(HBEntities.BANSHEE.get(), BansheeEntity.bakeAttributes().build());
+        event.put(HBEntities.ENDGEL.get(), EndgelEntity.bakeAttributes().build());
         event.put(HBEntities.DAWN_DOVE.get(), DawnDoveEntity.bakeAttributes().build());
+        event.put(HBEntities.SKIB.get(), SkibEntity.bakeAttributes().build());
 
     }
 
@@ -59,6 +60,7 @@ public class ServerEvent {
         event.registerSpriteSet(HBParticles.ELECTRIC_SPARKS.get(), AuraParticle.Provider::new);
         event.registerSpriteSet(HBParticles.FIREBALL.get(), ProjectileTrailParticle.FireBallProvider::new);
         event.registerSpriteSet(HBParticles.SLEEP.get(), SleepParticle.Provider::new);
+        event.registerSpriteSet(HBParticles.ENDGEL_TRAIL.get(), AuraParticle.Provider::new);
 
     }
 

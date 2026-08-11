@@ -3,9 +3,9 @@ package com.hedge.hedges_bestiary.registry;
 import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.entity.living.*;
 import com.hedge.hedges_bestiary.entity.living.ambientfish.GildGliderEntity;
-import com.hedge.hedges_bestiary.entity.living.ambientfish.GlimEntity;
 import com.hedge.hedges_bestiary.entity.living.ambientfish.ChubEntity;
-import com.hedge.hedges_bestiary.entity.projectile.BansheeScream;
+import com.hedge.hedges_bestiary.entity.living.ambientfish.SkibEntity;
+import com.hedge.hedges_bestiary.entity.projectile.EndgelScream;
 import com.hedge.hedges_bestiary.entity.projectile.DawnDoveFireBall;
 import com.hedge.hedges_bestiary.entity.projectile.MurkSmoke;
 import com.hedge.hedges_bestiary.entity.projectile.WaveEntity;
@@ -34,7 +34,7 @@ public class HBEntities {
 
     public static final RegistryObject<EntityType<GurkEntity>> GURK =
             ENTITY_TYPES.register("gurk", () -> EntityType.Builder.of(GurkEntity::new, MobCategory.CREATURE)
-                    .sized(1.2f, 0.7f).build("gurk"));
+                    .sized(1.0f, 0.7f).build("gurk"));
 
     public static final RegistryObject<EntityType<MurkEntity>> MURK =
             ENTITY_TYPES.register("murk", () -> EntityType.Builder.of(MurkEntity::new, MobCategory.CREATURE)
@@ -68,12 +68,12 @@ public class HBEntities {
             ENTITY_TYPES.register("wave", () -> EntityType.Builder.of(WaveEntity::new, MobCategory.MISC)
                     .sized(1.4f, 1.3f).build("wave"));
 
-    public static final RegistryObject<EntityType<BansheeEntity>> BANSHEE =
-            ENTITY_TYPES.register("banshee", () -> EntityType.Builder.of(BansheeEntity::new, MobCategory.MONSTER)
-                    .sized(1.9f, 1.05f).build("banshee"));
+    public static final RegistryObject<EntityType<EndgelEntity>> ENDGEL =
+            ENTITY_TYPES.register("endgel", () -> EntityType.Builder.of(EndgelEntity::new, MobCategory.MONSTER)
+                    .sized(2.8f, 2.4f).build("endgel"));
 
-    public static final RegistryObject<EntityType<BansheeScream>> BANSHEE_SCREAM =
-            ENTITY_TYPES.register("banshee_scream", () -> EntityType.Builder.of(BansheeScream::new, MobCategory.MISC)
+    public static final RegistryObject<EntityType<EndgelScream>> BANSHEE_SCREAM =
+            ENTITY_TYPES.register("banshee_scream", () -> EntityType.Builder.of(EndgelScream::new, MobCategory.MISC)
                     .sized(0.8f, 0.8f).build("banshee_scream"));
 
     public static final RegistryObject<EntityType<DawnDoveEntity>> DAWN_DOVE =
@@ -84,6 +84,9 @@ public class HBEntities {
             ENTITY_TYPES.register("dawn_dove_fireball", () -> EntityType.Builder.of(DawnDoveFireBall::new, MobCategory.MISC)
                     .sized(1f, 1f).build("dawn_dove_fireball"));
 
+    public static final RegistryObject<EntityType<SkibEntity>> SKIB =
+            ENTITY_TYPES.register("skib", () -> EntityType.Builder.of(SkibEntity::new, MobCategory.WATER_CREATURE)
+                    .sized(0.68f, 0.47f).build("skib"));
     public static void register(IEventBus eventbus) {
         ENTITY_TYPES.register(eventbus);
     }

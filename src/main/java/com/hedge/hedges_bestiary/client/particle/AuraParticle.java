@@ -11,14 +11,14 @@ public class AuraParticle extends TextureSheetParticle {
 
     protected final SpriteSet sprites;
 
-    protected AuraParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, SpriteSet pSprites) {
+    protected AuraParticle(ClientLevel pLevel, double pX, double pY, double pZ, int lifetime, SpriteSet pSprites) {
         super(pLevel, pX, pY, pZ);
         this.xd += ((this.random.nextFloat() - this.random.nextFloat()) * 0.05F);
         this.zd += ((this.random.nextFloat() - this.random.nextFloat()) * 0.05F);
 
         this.friction = 0.96F;
         this.quadSize *= 1.6F;
-        this.lifetime = 7 + this.random.nextInt(4);
+        this.lifetime = lifetime + this.random.nextInt(4);
         this.sprites = pSprites;
         this.setSpriteFromAge(pSprites);
     }
@@ -67,7 +67,7 @@ public class AuraParticle extends TextureSheetParticle {
         }
 
         public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
-            return new AuraParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites);
+            return new AuraParticle(pLevel, pX, pY, pZ, 7, this.sprites);
         }
     }
 }

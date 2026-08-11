@@ -48,5 +48,4 @@ public interface HBGroupMob<E extends LivingEntity & HBGroupMob<E>> {
 
     public void addFollowers(Stream<E> pFollowers);
 
-
 }

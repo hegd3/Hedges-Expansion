@@ -192,6 +192,10 @@ public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer 
             this.moveRelative(this.getSpeed(), pTravelVector);
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
+            if (this.horizontalCollision && this.level().getBlockState(this.blockPosition().above()).isAir()) {
+                final float f1 = this.getYRot() * Mth.DEG_TO_RAD;
+                this.setDeltaMovement(this.getDeltaMovement().add(-Mth.sin(f1) * 0.08f, 0.04D, Mth.cos(f1) * 0.08f));
+            }
         } else {
             super.travel(pTravelVector);
         }

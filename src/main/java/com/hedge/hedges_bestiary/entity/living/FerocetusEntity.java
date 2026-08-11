@@ -65,6 +65,14 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
         this.lookControl = new SmoothSwimmingLookControl(this, 0);
     }
 
+    public int getMaxHeadXRot() {
+        return 1;
+    }
+
+    public int getMaxHeadYRot() {
+        return 1;
+    }
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();

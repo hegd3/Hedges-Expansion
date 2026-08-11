@@ -287,12 +287,12 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
 
     @Override
     public void setUpAnimStates() {
-        this.idleAnimationState.animateWhen(inAirTimer < 5 && keepsIdle(), this.tickCount);
+        this.idleAnimationState.animateWhen(true, this.tickCount);
         this.sitAnimationState.animateWhen(this.isSitting() && !this.isDancing(), this.tickCount);
         this.napAnimationState.animateWhen(this.isNapping(), this.tickCount);
         this.danceAnimationState.animateWhen(this.isDancing(), this.tickCount);
         int animState = this.getAnimState();
-        this.airAnimationState.animateWhen(inAirTimer > 5 && keepsIdle(), this.tickCount);
+        this.airAnimationState.animateWhen(inAirTimer > 5, this.tickCount);
         this.biteAnimationState.animateWhen(animState == 1, this.tickCount);
         this.jumpAnimationState.animateWhen(animState == 2, this.tickCount);
         this.roarAnimationState.animateWhen(animState == 3, this.tickCount);
@@ -302,13 +302,7 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
 
     }
 
-    private boolean keepsIdle() {
-        if (this.isSitting()) return false;
-        return switch (this.getAnimState()) {
-            case JUMP_ANIM, ROAR_ANIM -> false;
-            default -> true;
-        };
-    }
+
 
     @Override
     public void setAttacking() {

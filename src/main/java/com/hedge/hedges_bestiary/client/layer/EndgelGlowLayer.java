@@ -1,8 +1,8 @@
 package com.hedge.hedges_bestiary.client.layer;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
-import com.hedge.hedges_bestiary.client.models.BansheeModel;
-import com.hedge.hedges_bestiary.entity.living.BansheeEntity;
+import com.hedge.hedges_bestiary.client.models.EndgelModel;
+import com.hedge.hedges_bestiary.entity.living.EndgelEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -12,16 +12,16 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
-public class BansheeGlowLayer extends RenderLayer<BansheeEntity, BansheeModel> {
+public class EndgelGlowLayer extends RenderLayer<EndgelEntity, EndgelModel> {
 
-    private static final RenderType texture = RenderType.eyes(new ResourceLocation(HedgesBestiary.MODID, "textures/entity/banshee/banshee_glow.png"));
+    private static final RenderType texture = RenderType.eyes(new ResourceLocation(HedgesBestiary.MODID, "textures/entity/endgel/endgel_glow.png"));
 
-    public BansheeGlowLayer(RenderLayerParent<BansheeEntity, BansheeModel> pRenderer) {
+    public EndgelGlowLayer(RenderLayerParent<EndgelEntity, EndgelModel> pRenderer) {
         super(pRenderer);
     }
 
     @Override
-    public void render(PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, BansheeEntity livingEntity, float pLimbSwing, float pLimbSwingAmount, float pPartialTicks, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
+    public void render(PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, EndgelEntity livingEntity, float pLimbSwing, float pLimbSwingAmount, float pPartialTicks, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
         VertexConsumer vertexconsumer = pBuffer.getBuffer(texture);
         this.getParentModel().renderToBuffer(pPoseStack, vertexconsumer, 15728640, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0F);
 

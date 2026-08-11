@@ -3,6 +3,7 @@ package com.hedge.hedges_bestiary.entity.AI.goal.specific;
 import com.hedge.hedges_bestiary.entity.AI.control.AdvancedTurner;
 import com.hedge.hedges_bestiary.entity.AI.goal.GenericMeleeGoal;
 import com.hedge.hedges_bestiary.entity.living.MurkEntity;
+import com.hedge.hedges_bestiary.entity.living.ambientfish.SkibEntity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.level.pathfinder.Path;
@@ -40,7 +41,7 @@ public class MurkAttackGoal extends GenericMeleeGoal<MurkEntity> {
             this.attackReach = this.mob.getAttackReachSqr(livingentity);
             this.dist = this.mob.distanceToSqr(livingentity);
 
-            if (this.mob.isInFluidType() && (this.canStartPathAway() || this.shouldPathAway)) {
+            if (!(livingentity instanceof SkibEntity) && this.mob.isInFluidType() && (this.canStartPathAway() || this.shouldPathAway)) {
                 this.pathTicks++;
                 if (!this.shouldPathAway) {
                     Vec3 vec3 = DefaultRandomPos.getPosAway(this.mob, 6, 6, livingentity.position());
@@ -73,41 +74,45 @@ public class MurkAttackGoal extends GenericMeleeGoal<MurkEntity> {
         }
 
         if (this.mob.getAnimState() == 0 && this.mob.hasLineOfSight(livingentity)) {
-            if (this.mob.isInFluidType()) {
-                if (this.mob.canMultiBite(this.attackReach, this.dist)) {
+            if (livingentity instanceof SkibEntity) {
+                if (this.mob.canUseAttack(livingentity, this.attackReach, this.dist)) {
+                    this.mob.setAttacking();
+                }
+            } else {
+                if (this.mob.isInFluidType()) {
+                    if (this.mob.canMultiBite(this.attackReach, this.dist)) {
+                        this.mob.setAnimState(3);
+                        this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
+                    } else if (this.mob.canUseAttack(livingentity, this.attackReach, this.dist)) {
+                        if (this.mob.getRandom().nextInt(5) == 0) {
+                            this.mob.setSlam();
+                            this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
+                        } else {
+                            this.mob.setAttacking();
+                        }
+                    } else if (this.mob.getNavigation().isDone() || this.pathTicks > 40) {
+                        if (this.mob.canRoar(this.attackReach, this.dist)) {
+                            this.mob.setAnimState(4);
+                            this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
+                        } else if (this.mob.getProjCD() == 0) {
+                            this.mob.setShooting();
+                            this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
+                        }
+                        this.pathTicks = 0;
+                        this.shouldPathAway = false;
+                    }
+                } else if (this.mob.canRoar(this.attackReach, this.dist)) {
+                    this.mob.setAnimState(4);
+                    this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
+                } else if (this.mob.canMultiBite(this.attackReach, this.dist)) {
                     this.mob.setAnimState(3);
                     this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
+                } else if (this.mob.canUseAttack(livingentity, this.attackReach, this.dist)) {
+                    this.mob.setAttacking();
+                } else if (this.mob.canShoot(this.attackReach, this.dist)) {
+                    this.mob.setShooting();
+                    this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
                 }
-                else if (this.mob.canUseAttack(livingentity, this.attackReach, this.dist)) {
-                    if (this.mob.getRandom().nextInt(5) == 0) {
-                        this.mob.setSlam();
-                        this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
-                    } else {
-                        this.mob.setAttacking();
-                    }
-                } else if (this.mob.getNavigation().isDone() || this.pathTicks > 40) {
-                    if (this.mob.canRoar(this.attackReach, this.dist)) {
-                        this.mob.setAnimState(4);
-                        this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
-                    } else if (this.mob.getProjCD() == 0) {
-                        this.mob.setShooting();
-                        this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
-                    }
-                    this.pathTicks = 0;
-                    this.shouldPathAway = false;
-                }
-            } else if (this.mob.canRoar(this.attackReach, this.dist)) {
-                this.mob.setAnimState(4);
-                this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
-            } else if (this.mob.canMultiBite(this.attackReach, this.dist)) {
-                this.mob.setAnimState(3);
-                this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
-            }
-            else if (this.mob.canUseAttack(livingentity, this.attackReach, this.dist)) {
-                this.mob.setAttacking();
-            }  else if (this.mob.canShoot(this.attackReach, this.dist)) {
-                this.mob.setShooting();
-                this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
             }
         }
     }

@@ -1,7 +1,6 @@
 package com.hedge.hedges_bestiary.registry;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -16,6 +15,7 @@ public class HBTags {
 
     public static final TagKey<EntityType<?>> DAWN_DOVE_TARGETS = registerEntityTag("dawn_dove_targets");
 
+    public static final TagKey<EntityType<?>> TEARACUDA_AVOIDS = registerEntityTag("tearacuda_avoids");
 
     private static TagKey<EntityType<?>> registerEntityTag(String name) {
         return TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(HedgesBestiary.MODID, name));

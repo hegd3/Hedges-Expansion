@@ -14,6 +14,7 @@ import com.hedge.hedges_bestiary.entity.AI.navigation.MMPathNavigatorGround;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.TargetMonstersGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.TargetPlayersGoal;
+import com.hedge.hedges_bestiary.entity.living.ambientfish.SkibEntity;
 import com.hedge.hedges_bestiary.entity.projectile.MurkSmoke;
 import com.hedge.hedges_bestiary.entity.types.*;
 import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
@@ -35,6 +36,7 @@ import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -80,7 +82,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     public MurkEntity(EntityType<? extends MurkEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        this.lookControl = new ATMSwimLookControl<>(this, 45, 90);
+        this.lookControl = new ATMSwimLookControl<>(this, 25, 90);
         this.moveControl = new ATMSwimMoveControl<>(this, 999, 0.4f, 1.0f, 15);
 
         this.setPathfindingMalus(BlockPathTypes.WATER, 0.0f);
@@ -116,6 +118,16 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.entityData.define(CHARGED, false);
         this.entityData.define(LEFT, false);
         this.entityData.define(HAS_EGG, false);
+    }
+
+    @Override
+    public int getMaxHeadYRot() {
+        return 25;
+    }
+
+    @Override
+    public int getMaxHeadXRot() {
+        return 25;
     }
 
     public static AttributeSupplier.Builder bakeAttributes(){
@@ -162,6 +174,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.targetSelector.addGoal(2, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(3, new TargetPlayersGoal(this));
         this.targetSelector.addGoal(4, new TargetMonstersGoal(this));
+        this.targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(this, SkibEntity.class, true));
 
     }
 
@@ -186,8 +199,9 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
             this.moveRelative(this.getSpeed(), pTravelVector);
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
-            if (this.jumping) {
-                this.setDeltaMovement(this.getDeltaMovement().add(0, 0.3, 0));
+            if (this.horizontalCollision && this.level().getBlockState(this.blockPosition().above()).isAir()) {
+                final float f1 = this.getYRot() * Mth.DEG_TO_RAD;
+                this.setDeltaMovement(this.getDeltaMovement().add(-Mth.sin(f1) * 0.1f, 0.05D, Mth.cos(f1) * 0.1f));
             }
         } else {
             super.travel(pTravelVector);
@@ -290,7 +304,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                                 case 18 -> this.turnType = TurnType.LOCK;
                                 case 19, 36, 54 -> {
                                     this.powerBite();
-                                    this.addDeltaMovement(EntityHelpers.bodyAngle(this).scale(0.4));
+                                    this.addDeltaMovement(this.getLookAngle().scale(0.4));
                                 }
                             }
                         }
@@ -425,7 +439,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     @Override
     public void setUpAnimStates() {
-        this.idleAnimationState.animateWhen(this.isAlive(), this.tickCount);
+        this.idleAnimationState.animateWhen(true, this.tickCount);
         int animstate = this.getAnimState();
         this.biteAnimationState.animateWhen(animstate == 1, this.tickCount);
         this.breathAnimationState.animateWhen(animstate == 2, this.tickCount);

@@ -14,11 +14,11 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 
-public class BansheeScream extends GenericProjectile{
-    private static final EntityDataAccessor<Float> PARTICLEX_ROT = SynchedEntityData.defineId(BansheeScream.class, EntityDataSerializers.FLOAT);
-    private static final EntityDataAccessor<Float> PARTICLEY_ROT = SynchedEntityData.defineId(BansheeScream.class, EntityDataSerializers.FLOAT);
+public class EndgelScream extends GenericProjectile{
+    private static final EntityDataAccessor<Float> PARTICLEX_ROT = SynchedEntityData.defineId(EndgelScream.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> PARTICLEY_ROT = SynchedEntityData.defineId(EndgelScream.class, EntityDataSerializers.FLOAT);
 
-    public BansheeScream(EntityType<? extends Projectile> pEntityType, Level pLevel) {
+    public EndgelScream(EntityType<? extends Projectile> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.setNoGravity(true);
     }

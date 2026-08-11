@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class ZappetGlowLayer extends RenderLayer<ZappetEntity, ZappetModel> {
 
-    private static final RenderType texture = HBRenderTypes.getEyesAlphaEnabled(new ResourceLocation(HedgesBestiary.MODID, "textures/entity/zappet/zappet_glow.png"));
+    private static final RenderType TEXTURE = HBRenderTypes.getEyesAlphaEnabled(new ResourceLocation(HedgesBestiary.MODID, "textures/entity/zappet/zappet_glow.png"));
 
     public ZappetGlowLayer(RenderLayerParent<ZappetEntity, ZappetModel> pRenderer) {
         super(pRenderer);
@@ -25,7 +25,7 @@ public class ZappetGlowLayer extends RenderLayer<ZappetEntity, ZappetModel> {
     public void render(PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, ZappetEntity entity, float pLimbSwing, float pLimbSwingAmount, float pPartialTicks, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
 
         if (entity.isInvisible()) return;
-        VertexConsumer vertexconsumer = pBuffer.getBuffer(texture);
+        VertexConsumer vertexconsumer = pBuffer.getBuffer(TEXTURE);
         float alpha = entity.getGlowProgress(pPartialTicks);
         this.getParentModel().renderToBuffer(pPoseStack, vertexconsumer, 1, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, alpha);
 

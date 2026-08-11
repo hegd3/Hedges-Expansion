@@ -13,6 +13,7 @@ import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
 import com.hedge.hedges_bestiary.entity.types.AttackStateMob;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.registry.HBEntities;
+import com.hedge.hedges_bestiary.registry.HBTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -23,6 +24,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
+import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.AbstractSchoolingFish;
@@ -36,8 +38,13 @@ import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class TearacudaEntity extends HBSchoolingMob implements AttackStateMob {
+
+
+
+    private static final Predicate<LivingEntity> TEARACUDA_AVOIDS = living -> living.getType().is(HBTags.TEARACUDA_AVOIDS);
 
     public final AnimationState biteAnimationState = new AnimationState();
     public final AnimationState frenzyAnimationState = new AnimationState();
@@ -65,12 +72,21 @@ public class TearacudaEntity extends HBSchoolingMob implements AttackStateMob {
                 .add(Attributes.MOVEMENT_SPEED, 1.8F);
     }
 
+    public int getMaxHeadXRot() {
+        return 1;
+    }
+
+    public int getMaxHeadYRot() {
+        return 1;
+    }
+
     @Override
     protected void registerGoals() {
 
-        this.goalSelector.addGoal(0, new TearacudaAttackGoal(this));
-        this.goalSelector.addGoal(1, new GroupFollowLeaderGoal<>(this));
-        this.goalSelector.addGoal(2, new CustomSwimGoal(this, 1.0f, 10, 6, 5, true));
+        this.goalSelector.addGoal(0, new AvoidEntityGoal<>(this, LivingEntity.class,10.0F, 1.0D, 1.0D, TEARACUDA_AVOIDS));
+        this.goalSelector.addGoal(1, new TearacudaAttackGoal(this));
+        this.goalSelector.addGoal(2, new GroupFollowLeaderGoal<>(this));
+        this.goalSelector.addGoal(3, new CustomSwimGoal(this, 1.0f, 10, 6, 5, true));
 
         this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, AbstractSchoolingFish.class, true));
