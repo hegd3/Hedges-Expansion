@@ -1,7 +1,8 @@
 package com.hedge.hedges_bestiary.client.renderer;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
-import com.hedge.hedges_bestiary.client.layer.EntityLayers;
+import com.hedge.hedges_bestiary.client.EntityLayers;
+import com.hedge.hedges_bestiary.client.layer.MurkRiderLayer;
 import com.hedge.hedges_bestiary.client.models.MurkModel;
 import com.hedge.hedges_bestiary.entity.living.MurkEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -23,6 +24,7 @@ public class MurkRenderer extends MobRenderer<MurkEntity, MurkModel> {
     public MurkRenderer(EntityRendererProvider.Context pContext) {
         super(pContext, new MurkModel(pContext.bakeLayer(EntityLayers.MURK_LAYER)), 2.0f);
         this.addLayer(new MurkEyeLayer(this));
+        this.addLayer(new MurkRiderLayer(this));
     }
 
     @Override

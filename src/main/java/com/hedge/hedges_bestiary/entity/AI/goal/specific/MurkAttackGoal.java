@@ -82,10 +82,12 @@ public class MurkAttackGoal extends GenericMeleeGoal<MurkEntity> {
                 if (this.mob.isInFluidType()) {
                     if (this.mob.canMultiBite(this.attackReach, this.dist)) {
                         this.mob.setAnimState(3);
+                        this.mob.getNavigation().stop();
                         this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
                     } else if (this.mob.canUseAttack(livingentity, this.attackReach, this.dist)) {
                         if (this.mob.getRandom().nextInt(5) == 0) {
                             this.mob.setSlam();
+                            this.mob.getNavigation().stop();
                             this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
                         } else {
                             this.mob.setAttacking();
@@ -93,25 +95,28 @@ public class MurkAttackGoal extends GenericMeleeGoal<MurkEntity> {
                     } else if (this.mob.getNavigation().isDone() || this.pathTicks > 40) {
                         if (this.mob.canRoar(this.attackReach, this.dist)) {
                             this.mob.setAnimState(4);
+                            this.mob.getNavigation().stop();
                             this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
                         } else if (this.mob.getProjCD() == 0) {
                             this.mob.setShooting();
-                            this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
+                            this.mob.getNavigation().stop();
                         }
                         this.pathTicks = 0;
                         this.shouldPathAway = false;
                     }
                 } else if (this.mob.canRoar(this.attackReach, this.dist)) {
                     this.mob.setAnimState(4);
+                    this.mob.getNavigation().stop();
                     this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
                 } else if (this.mob.canMultiBite(this.attackReach, this.dist)) {
                     this.mob.setAnimState(3);
+                    this.mob.getNavigation().stop();
                     this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
                 } else if (this.mob.canUseAttack(livingentity, this.attackReach, this.dist)) {
                     this.mob.setAttacking();
                 } else if (this.mob.canShoot(this.attackReach, this.dist)) {
                     this.mob.setShooting();
-                    this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
+                    this.mob.getNavigation().stop();
                 }
             }
         }

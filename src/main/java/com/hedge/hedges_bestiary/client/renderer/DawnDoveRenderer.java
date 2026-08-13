@@ -2,7 +2,7 @@ package com.hedge.hedges_bestiary.client.renderer;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.client.layer.DawnDoveRiderLayer;
-import com.hedge.hedges_bestiary.client.layer.EntityLayers;
+import com.hedge.hedges_bestiary.client.EntityLayers;
 import com.hedge.hedges_bestiary.client.models.DawnDoveModel;
 import com.hedge.hedges_bestiary.entity.living.DawnDoveEntity;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;

@@ -4,7 +4,7 @@ package com.hedge.hedges_bestiary.client.models;// Made with Blockbench 5.0.7
 
 
 import com.hedge.hedges_bestiary.client.animations.*;
-import com.hedge.hedges_bestiary.client.layer.EntityLayers;
+import com.hedge.hedges_bestiary.client.EntityLayers;
 import com.hedge.hedges_bestiary.entity.living.MurkEntity;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -15,8 +15,8 @@ import net.minecraft.util.Mth;
 public class MurkModel extends HBModel<MurkEntity> {
 	public static final ModelLayerLocation LAYER_LOCATION = EntityLayers.MURK_LAYER;
 	private final ModelPart root;
-	private final ModelPart swimcontrol;
-	private final ModelPart wholebody;
+	public final ModelPart swimcontrol;
+	public final ModelPart wholebody;
 	private final ModelPart body;
 	private final ModelPart big_spike_left;
 	private final ModelPart spikes_left;
@@ -157,7 +157,7 @@ public class MurkModel extends HBModel<MurkEntity> {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 
 		netHeadYaw = Mth.clamp(netHeadYaw, -25.0F, 25.0F) * ((float)Math.PI / 180F);
-		headPitch = Mth.clamp(headPitch, -45.0F, 45.0F) * ((float)Math.PI / 180F);
+		headPitch = Mth.clamp(headPitch, -25.0F, 25.0F) * ((float)Math.PI / 180F);
 		float tailYaw = entity.getTrailYaw(ageInTicks - entity.tickCount);
 
 
@@ -166,9 +166,14 @@ public class MurkModel extends HBModel<MurkEntity> {
 		if (this.young) {
 			this.applyStatic(GenericPosesAnimation.BABY_TRANSFORM_WITH_NECK);
 		}
-		if (entity.isInFluidType()) {
-			this.swimcontrol.xRot = headPitch * 0.6f;
-			this.animateWalk(MurkBasicsAnimation.SWIM, limbSwing, limbSwingAmount, 1.5f, 2.5f);
+		this.animateSmooth(entity.swimIdleAnimationState, MurkBasicsAnimation.SWIM_IDLE, ageInTicks, 0.5f);
+		this.animateSmooth(entity.idleAnimationState, MurkBasicsAnimation.IDLE, ageInTicks, 0.33f);
+		this.animateWalk(MurkBasicsAnimation.SWIM, limbSwing, limbSwingAmount * (1 - entity.landProgress /5), 1.5f, 2.5f);
+		this.animateWalk(MurkBasicsAnimation.WALK, limbSwing, limbSwingAmount* (entity.landProgress /5), 1.5f, 2.5f);
+
+		if (entity.isInWater()) {
+			headPitch *= 0.6F;
+			this.swimcontrol.xRot = headPitch;
 			this.animate(entity.idleAnimationState, MurkBasicsAnimation.SWIM_IDLE, ageInTicks, 0.5f);
 			this.animate(entity.multiBiteAnimationState, entity.swingingLeft() ? MurkAttacksAnimation.MULTI_BITE_LEFT: MurkAttacksAnimation.MULTI_BITE_RIGHT, ageInTicks, 1);
 
@@ -176,8 +181,6 @@ public class MurkModel extends HBModel<MurkEntity> {
 
 
 		} else {
-			this.animateWalk(MurkBasicsAnimation.WALK, limbSwing, limbSwingAmount, 1.5f, 2.5f);
-			this.animate(entity.idleAnimationState, MurkBasicsAnimation.IDLE, ageInTicks, 0.33f);
 			this.animate(entity.roarAnimationState, MurkAttacksAnimation.ROAR_LAND, ageInTicks, 1f);
 
 			this.animate(entity.multiBiteAnimationState, entity.swingingLeft() ? MurkAttacksAnimation.MULTIBITE_LEFT_LAND : MurkAttacksAnimation.MULTIBITE_RIGHT_LAND, ageInTicks, 1);
@@ -197,6 +200,7 @@ public class MurkModel extends HBModel<MurkEntity> {
 		this.tail2.yRot = Mth.lerp(0.3F, this.tail2.yRot, tailYaw * 0.2F);
 
 		this.neck.yRot += netHeadYaw;
+		this.neck.xRot += headPitch;
 		this.head.yRot += netHeadYaw;
 		this.head.xRot += headPitch;
 

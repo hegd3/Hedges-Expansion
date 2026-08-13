@@ -3,7 +3,7 @@ package com.hedge.hedges_bestiary.client.models;
 
 import com.hedge.hedges_bestiary.client.animations.GenericPosesAnimation;
 import com.hedge.hedges_bestiary.client.animations.DawnDoveAnimation;
-import com.hedge.hedges_bestiary.client.layer.EntityLayers;
+import com.hedge.hedges_bestiary.client.EntityLayers;
 import com.hedge.hedges_bestiary.entity.living.DawnDoveEntity;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;

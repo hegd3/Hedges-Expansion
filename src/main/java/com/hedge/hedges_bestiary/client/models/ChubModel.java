@@ -4,7 +4,7 @@ package com.hedge.hedges_bestiary.client.models;// Made with Blockbench 5.1.4
 
 
 import com.hedge.hedges_bestiary.client.animations.ChubAnimation;
-import com.hedge.hedges_bestiary.client.layer.EntityLayers;
+import com.hedge.hedges_bestiary.client.EntityLayers;
 import com.hedge.hedges_bestiary.entity.living.ambientfish.ChubEntity;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;

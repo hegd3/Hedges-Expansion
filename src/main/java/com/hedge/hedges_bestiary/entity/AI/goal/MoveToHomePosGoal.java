@@ -36,7 +36,7 @@ public class MoveToHomePosGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        if (!this.mob.hasHome() || this.mob.hasControllingPassenger() || this.mob.getCommand() == 2) {
+        if (!this.mob.hasHome() || this.mob.getCommand() == 2) {
             return false;
         }
         this.closeToHomeTryTicks = Math.max(this.closeToHomeTryTicks - 1, 0);

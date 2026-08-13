@@ -36,7 +36,7 @@ public class SemiFlyerFlyingGoal<E extends PathfinderMob & SemiFlyer> extends Go
 
     @Override
     public boolean canUse() {
-        if (mob.isVehicle() || (mob.getTarget() != null && mob.getTarget().isAlive()) || mob.isPassenger()) {
+        if (mob.isPassenger()) {
             return false;
         }
         if (!mob.isFlying() && mob.getRandom().nextInt(interval) != 0) {
@@ -72,6 +72,7 @@ public class SemiFlyerFlyingGoal<E extends PathfinderMob & SemiFlyer> extends Go
             this.mob.getDeltaMovement().add(0, -0.01, 0);
         }
         else if (this.mob.isFlying()) {
+            this.mob.getDeltaMovement().add(0, -0.004, 0);
             if (this.flyTicks % maxTimeFlying == 0 && !this.isOverWaterOrVoid()) {
                 this.isLanding = true;
                 this.pos = this.groundPosition(this.pos);

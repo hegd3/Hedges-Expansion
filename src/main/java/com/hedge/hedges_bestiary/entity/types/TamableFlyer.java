@@ -23,7 +23,7 @@ public abstract class TamableFlyer extends HBTamableAnimal implements SemiFlyer 
 
     public static final EntityDataAccessor<Boolean> FLYING = SynchedEntityData.defineId(TamableFlyer.class, EntityDataSerializers.BOOLEAN);
 
-    private float flyProgress;
+    protected float flyProgress;
     private float prevFlyProgress;
     private float flightPitch = 0;
     private float prevFlightPitch = 0;
@@ -157,12 +157,11 @@ public abstract class TamableFlyer extends HBTamableAnimal implements SemiFlyer 
 
 
         if (!level().isClientSide) {
-            if (this.isFlying() && this.isAlive() && !this.isVehicle()) {
+            if (this.isFlying() && this.isAlive()) {
                 if (horizontalCollision && !this.isInWater()) {
                     this.setDeltaMovement(this.getDeltaMovement().add(0, 0.05D, 0));
                 }
             }
-            if (this.isFlying() && this.flyProgress > 40 && this.onGround()) this.setFlying(false);
         }
     }
 

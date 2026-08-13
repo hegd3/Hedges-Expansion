@@ -2,7 +2,7 @@ package com.hedge.hedges_bestiary.client.models;
 
 
 import com.hedge.hedges_bestiary.client.animations.SpottedStrikerAnimation;
-import com.hedge.hedges_bestiary.client.layer.EntityLayers;
+import com.hedge.hedges_bestiary.client.EntityLayers;
 import com.hedge.hedges_bestiary.entity.living.SpottedStrikerEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;

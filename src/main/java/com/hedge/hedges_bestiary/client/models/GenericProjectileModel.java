@@ -3,7 +3,7 @@ package com.hedge.hedges_bestiary.client.models;// Made with Blockbench 5.0.7
 // Paste this class into your mod and generate all required imports
 
 
-import com.hedge.hedges_bestiary.client.layer.EntityLayers;
+import com.hedge.hedges_bestiary.client.EntityLayers;
 import com.hedge.hedges_bestiary.entity.projectile.GenericProjectile;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;

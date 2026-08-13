@@ -1,17 +1,14 @@
 package com.hedge.hedges_bestiary.client.renderer;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
-import com.hedge.hedges_bestiary.client.layer.EntityLayers;
+import com.hedge.hedges_bestiary.client.EntityLayers;
 import com.hedge.hedges_bestiary.client.models.BurodonModel;
 import com.hedge.hedges_bestiary.entity.living.BurodonEntity;
-import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
-import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.phys.Vec3;
 
 public class BurodonRenderer extends MobRenderer<BurodonEntity, BurodonModel> {
     private static final ResourceLocation texture = new ResourceLocation(HedgesBestiary.MODID, "textures/entity/burodon.png");

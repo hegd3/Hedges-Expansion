@@ -1,4 +1,4 @@
-package com.hedge.hedges_bestiary.client.layer;
+package com.hedge.hedges_bestiary.client;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
 import net.minecraft.client.model.geom.ModelLayerLocation;

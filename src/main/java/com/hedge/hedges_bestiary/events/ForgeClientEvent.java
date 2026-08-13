@@ -2,8 +2,15 @@ package com.hedge.hedges_bestiary.events;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.client.ClientProxy;
+import com.hedge.hedges_bestiary.entity.types.HUDMount;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.client.event.ViewportEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -23,5 +30,31 @@ public class ForgeClientEvent {
         }
     }
 
+    @SubscribeEvent
+    public static void onPreRenderGuiOverlay(RenderGuiOverlayEvent.Pre event) {
+        Entity player = Minecraft.getInstance().getCameraEntity();
+        if (player != null && player.getVehicle() instanceof HUDMount && event.getOverlay().id().equals(VanillaGuiOverlay.EXPERIENCE_BAR.id())) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPostRenderGuiOverlay(RenderGuiOverlayEvent.Post event) {
+        Player player = Minecraft.getInstance().player;
+        if (event.getOverlay().id().equals(VanillaGuiOverlay.CROSSHAIR.id())&& player.getVehicle() instanceof HUDMount mount) {
+            event.getGuiGraphics().pose().pushPose();
+            mount.renderHUD(event.getGuiGraphics());
+            event.getGuiGraphics().pose().popPose();
+        }
+    }
+
+    @SubscribeEvent
+    public static void onComputeFOV(ViewportEvent.ComputeFov event) {
+
+        Player player = Minecraft.getInstance().player;
+        if (player != null && player.getVehicle() instanceof HUDMount && !HedgesBestiary.PROXY.isFirstPersonPlayer(player)) {
+            event.setFOV(90);
+        }
+    }
 
 }

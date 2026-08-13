@@ -1,7 +1,7 @@
 package com.hedge.hedges_bestiary.client.renderer;
 
 import com.hedge.hedges_bestiary.client.ClientHelpers;
-import com.hedge.hedges_bestiary.client.layer.EntityLayers;
+import com.hedge.hedges_bestiary.client.EntityLayers;
 import com.hedge.hedges_bestiary.client.models.WaveModel;
 import com.hedge.hedges_bestiary.entity.projectile.WaveEntity;
 import com.mojang.blaze3d.vertex.PoseStack;

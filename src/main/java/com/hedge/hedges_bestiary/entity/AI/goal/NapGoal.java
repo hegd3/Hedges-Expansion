@@ -30,9 +30,6 @@ public class NapGoal extends Goal {
         if (!this.sleepsInWater && (this.mob.isInFluidType() || !this.mob.onGround())) {
             return false;
         }
-        if (this.mob.hasControllingPassenger()) {
-            return false;
-        }
         this.napCD = Math.max(this.napCD - 1, 0);
         return this.napCD == 0 && this.canSleep();
     }

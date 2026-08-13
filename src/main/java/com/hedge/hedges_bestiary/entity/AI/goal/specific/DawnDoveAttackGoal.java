@@ -22,12 +22,7 @@ public class DawnDoveAttackGoal extends GenericMeleeGoal<DawnDoveEntity> {
 
     @Override
     public boolean canUse() {
-        return !this.mob.isBaby() && !this.mob.hasControllingPassenger() && super.canUse();
-    }
-
-    @Override
-    public boolean canContinueToUse() {
-        return !this.mob.hasControllingPassenger() && super.canContinueToUse();
+        return !this.mob.isBaby() && super.canUse();
     }
 
     @Override
