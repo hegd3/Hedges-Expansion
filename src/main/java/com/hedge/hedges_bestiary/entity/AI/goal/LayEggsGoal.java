@@ -1,6 +1,5 @@
 package com.hedge.hedges_bestiary.entity.AI.goal;
 
-import com.hedge.hedges_bestiary.blocks.EggBlock;
 import com.hedge.hedges_bestiary.blocks.MultiEggBlock;
 import com.hedge.hedges_bestiary.entity.types.EggLayer;
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
@@ -12,7 +11,6 @@ import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.gameevent.GameEvent;
 
 public class LayEggsGoal<E extends HBTamableAnimal & EggLayer> extends MoveToBlockGoal {

@@ -20,6 +20,7 @@ import com.hedge.hedges_bestiary.entity.types.*;
 import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.entity.util.MathHelpers;
+import com.hedge.hedges_bestiary.items.HBItems;
 import com.hedge.hedges_bestiary.message.EntityKeyMessage;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.registry.HBKeyMappings;
@@ -46,7 +47,11 @@ import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
@@ -57,11 +62,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 public class MurkEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurner, EggLayer, HUDMount {
     private static final EntityDataAccessor<Boolean> CHARGED = SynchedEntityData.defineId(MurkEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> LEFT = SynchedEntityData.defineId(MurkEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> HAS_EGG = SynchedEntityData.defineId(MurkEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final Predicate<ItemEntity> FOOD = item -> item.getItem().is(HBItems.SKIB.get());
 
     public final SmoothAnimationState swimIdleAnimationState = new SmoothAnimationState(0.25F);
     public final AnimationState biteAnimationState = new AnimationState();
@@ -143,7 +150,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                 .add(Attributes.MAX_HEALTH, 120.0D)
                 .add(Attributes.ATTACK_DAMAGE, 8.0D)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.7D)
-                .add(Attributes.ARMOR, 12)
+                .add(Attributes.ARMOR, 14)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.85)
                 .add(Attributes.FOLLOW_RANGE, 64F)
                 .add(Attributes.MOVEMENT_SPEED, 0.2F);
@@ -159,6 +166,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2, 1.6, 7.0f, 4.0f));
         this.goalSelector.addGoal(i++, new MurkAttackGoal(this));
         this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
+        this.goalSelector.addGoal(i++, new FindAndEatFoodGoal(this, FOOD));
         this.goalSelector.addGoal(i++, new NapGoal(this, false));
         this.goalSelector.addGoal(i++, new CustomSwimGoal(this, 1.0, 10, 4, 7, true));
         this.goalSelector.addGoal(i++, new RandomStrollGoal(this, 1.0) {
@@ -370,9 +378,11 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         if (this.level().isClientSide()) {
             this.setUpAnimStates();
             if (this.isCharged()) {
-                Vec3 rand = EntityHelpers.getRandomVec3(1.2);
-                this.level().addParticle(HBParticles.MURK_CHARGE.get(), this.getX() + rand.x,
-                        this.getY() + rand.y + 0.5, this.getZ() + rand.z, rand.x, rand.y + 0.2, rand.z);
+                for (int i = 0; i < 3; i++) {
+                    Vec3 rand = EntityHelpers.getRandomVec3(2);
+                    this.level().addParticle(HBParticles.MURK_CHARGE.get(), this.getX() + rand.x,
+                            this.getY() + rand.y / 2 + 2, this.getZ() + rand.z, rand.x, rand.y + 0.2, rand.z);
+                }
                 if (this.chargeProgress > 0F) {
                     this.chargeProgress = Math.max(chargeProgress - 1/600F, 0F);
                 }
@@ -783,6 +793,11 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     @Override
     public float getSpriteHeight() {
         return (this.isCharged() || this.getAnimState() == 4) ? this.chargeProgress : this.roarCD;
+    }
+
+    @Override
+    public boolean isFood(ItemStack pStack) {
+        return super.isFood(pStack) && pStack.is(HBItems.SKIB.get());
     }
 
     @Override

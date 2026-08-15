@@ -380,9 +380,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
                 double extraZ = radius * Mth.cos(angle);
                 BlockState groundState = this.level().getBlockState(this.blockPosition().below());
                 if (groundState.isSolid()) {
-                    if (level().isClientSide) {
-                        level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, groundState), true, this.getX() + extraX, this.getY(), this.getZ() + extraZ, motionX, motionY, motionZ);
-                    }
+                    level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, groundState), true, this.getX() + extraX, this.getY(), this.getZ() + extraZ, motionX, motionY, motionZ);
                 }
             }
         }

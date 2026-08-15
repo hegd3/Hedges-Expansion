@@ -8,10 +8,7 @@ import com.hedge.hedges_bestiary.items.HBItems;
 import com.hedge.hedges_bestiary.message.DanceJukeboxMessage;
 import com.hedge.hedges_bestiary.message.EntityKeyMessage;
 import com.hedge.hedges_bestiary.message.OpenTamableScreenMessage;
-import com.hedge.hedges_bestiary.registry.HBEntities;
-import com.hedge.hedges_bestiary.registry.HBParticles;
-import com.hedge.hedges_bestiary.registry.HBStructurePieces;
-import com.hedge.hedges_bestiary.registry.HBStructures;
+import com.hedge.hedges_bestiary.registry.*;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -51,8 +48,10 @@ public class HedgesBestiary
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
         HBEntities.register(modEventBus);
-        HBItems.register(modEventBus);
+
         HBBlocks.registerBlocks(modEventBus);
+        HBBlockEntities.register(modEventBus);
+        HBItems.register(modEventBus);
         HBParticles.register(modEventBus);
         HBSounds.register(modEventBus);
         HBStructures.register(modEventBus);

@@ -124,8 +124,8 @@ public class DawnDoveModel extends HBModel<DawnDoveEntity> {
 	public void setupAnim(DawnDoveEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 
-		netHeadYaw = Mth.clamp(netHeadYaw, -35.0F, 35.0F) * ((float)Math.PI / 180F);
-		headPitch = Mth.clamp(headPitch, -25.0F, 25.0F) * ((float)Math.PI / 180F);;
+		netHeadYaw = Mth.clamp(netHeadYaw, -15.0F, 15.0F) * ((float)Math.PI / 180F);
+		headPitch = Mth.clamp(headPitch, -8.0F, 8.0F) * ((float)Math.PI / 180F);;
 		if (this.young) {
 			this.applyStatic(GenericPosesAnimation.BABY_TRANSFORM_WITH_NECK);
 		}
@@ -154,6 +154,8 @@ public class DawnDoveModel extends HBModel<DawnDoveEntity> {
 		this.tail.yRot += Mth.lerp(0.3F, this.tail.yRot, tailYaw * 0.27F);
 		this.tail2.yRot += Mth.lerp(0.3F, this.tail2.yRot, tailYaw * 0.23F);
 
+		this.neck.yRot += netHeadYaw / 2;
+		this.neck.xRot += headPitch / 2;
 		this.head.yRot += netHeadYaw;
 		this.head.xRot += headPitch;
 

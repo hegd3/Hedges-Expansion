@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 
 public class ZappetRenderer extends MobRenderer<ZappetEntity, ZappetModel> {
-    private static final ResourceLocation texture = new ResourceLocation(HedgesBestiary.MODID, "textures/entity/zappet/zappet.png");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(HedgesBestiary.MODID, "textures/entity/zappet/zappet.png");
 
     public ZappetRenderer(EntityRendererProvider.Context pContext) {
         super(pContext, new ZappetModel(pContext.bakeLayer(EntityLayers.ZAPPET_LAYER)), 0.7f);
@@ -19,6 +19,6 @@ public class ZappetRenderer extends MobRenderer<ZappetEntity, ZappetModel> {
 
     @Override
     public ResourceLocation getTextureLocation(ZappetEntity pEntity) {
-        return texture;
+        return TEXTURE;
     }
 }

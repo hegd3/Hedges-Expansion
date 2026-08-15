@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class GroupFollowLeaderGoal<E extends LivingEntity & HBGroupMob<E>> extends Goal{
-    private static final int INTERVAL_TICKS = 200;
     protected final E mob;
     private int timeToRecalcPath;
     private int nextStartTick;

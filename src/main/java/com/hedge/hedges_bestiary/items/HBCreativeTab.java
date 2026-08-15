@@ -41,6 +41,7 @@ public class HBCreativeTab {
                         // foods
                         output.accept(HBItems.RAW_URKMEAT.get());
                         output.accept(HBItems.COOKED_URKMEAT.get());
+                        output.accept(HBItems.SKIB.get());
 
                         // buckets
                         output.accept(HBItems.GILD_GLIDER_BUCKET.get());

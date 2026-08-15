@@ -41,20 +41,23 @@ public class ForgeClientEvent {
     @SubscribeEvent
     public static void onPostRenderGuiOverlay(RenderGuiOverlayEvent.Post event) {
         Player player = Minecraft.getInstance().player;
-        if (event.getOverlay().id().equals(VanillaGuiOverlay.CROSSHAIR.id())&& player.getVehicle() instanceof HUDMount mount) {
+        if (event.getOverlay().id().equals(VanillaGuiOverlay.MOUNT_HEALTH.id())&& player.getVehicle() instanceof HUDMount mount) {
             event.getGuiGraphics().pose().pushPose();
             mount.renderHUD(event.getGuiGraphics());
             event.getGuiGraphics().pose().popPose();
         }
     }
 
+    /*
     @SubscribeEvent
     public static void onComputeFOV(ViewportEvent.ComputeFov event) {
 
         Player player = Minecraft.getInstance().player;
         if (player != null && player.getVehicle() instanceof HUDMount && !HedgesBestiary.PROXY.isFirstPersonPlayer(player)) {
-            event.setFOV(90);
+            event.setFOV(10);
         }
     }
+
+     */
 
 }

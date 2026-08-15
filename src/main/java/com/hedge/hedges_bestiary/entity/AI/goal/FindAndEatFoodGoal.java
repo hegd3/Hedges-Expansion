@@ -1,0 +1,69 @@
+package com.hedge.hedges_bestiary.entity.AI.goal;
+
+import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+
+import java.util.EnumSet;
+import java.util.List;
+import java.util.function.Predicate;
+
+public class FindAndEatFoodGoal extends Goal {
+    private final HBTamableAnimal mob;
+    private final Predicate<ItemEntity> food;
+    private int attemptTicks;
+    public FindAndEatFoodGoal(HBTamableAnimal mob, Predicate<ItemEntity> food) {
+        this.mob = mob;
+        this.food = food;
+        this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+    }
+
+    public boolean canUse() {
+        if (!this.mob.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty()) {
+            return false;
+        }
+        if (this.mob.getRandom().nextInt(reducedTickDelay(10)) != 0) {
+            return false;
+        } else {
+            List<ItemEntity> list = this.mob.level().getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(8.0D, 8.0D, 8.0D), food);
+            return !list.isEmpty() && this.mob.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty();
+        }
+    }
+
+    @Override
+    public boolean canContinueToUse() {
+        return this.attemptTicks < 200;
+    }
+
+    public void tick() {
+        this.attemptTicks++;
+        List<ItemEntity> list = this.mob.level().getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(8.0D, 8.0D, 8.0D), food);
+        ItemStack itemstack = this.mob.getItemBySlot(EquipmentSlot.MAINHAND);
+        if (list.isEmpty()) {
+            this.attemptTicks = 200;
+            return;
+        }
+        if (this.mob.distanceTo(list.get(0)) <= this.mob.getBbWidth()) {
+            list.get(0).discard();
+            this.mob.playSound(SoundEvents.GENERIC_EAT);
+            this.mob.heal(this.mob.getMaxHealth() / 10);
+            this.attemptTicks = 200;
+        }
+        else if (this.mob.getNavigation().isDone() && itemstack.isEmpty()) {
+            this.mob.getNavigation().moveTo(list.get(0),1.2F);
+        }
+
+    }
+
+    public void start() {
+        this.attemptTicks = 0;
+        List<ItemEntity> list = this.mob.level().getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(8.0D, 8.0D, 8.0D), food);
+        if (!list.isEmpty()) {
+            this.mob.getNavigation().moveTo(list.get(0),1.2F);
+        }
+
+    }
+}

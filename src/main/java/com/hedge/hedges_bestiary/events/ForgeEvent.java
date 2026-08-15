@@ -1,12 +1,15 @@
 package com.hedge.hedges_bestiary.events;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
+import com.hedge.hedges_bestiary.entity.living.MurkEntity;
+import com.hedge.hedges_bestiary.entity.living.ambientfish.SkibEntity;
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.JukeboxBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -18,6 +21,7 @@ public class ForgeEvent {
 
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+
         BlockPos blockpos = event.getPos();
 
         BlockState state = event.getLevel().getBlockState(blockpos);
@@ -33,4 +37,6 @@ public class ForgeEvent {
             }
         }
     }
+
+
 }

@@ -77,7 +77,10 @@ public class SkibModel extends HBModel<SkibEntity> {
 	@Override
 	public void setupAnim(SkibEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		this.animate(entity.idleAnimationState, SkibAnimation.IDLE, ageInTicks, 0.5f);
+		this.animate(entity.idleAnimationState, SkibAnimation.IDLE, ageInTicks, 0.25f);
 		this.animateWalk(SkibAnimation.WALK, limbSwing, limbSwingAmount, 2.5f, 2.5f);
+		this.animateSmooth(entity.scratchAnimationState, SkibAnimation.SCRATCH, ageInTicks, 1.5f);
+		this.animateSmooth(entity.hideAnimationState, SkibAnimation.HIDE, ageInTicks, 1f);
+
 	}
 }

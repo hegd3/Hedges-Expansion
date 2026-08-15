@@ -2,6 +2,7 @@ package com.hedge.hedges_bestiary.client.layer;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.client.models.EndgelModel;
+import com.hedge.hedges_bestiary.client.renderer.EndgelRenderer;
 import com.hedge.hedges_bestiary.entity.living.EndgelEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -16,7 +17,7 @@ public class EndgelGlowLayer extends RenderLayer<EndgelEntity, EndgelModel> {
 
     private static final RenderType texture = RenderType.eyes(new ResourceLocation(HedgesBestiary.MODID, "textures/entity/endgel/endgel_glow.png"));
 
-    public EndgelGlowLayer(RenderLayerParent<EndgelEntity, EndgelModel> pRenderer) {
+    public EndgelGlowLayer(EndgelRenderer pRenderer) {
         super(pRenderer);
     }
 

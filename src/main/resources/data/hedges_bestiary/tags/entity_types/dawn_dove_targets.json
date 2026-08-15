@@ -7,7 +7,10 @@
     "minecraft:mule",
     "minecraft:horse",
     "minecraft:donkey",
+    "minecraft:goat",
+    "minecraft:llama",
     "minecraft:villager",
+    "minecraft:pillager",
     "hedges_bestiary:zappet"
   ]
 }

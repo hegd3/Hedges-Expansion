@@ -3,6 +3,7 @@ package com.hedge.hedges_bestiary.client.layer;
 import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.client.HBRenderTypes;
 import com.hedge.hedges_bestiary.client.models.ZappetModel;
+import com.hedge.hedges_bestiary.client.renderer.ZappetRenderer;
 import com.hedge.hedges_bestiary.entity.living.ZappetEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -17,7 +18,7 @@ public class ZappetGlowLayer extends RenderLayer<ZappetEntity, ZappetModel> {
 
     private static final RenderType TEXTURE = HBRenderTypes.getEyesAlphaEnabled(new ResourceLocation(HedgesBestiary.MODID, "textures/entity/zappet/zappet_glow.png"));
 
-    public ZappetGlowLayer(RenderLayerParent<ZappetEntity, ZappetModel> pRenderer) {
+    public ZappetGlowLayer(ZappetRenderer pRenderer) {
         super(pRenderer);
     }
 

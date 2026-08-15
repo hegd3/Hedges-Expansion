@@ -1,10 +1,16 @@
 package com.hedge.hedges_bestiary.entity.living.ambientfish;
 
-import com.hedge.hedges_bestiary.entity.living.MurkEntity;
+import com.hedge.hedges_bestiary.entity.AI.goal.IdleInPlaceGoal;
 import com.hedge.hedges_bestiary.entity.types.HBAquaticMob;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
+import com.hedge.hedges_bestiary.entity.types.IdleAnimMob;
+import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
+import com.hedge.hedges_bestiary.registry.HBParticles;
+import com.hedge.hedges_bestiary.util.SmoothAnimationState;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
@@ -16,11 +22,16 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 
-public class SkibEntity extends HBAquaticMob {
-    private static final EntityDataAccessor<Boolean> CHARGED = SynchedEntityData.defineId(SkibEntity.class, EntityDataSerializers.BOOLEAN);
+public class SkibEntity extends HBAquaticMob implements IdleAnimMob {
+    private float prevGlowProgress = 0.0f;
+    public float glowProgress = 0.0f;
+
+    public final SmoothAnimationState scratchAnimationState = new SmoothAnimationState(0.25F);
+    public final SmoothAnimationState hideAnimationState = new SmoothAnimationState(0.1F);
 
     public SkibEntity(EntityType<? extends SkibEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -33,14 +44,14 @@ public class SkibEntity extends HBAquaticMob {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(CHARGED, false);
     }
 
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new PanicGoal(this, 1.2D));
-        this.goalSelector.addGoal(1, new RandomStrollGoal(this, 1.0f));
-        this.goalSelector.addGoal(2, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(1, new IdleInPlaceGoal<>(this));
+        this.goalSelector.addGoal(2, new RandomStrollGoal(this, 1.0f));
+        this.goalSelector.addGoal(3, new RandomLookAroundGoal(this));
     }
 
     public static AttributeSupplier.Builder bakeAttributes() {
@@ -53,8 +64,88 @@ public class SkibEntity extends HBAquaticMob {
     }
 
     @Override
+    protected void clientTick() {
+        super.clientTick();
+        this.prevGlowProgress = this.glowProgress;
+        this.glowProgress+=0.01F;
+        if (this.glowProgress >= 1) {
+            this.glowProgress = 0.0F;
+        }
+        if (this.getAnimState() == 1) {
+            float radius = this.getBbWidth() * 0.55F;
+            float particleCount = (2 + random.nextInt(2)) * radius;
+            for (int i1 = 0; i1 < particleCount; i1++) {
+                double motionX = (getRandom().nextFloat() - 0.5F) * 0.7D;
+                double motionY = getRandom().nextFloat() * 0.7D + 0.8F;
+                double motionZ = (getRandom().nextFloat() - 0.5F) * 0.7D;
+                float angle = (0.01745329251F * (this.yBodyRot + (i1 / particleCount) * 360F));
+                double extraX = radius * Mth.sin((float) (Math.PI + angle));
+                double extraZ = radius * Mth.cos(angle);
+                BlockState groundState = this.level().getBlockState(this.blockPosition().below());
+                if (groundState.isSolid()) {
+                    level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, groundState), true, this.getX() + extraX, this.getY(), this.getZ() + extraZ, motionX, motionY, motionZ);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void setUpAnimStates() {
+        super.setUpAnimStates();
+        this.scratchAnimationState.animateWhen(this.getAnimState() == 1, this.tickCount);
+        this.hideAnimationState.animateWhen(this.getAnimState() == 2, this.tickCount);
+
+    }
+
+    @Override
+    protected void serverTick() {
+        super.serverTick();
+        if (this.getAnimState() > 0) {
+            animTicks++;
+            switch (this.getAnimState()) {
+                case 1 -> {
+                    if (this.animTicks >= 200) {
+                        if (this.getRandom().nextBoolean()) {
+                            this.setAnimState(2);
+                        } else {
+                            this.resetAnimState();
+                        }
+                    } else if (this.getLastHurtMob() != null) {
+                        this.resetAnimState();
+                    }
+                }
+                case 2 -> {
+                    if (this.animTicks >= 400 || this.getLastHurtMob() != null) {
+                        this.resetAnimState();
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean hurt(DamageSource pSource, float pAmount) {
+        if (pSource.is(DamageTypes.PLAYER_ATTACK) || pSource.is(DamageTypes.MOB_ATTACK)) {
+            if (pSource.getEntity() != null) {
+                if (this.level().isClientSide()) {
+                    for (int i = 0; i < 10; i++) {
+                        Vec3 rand = EntityHelpers.getRandomVec3(1);
+                        this.level().addParticle(HBParticles.MURK_CHARGE.get(), this.getX() + rand.x,
+                                this.getY() + rand.y / 2 + 0.7, this.getZ() + rand.z, rand.x, rand.y + 0.2, rand.z);
+                    }
+                    this.glowProgress = 0.5F;
+                }
+                pSource.getEntity().hurt(this.damageSources().thorns(this), 1.5F);
+            }
+        }
+        return super.hurt(pSource, pAmount);
+    }
+
+    @Override
     public void travel(Vec3 pTravelVector) {
-        if (this.isEffectiveAi() && this.isInWater()) {
+        if (this.getAnimState() > 0) {
+            super.travel(Vec3.ZERO);
+        } else if (this.isEffectiveAi() && this.isInWater()) {
             this.moveRelative(this.getSpeed(), pTravelVector);
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(0.6F));
@@ -69,6 +160,10 @@ public class SkibEntity extends HBAquaticMob {
         }
     }
 
+    public float getGlowProgress(float partialTicks) {
+        return (prevGlowProgress + (glowProgress - prevGlowProgress) * partialTicks);
+    }
+
     @Override
     public MobType getMobType() {
         return MobType.ARTHROPOD;
@@ -79,11 +174,28 @@ public class SkibEntity extends HBAquaticMob {
 
     }
 
-    public boolean isCharged() {
-        return this.entityData.get(CHARGED);
+    @Override
+    public void playIdle() {
     }
 
-    public void setCharged(boolean b) {
-        this.entityData.set(CHARGED, b);
+    @Override
+    public boolean canPlayIdle() {
+        return false;
+    }
+
+    @Override
+    public void playStaticIdle() {
+        this.setAnimState(1);
+
+    }
+
+    @Override
+    public boolean canPlayStaticIdle() {
+        return this.getAnimState() == 0 && this.getLastHurtMob() == null;
+    }
+
+    @Override
+    public boolean isStaticIdling() {
+        return this.getAnimState() > 0;
     }
 }

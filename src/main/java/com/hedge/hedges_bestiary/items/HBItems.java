@@ -49,6 +49,8 @@ public class HBItems {
     public static final RegistryObject<Item> COOKED_URKMEAT = ITEMS.register("cooked_urkmeat",
             () -> new Item(new Item.Properties().food(HBFoodTypes.COOKED_URKMEAT)));
 
+    public static final RegistryObject<Item> SKIB = ITEMS.register("skib",
+            () -> new Item(new Item.Properties().food(HBFoodTypes.SKIB)));
 
     // BUCKETS
     public static final RegistryObject<Item> GILD_GLIDER_BUCKET = createBucket("gild_glider", HBEntities.GILD_GLIDER);
