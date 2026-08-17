@@ -45,6 +45,7 @@ import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -66,12 +67,12 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     private static final EntityDataAccessor<Boolean> HAS_EGG = SynchedEntityData.defineId(DawnDoveEntity.class, EntityDataSerializers.BOOLEAN);
 
     private static final Predicate<LivingEntity> DAWN_DOVE_TARGETS = living -> living.getType().is(HBTags.DAWN_DOVE_TARGETS);
-
+    private static final Predicate<ItemEntity> FOOD_ENTITIES = item -> item.getItem().is(HBTags.DAWN_DOVE_FOOD);
     public final SmoothAnimationState glideAnimationState = new SmoothAnimationState(0.1f);
     public final SmoothAnimationState flyUpAnimationState = new SmoothAnimationState(0.1f);
     public final SmoothAnimationState flyForwardAnimationState = new SmoothAnimationState(0.1f);
     public final SmoothAnimationState clawAttackAnimationState = new SmoothAnimationState();
-
+    public final SmoothAnimationState eatAnimationState = new SmoothAnimationState(0.1f);
     public final AnimationState biteAnimationState = new AnimationState();
     public final AnimationState shootAnimationState = new AnimationState();
 
@@ -83,6 +84,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     private int clawAttackCD;
     private int attackCD;
     private int shootCD;
+    private int eatProgress = 0;
 
     private int tameAttempts = 3;
     private Entity grabbedEntity;
@@ -110,7 +112,8 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         this.goalSelector.addGoal(i++, new LayEggsGoal<>(this, 100, 1.0f));
         this.goalSelector.addGoal(i++, new FlyerFollowOwnerGoal(this, 1.2D, 1.6D, 8.0f, 8.0f));
         this.goalSelector.addGoal(i++, new DawnDoveAttackGoal(this));
-        this.goalSelector.addGoal(i++, new HBTemptGoal(this, 1.1f, Ingredient.of(Items.BEEF), false));
+        this.goalSelector.addGoal(i++, new HBTemptGoal(this, 1.1f, Ingredient.of(HBTags.DAWN_DOVE_FOOD), false));
+        this.goalSelector.addGoal(i++, new FindAndEatFoodGoal(this, FOOD_ENTITIES));
         this.goalSelector.addGoal(i++, new FlyerMoveToHomePosGoal(this, 1.0D, 32, 2d));
         this.goalSelector.addGoal(i++, new NapGoal(this, false));
         this.goalSelector.addGoal(i++, new RandomlySitGoal(this));
@@ -376,10 +379,23 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
             if (this.onGround() && this.meterAmount < 1.0F && this.tickCount % 5 == 0) {
                 this.meterAmount+=0.02F;
             }
+            if (this.eatAnimationState.isStarted() && this.tickCount % 10 == 0) {
+                this.addEatingParticles();
+            }
         } else {
             this.attackCD = Math.max(this.attackCD - 1, 0);
             this.shootCD = Math.max(this.shootCD - 1, 0);
             this.clawAttackCD = Math.max(this.clawAttackCD - 1, 0);
+            if (!this.getMainHandItem().isEmpty()) {
+                this.eatProgress++;
+                if (this.eatProgress > 20) {
+                    this.eatProgress = 0;
+                    this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+                    this.heal(this.getMaxHealth() / 5);
+                } else if (this.eatProgress % 5 == 0) {
+                    this.playSound(SoundEvents.GENERIC_EAT);
+                }
+            }
             if (this.getAnimState() > 0) {
                 this.animTicks++;
                 switch(this.getAnimState()) {
@@ -481,6 +497,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         this.flyUpAnimationState.animateWhen(flying && (delta.y >= 0 || delta.horizontalDistanceSqr() < 0.002 || this.getAnimState() == 3), this.tickCount);
         this.flyForwardAnimationState.animateWhen(flying && delta.horizontalDistanceSqr() >= 0.002 && flyUpAnimationState.isStarted(), this.tickCount);
         this.glideAnimationState.animateWhen(flying && !flyUpAnimationState.isStarted(), this.tickCount);
+        this.eatAnimationState.animateWhen(!this.getMainHandItem().isEmpty(), this.tickCount);
         this.biteAnimationState.animateWhen(this.getAnimState() == 1, this.tickCount);
         this.shootAnimationState.animateWhen(this.getAnimState() == 2, this.tickCount);
         this.clawAttackAnimationState.animateWhen(this.getAnimState() == 3, this.tickCount);
@@ -583,7 +600,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
 
     @Override
     public boolean isFood(ItemStack pStack) {
-        return this.isTame() && pStack.is(Items.BEEF);
+        return this.isTame() && pStack.is(HBTags.DAWN_DOVE_FOOD);
     }
 
     @Override

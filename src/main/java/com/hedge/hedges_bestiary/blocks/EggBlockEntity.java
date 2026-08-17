@@ -26,7 +26,7 @@ public class EggBlockEntity<E extends EntityType<?>> extends BlockEntity {
 
     protected final RegistryObject<E> toHatch;
     private int ticksTillHatch = 250;
-    private String ownerUUID;
+    private String ownerUUID = "";
 
     public EggBlockEntity(BlockPos pos, BlockState blockState) {
         super(HBBlockEntities.EGG_BLOCK_ENTITY.get(), pos, blockState);
@@ -42,6 +42,8 @@ public class EggBlockEntity<E extends EntityType<?>> extends BlockEntity {
     public @NotNull ModelData getModelData() {
         return super.getModelData();
     }
+
+
 
     @Override
     protected void saveAdditional(CompoundTag tag) {
@@ -86,8 +88,6 @@ public class EggBlockEntity<E extends EntityType<?>> extends BlockEntity {
                         baby.setBaby(true);
                         baby.setTame(true);
                         baby.setOwnerUUID(this.getOwnerUUID());
-                        baby.setCommand(1);
-                        baby.setOrderedToSit(true);
                         baby.finalizeSpawn((ServerLevelAccessor) level, level.getCurrentDifficultyAt(pos), MobSpawnType.BREEDING, null, null);
                         baby.playSound(SoundEvents.TURTLE_EGG_HATCH);
                         level.addFreshEntity(baby);
@@ -100,8 +100,6 @@ public class EggBlockEntity<E extends EntityType<?>> extends BlockEntity {
                     baby.setBaby(true);
                     baby.setTame(true);
                     baby.setOwnerUUID(this.getOwnerUUID());
-                    baby.setCommand(1);
-                    baby.setOrderedToSit(true);
                     baby.finalizeSpawn((ServerLevelAccessor) level, level.getCurrentDifficultyAt(pos), MobSpawnType.BREEDING, null, null);
                     baby.playSound(SoundEvents.TURTLE_EGG_HATCH);
                     level.addFreshEntity(baby);
@@ -136,6 +134,7 @@ public class EggBlockEntity<E extends EntityType<?>> extends BlockEntity {
     }
 
     public UUID getOwnerUUID() {
+        if (ownerUUID.isEmpty()) return UUID.randomUUID();
         return UUID.fromString(ownerUUID);
     }
 

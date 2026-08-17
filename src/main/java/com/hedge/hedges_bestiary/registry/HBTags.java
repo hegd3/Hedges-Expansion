@@ -17,6 +17,10 @@ public class HBTags {
 
     public static final TagKey<EntityType<?>> TEARACUDA_AVOIDS = registerEntityTag("tearacuda_avoids");
 
+    public static final TagKey<Item> DAWN_DOVE_FOOD = registerItemTag("dawn_dove_food");
+
+
+
     private static TagKey<EntityType<?>> registerEntityTag(String name) {
         return TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(HedgesBestiary.MODID, name));
     }

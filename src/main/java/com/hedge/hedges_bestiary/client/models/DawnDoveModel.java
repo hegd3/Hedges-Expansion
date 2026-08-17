@@ -137,6 +137,7 @@ public class DawnDoveModel extends HBModel<DawnDoveEntity> {
 		this.animateSmooth(entity.glideAnimationState, DawnDoveAnimation.GLIDE, ageInTicks, limbSwingAmount * 0.25f + 0.7f);
 		this.animateSmooth(entity.napAnimationState, DawnDoveAnimation.SLEEP, ageInTicks, 1f);
 		this.animateSmooth(entity.clawAttackAnimationState, DawnDoveAnimation.CLAW_ATTACK, ageInTicks, 1f);
+		this.animateSmooth(entity.eatAnimationState, DawnDoveAnimation.BITE, ageInTicks, 2f);
 		this.animate(entity.biteAnimationState, DawnDoveAnimation.BITE, ageInTicks);
 		this.animate(entity.shootAnimationState, DawnDoveAnimation.SHOOT, ageInTicks);
 		if (entity.isFlying()) {

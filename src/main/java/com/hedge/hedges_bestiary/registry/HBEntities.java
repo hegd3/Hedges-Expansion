@@ -5,7 +5,7 @@ import com.hedge.hedges_bestiary.entity.living.*;
 import com.hedge.hedges_bestiary.entity.living.ambientfish.GildGliderEntity;
 import com.hedge.hedges_bestiary.entity.living.ambientfish.ChubEntity;
 import com.hedge.hedges_bestiary.entity.living.ambientfish.SkibEntity;
-import com.hedge.hedges_bestiary.entity.projectile.EndgelScream;
+import com.hedge.hedges_bestiary.entity.projectile.EndgelBullet;
 import com.hedge.hedges_bestiary.entity.projectile.DawnDoveFireBall;
 import com.hedge.hedges_bestiary.entity.projectile.MurkSmoke;
 import com.hedge.hedges_bestiary.entity.projectile.WaveEntity;
@@ -72,9 +72,9 @@ public class HBEntities {
             ENTITY_TYPES.register("endgel", () -> EntityType.Builder.of(EndgelEntity::new, MobCategory.MONSTER)
                     .sized(2.8f, 2.4f).build("endgel"));
 
-    public static final RegistryObject<EntityType<EndgelScream>> BANSHEE_SCREAM =
-            ENTITY_TYPES.register("banshee_scream", () -> EntityType.Builder.of(EndgelScream::new, MobCategory.MISC)
-                    .sized(0.8f, 0.8f).build("banshee_scream"));
+    public static final RegistryObject<EntityType<EndgelBullet>> ENDGEL_BULLET =
+            ENTITY_TYPES.register("endgel_bullet", () -> EntityType.Builder.of(EndgelBullet::new, MobCategory.MISC)
+                    .sized(0.8f, 0.8f).build("endgel_bullet"));
 
     public static final RegistryObject<EntityType<DawnDoveEntity>> DAWN_DOVE =
             ENTITY_TYPES.register("dawn_dove", () -> EntityType.Builder.of(DawnDoveEntity::new, MobCategory.CREATURE)

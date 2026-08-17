@@ -1,4 +1,4 @@
-package com.hedge.hedges_bestiary.client.renderer;
+package com.hedge.hedges_bestiary.client.renderer.projectile;
 
 import com.hedge.hedges_bestiary.client.ClientHelpers;
 import com.hedge.hedges_bestiary.client.EntityLayers;

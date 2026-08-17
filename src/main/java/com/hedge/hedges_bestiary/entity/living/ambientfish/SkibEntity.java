@@ -8,6 +8,7 @@ import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -125,7 +126,7 @@ public class SkibEntity extends HBAquaticMob implements IdleAnimMob {
 
     @Override
     public boolean hurt(DamageSource pSource, float pAmount) {
-        if (pSource.is(DamageTypes.PLAYER_ATTACK) || pSource.is(DamageTypes.MOB_ATTACK)) {
+        if (!pSource.is(DamageTypeTags.IS_PROJECTILE)) {
             if (pSource.getEntity() != null) {
                 if (this.level().isClientSide()) {
                     for (int i = 0; i < 10; i++) {

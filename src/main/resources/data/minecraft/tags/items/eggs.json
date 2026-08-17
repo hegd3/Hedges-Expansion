@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "hedges_bestiary:murk_egg",
+    "hedges_bestiary:dawn_dove_egg",
+    "hedges_bestiary:gurk_egg",
+    "hedges_bestiary:zappet_egg"
+  ]
+}

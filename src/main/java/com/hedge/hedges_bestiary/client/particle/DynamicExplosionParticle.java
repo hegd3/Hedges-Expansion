@@ -61,4 +61,16 @@ public class DynamicExplosionParticle extends TextureSheetParticle {
             return new DynamicExplosionParticle(pLevel, pX, pY, pZ, this.sprites, 7, 2.7f);
         }
     }
+
+    @OnlyIn(Dist.CLIENT)
+    public static class EndgelExplodeProvider implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet sprites;
+
+        public EndgelExplodeProvider(SpriteSet pSprites) {
+            this.sprites = pSprites;
+        }
+        public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
+            return new DynamicExplosionParticle(pLevel, pX, pY, pZ, this.sprites, 9, 3.3f);
+        }
+    }
 }

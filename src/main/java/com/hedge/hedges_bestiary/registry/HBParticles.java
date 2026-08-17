@@ -21,6 +21,8 @@ public class HBParticles {
     public static final RegistryObject<SimpleParticleType> FIREBALL = DEF_REG.register("fireball", ()-> new SimpleParticleType(false));
     public static final RegistryObject<SimpleParticleType> SLEEP = DEF_REG.register("sleep", ()-> new SimpleParticleType(false));
     public static final RegistryObject<SimpleParticleType> ENDGEL_TRAIL = DEF_REG.register("endgel_trail", ()-> new SimpleParticleType(false));
+    public static final RegistryObject<SimpleParticleType> ENDGEL_EXPLODE = DEF_REG.register("endgel_explode", ()-> new SimpleParticleType(false));
+    public static final RegistryObject<SimpleParticleType> ENDGEL_BULLET = DEF_REG.register("endgel_bullet", ()-> new SimpleParticleType(false));
 
     public static final RegistryObject<ParticleType<SmokeParticleOptions>> SMOKE = DEF_REG.register("smoke", ()-> new ParticleType<>(true, SmokeParticleOptions.DESERIALIZER) {
         @Override

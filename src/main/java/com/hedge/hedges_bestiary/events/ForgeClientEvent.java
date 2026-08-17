@@ -48,16 +48,16 @@ public class ForgeClientEvent {
         }
     }
 
-    /*
-    @SubscribeEvent
-    public static void onComputeFOV(ViewportEvent.ComputeFov event) {
 
-        Player player = Minecraft.getInstance().player;
-        if (player != null && player.getVehicle() instanceof HUDMount && !HedgesBestiary.PROXY.isFirstPersonPlayer(player)) {
-            event.setFOV(10);
+    @SubscribeEvent
+    public static void computeCameraAngles(ViewportEvent.ComputeCameraAngles event) {
+
+        Entity player = Minecraft.getInstance().getCameraEntity();
+        if (player != null && player.getVehicle() instanceof HUDMount && event.getCamera().isDetached()) {
+            event.getCamera().move(-3, 0.5, 0);
         }
     }
 
-     */
+
 
 }

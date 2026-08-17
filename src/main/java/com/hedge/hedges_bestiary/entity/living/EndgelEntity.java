@@ -2,16 +2,14 @@ package com.hedge.hedges_bestiary.entity.living;
 
 import com.hedge.hedges_bestiary.entity.AI.control.FlyingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.FlyingWanderGoal;
+import com.hedge.hedges_bestiary.entity.AI.goal.specific.EndgelAttackGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
-import com.hedge.hedges_bestiary.entity.projectile.EndgelScream;
+import com.hedge.hedges_bestiary.entity.projectile.EndgelBullet;
 import com.hedge.hedges_bestiary.entity.types.HBMonster;
-import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.registry.HBParticles;
-import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -26,13 +24,11 @@ import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.List;
 
 public class EndgelEntity extends HBMonster {
     private static final EntityDataAccessor<Boolean> LEFT = SynchedEntityData.defineId(EndgelEntity.class, EntityDataSerializers.BOOLEAN);
@@ -42,9 +38,11 @@ public class EndgelEntity extends HBMonster {
     private float prevTrail;
     private float trail = 0.0f;
     private int spinCD = 0;
-
+    private int attackCD = 0;
+    private int projAngle = 0;
 
     public final AnimationState spinAnimationState = new AnimationState();
+    public final AnimationState shootAnimationState = new AnimationState();
 
     public EndgelEntity(EntityType<? extends EndgelEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -54,11 +52,11 @@ public class EndgelEntity extends HBMonster {
 
     public static AttributeSupplier.Builder bakeAttributes(){
         return Monster.createLivingAttributes()
-                .add(Attributes.MAX_HEALTH, 180.0D)
+                .add(Attributes.MAX_HEALTH, 100.0D)
                 .add(Attributes.ATTACK_DAMAGE, 6.0D)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.2D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.5)
-                .add(Attributes.FOLLOW_RANGE, 35F)
+                .add(Attributes.FOLLOW_RANGE, 70F)
                 .add(Attributes.MOVEMENT_SPEED, 0.18F);
     }
 
@@ -72,10 +70,11 @@ public class EndgelEntity extends HBMonster {
 
     @Override
     protected void registerGoals() {
+        this.goalSelector.addGoal(0, new EndgelAttackGoal(this));
         this.goalSelector.addGoal(1, new FlyingWanderGoal(this, 1.0f, 35, 25));
 
-        //this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this));
-        //this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, LivingEntity.class, true));
+        this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, LivingEntity.class, true));
 
     }
 
@@ -108,16 +107,44 @@ public class EndgelEntity extends HBMonster {
         if (this.getAnimState() > 0) {
             this.animTicks++;
             switch (this.getAnimState()) {
+
                 case 1 -> {
-                    if (this.animTicks >= 36) {
+                    if (this.animTicks == 25) {
+                        for (int i = -45; i < 45; i+=45) {
+                            for (int j = -25; j < 25; j+=25) {
+                                EndgelBullet scream = new EndgelBullet(HBEntities.ENDGEL_BULLET.get(), this.level());
+                                scream.moveTo(this.position());
+                                scream.shootFromRotation(this, this.getXRot() + j, this.getYRot() + i, 0.0f, 2, 0);
+                                scream.setTarget(this.getTarget());
+                                level().addFreshEntity(scream);
+                            }
+                        }
+                    } else if (this.animTicks > 34) {
+                        this.resetAnimState();
+                        this.attackCD = 200;
+                    }
+                }
+                case 2 -> {
+                    if (this.animTicks > 69) {
                         this.resetAnimState();
                         this.setLeft(this.getRandom().nextBoolean());
                         this.spinCD = 100 + this.getRandom().nextInt(60);
+                    } else if (this.animTicks < 50 && this.animTicks % 5 == 0) {
+                        EndgelBullet scream = new EndgelBullet(HBEntities.ENDGEL_BULLET.get(), this.level());
+                        Vec3 v = new Vec3(Mth.sin(projAngle * Mth.DEG_TO_RAD) * 2, Mth.cos(projAngle * Mth.DEG_TO_RAD) * 2, 0);
+
+                        v = v.yRot(-(this.getYRot() + (this.getLeft() ? -90 : 90)) * Mth.DEG_TO_RAD);
+
+                        scream.moveTo(this.position().add(v));
+                        scream.shootFromRotation(this, this.projAngle, this.getLeft() ? -90 + this.getYRot() : 90 + this.getYRot(), 0.0f, 2, 0);
+                        scream.setTarget(this.getTarget());
+                        level().addFreshEntity(scream);
+                        this.projAngle+= 36;
                     }
                 }
             }
         }
-
+        this.attackCD = Math.max(this.attackCD - 1, 0);
         this.spinCD = Math.max(this.spinCD - 1, 0);
     }
 
@@ -126,8 +153,9 @@ public class EndgelEntity extends HBMonster {
     @Override
     public void setUpAnimStates() {
         int state = this.getAnimState();
-        this.idleAnimationState.animateWhen(this.isAlive() && state != 4, this.tickCount);
-        this.spinAnimationState.animateWhen(state == 1, this.tickCount);
+        this.idleAnimationState.animateWhen(true, this.tickCount);
+        this.shootAnimationState.animateWhen(state == 1, this.tickCount);
+        this.spinAnimationState.animateWhen(state == 2, this.tickCount);
     }
 
     @Override
@@ -174,16 +202,20 @@ public class EndgelEntity extends HBMonster {
         return this.spinCD == 0;
     }
 
+    public void setSpin() {
+        this.setAnimState(2);
+        this.projAngle = -180;
+    }
+
 
     @Override
     public void setAttacking() {
-        this.getNavigation().stop();
-        this.setAnimState(2);
+        this.setAnimState(1);
     }
 
     @Override
     public boolean canUseAttack(LivingEntity entity, double attackReach, double dist) {
-        return attackReach >= dist;
+        return this.attackCD == 0 && attackReach >= dist;
     }
 
     @Override
@@ -198,4 +230,15 @@ public class EndgelEntity extends HBMonster {
         this.roll = prevRoll + (targetRoll - prevRoll) * 0.05F;
     }
 
+    @Override
+    public void handleEntityEvent(byte pId) {
+        if (pId == 39) {
+            Vec3 rand = EntityHelpers.getRandomVec3(3.5);
+            this.level().addParticle(HBParticles.ENDGEL_EXPLODE.get(), this.getX() + rand.x + rand.x,
+                    this.getY() + rand.y + 1, this.getZ() + rand.z, rand.x, rand.y + 0.2, rand.z);
+
+        } else {
+            super.handleEntityEvent(pId);
+        }
+    }
 }

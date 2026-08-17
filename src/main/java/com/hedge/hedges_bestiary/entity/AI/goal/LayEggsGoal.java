@@ -1,5 +1,6 @@
 package com.hedge.hedges_bestiary.entity.AI.goal;
 
+import com.hedge.hedges_bestiary.blocks.EggBlockEntity;
 import com.hedge.hedges_bestiary.blocks.MultiEggBlock;
 import com.hedge.hedges_bestiary.entity.types.EggLayer;
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
@@ -12,6 +13,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+
+import java.util.Objects;
 
 public class LayEggsGoal<E extends HBTamableAnimal & EggLayer> extends MoveToBlockGoal {
 
@@ -54,6 +57,9 @@ public class LayEggsGoal<E extends HBTamableAnimal & EggLayer> extends MoveToBlo
                     eggLayer.getEgg();
             level.setBlockAndUpdate(blockpos1, egg);
             level.gameEvent(GameEvent.BLOCK_PLACE, blockpos1, GameEvent.Context.of(this.mob, egg));
+            if (this.eggLayer.getOwnerUUID() != null && level.getBlockEntity(blockpos1) instanceof EggBlockEntity<?> eggBlockEntity) {
+                eggBlockEntity.setOwnerUUID(eggLayer.getOwnerUUID().toString());
+            }
             this.eggLayer.setHasEgg(false);
             this.eggLayer.setInLoveTime(600);
             this.mob.level().broadcastEntityEvent(this.mob, (byte) 78);

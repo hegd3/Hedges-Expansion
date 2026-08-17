@@ -36,7 +36,7 @@ public class SemiFlyerFlyingGoal<E extends PathfinderMob & SemiFlyer> extends Go
 
     @Override
     public boolean canUse() {
-        if (mob.isPassenger()) {
+        if (mob.isPassenger() || mob.isBaby()) {
             return false;
         }
         if (!mob.isFlying() && mob.getRandom().nextInt(interval) != 0) {

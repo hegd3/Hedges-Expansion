@@ -77,12 +77,11 @@ public abstract class GenericProjectile extends Projectile {
         if (tickCount == 1) {
             deltaMovementOld = getDeltaMovement();
         }
-        if (tickCount > this.getLifespan()) {
-            this.onMaxAge();
-            return;
-        }
         if (this.level().isClientSide) {
             trailParticles();
+        } else if (tickCount > this.getLifespan()) {
+            this.onMaxAge();
+            return;
         }
         handleHitDetection();
         travel();

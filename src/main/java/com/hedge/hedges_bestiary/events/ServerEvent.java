@@ -60,7 +60,10 @@ public class ServerEvent {
         event.registerSpriteSet(HBParticles.ELECTRIC_SPARKS.get(), AuraParticle.Provider::new);
         event.registerSpriteSet(HBParticles.FIREBALL.get(), ProjectileTrailParticle.FireBallProvider::new);
         event.registerSpriteSet(HBParticles.SLEEP.get(), SleepParticle.Provider::new);
+
         event.registerSpriteSet(HBParticles.ENDGEL_TRAIL.get(), AuraParticle.Provider::new);
+        event.registerSpriteSet(HBParticles.ENDGEL_EXPLODE.get(), DynamicExplosionParticle.EndgelExplodeProvider::new);
+        event.registerSpriteSet(HBParticles.ENDGEL_BULLET.get(), ProjectileTrailParticle.MurkChargeShotProvider::new);
 
     }
 

@@ -9,6 +9,7 @@ import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -363,6 +364,21 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     @Override
     public boolean isStaticIdling() {
         return this.getAnimState() == 1;
+    }
+
+    protected void addEatingParticles() {
+        float radius = this.getBbWidth() * 0.55F;
+        float particleCount = (2 + random.nextInt(2)) * radius;
+        for (int i1 = 0; i1 < particleCount; i1++) {
+            Vec3 v = this.getEyePosition();
+            double motionX = (getRandom().nextFloat() - 0.15F) * 0.4D;
+            double motionY = getRandom().nextFloat() * -0.7F - 0.1F;
+            double motionZ = (getRandom().nextFloat() - 0.15F) * 0.4D;
+            float angle = (0.01745329251F * (this.yBodyRot + (i1 / particleCount) * 360F));
+            double extraX = radius * Mth.sin((float) (Math.PI + angle));
+            double extraZ = radius * Mth.cos(angle);
+            level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, this.getMainHandItem()), true, v.x + extraX, v.y, v.z + extraZ, motionX, motionY, motionZ);
+        }
     }
 
     @Override

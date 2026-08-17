@@ -4,6 +4,8 @@ import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.client.EntityLayers;
 import com.hedge.hedges_bestiary.client.models.*;
 import com.hedge.hedges_bestiary.client.renderer.*;
+import com.hedge.hedges_bestiary.client.renderer.projectile.EndgelBulletRenderer;
+import com.hedge.hedges_bestiary.client.renderer.projectile.WaveRenderer;
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
 import com.hedge.hedges_bestiary.menu.HBTamableMenu;
 import com.hedge.hedges_bestiary.menu.HBTamableMenuScreen;
@@ -54,7 +56,7 @@ public class ClientEvent {
         event.registerLayerDefinition(EntityLayers.BANSHEE_LAYER, EndgelModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.DAWN_DOVE_LAYER, DawnDoveModel::createBodyLayer);
         event.registerLayerDefinition(EntityLayers.SKIB_LAYER, SkibModel::createBodyLayer);
-
+        event.registerLayerDefinition(EntityLayers.GENERIC_PROJECTILE_LAYER, CrossedProjectileModel::createBodyLayer);
     }
 
     @SubscribeEvent
@@ -73,7 +75,7 @@ public class ClientEvent {
         EntityRenderers.register(HBEntities.FEROCETUS.get(), FerocetusRenderer::new);
         EntityRenderers.register(HBEntities.WAVE.get(), WaveRenderer::new);
         EntityRenderers.register(HBEntities.ENDGEL.get(), EndgelRenderer::new);
-        EntityRenderers.register(HBEntities.BANSHEE_SCREAM.get(), ModellessProjectileRenderer::new);
+        EntityRenderers.register(HBEntities.ENDGEL_BULLET.get(), ModellessProjectileRenderer::new);
         EntityRenderers.register(HBEntities.DAWN_DOVE.get(), DawnDoveRenderer::new);
         EntityRenderers.register(HBEntities.DAWN_DOVE_FIREBALL.get(), ModellessProjectileRenderer::new);
         EntityRenderers.register(HBEntities.SKIB.get(), SkibRenderer::new);

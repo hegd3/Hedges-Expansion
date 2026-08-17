@@ -66,7 +66,7 @@ public class EggBlock<E extends EntityType<?>> extends BaseEntityBlock {
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-        if (level.getBlockEntity(pos) instanceof EggBlockEntity egg) {
+        if (level.getBlockEntity(pos) instanceof EggBlockEntity egg && placer != null) {
             egg.setOwnerUUID(placer.getStringUUID());
         }
 

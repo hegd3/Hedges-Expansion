@@ -195,6 +195,7 @@ public class MurkModel extends HBModel<MurkEntity> {
 		this.animateSmooth(entity.napAnimationState, MurkBasicsAnimation.SLEEP, ageInTicks, 1f);
 		this.animateSmooth(entity.sitAnimationState, MurkBasicsAnimation.SIT, ageInTicks, 1f);
 		this.animateSmooth(entity.danceAnimationState, MurkBasicsAnimation.DANCE, ageInTicks, 1f);
+		this.animateSmooth(entity.eatAnimationState, MurkAttacksAnimation.BITE, ageInTicks, 2f);
 
 		this.tail.yRot = Mth.lerp(0.3F, this.tail.yRot, tailYaw * 0.25F);
 		this.tail2.yRot = Mth.lerp(0.3F, this.tail2.yRot, tailYaw * 0.2F);

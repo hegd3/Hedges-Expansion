@@ -13,7 +13,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 
-public class GenericProjectileModel extends EntityModel<GenericProjectile> {
+public class GenericProjectileModel extends HBModel<GenericProjectile> {
 	public static final ModelLayerLocation LAYER_LOCATION = EntityLayers.GENERIC_PROJECTILE_LAYER;
 	private final ModelPart root;
 
@@ -30,11 +30,9 @@ public class GenericProjectileModel extends EntityModel<GenericProjectile> {
 		return LayerDefinition.create(meshdefinition, 32, 32);
 	}
 
-
-
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-		root.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
+	public ModelPart root() {
+		return this.root;
 	}
 
 	@Override

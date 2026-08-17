@@ -28,11 +28,16 @@ import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -42,6 +47,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
@@ -50,7 +56,6 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -70,7 +75,8 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     private static final EntityDataAccessor<Boolean> HAS_EGG = SynchedEntityData.defineId(MurkEntity.class, EntityDataSerializers.BOOLEAN);
     private static final Predicate<ItemEntity> FOOD = item -> item.getItem().is(HBItems.SKIB.get());
 
-    public final SmoothAnimationState swimIdleAnimationState = new SmoothAnimationState(0.25F);
+    public final SmoothAnimationState swimIdleAnimationState = new SmoothAnimationState(0.1F);
+    public final SmoothAnimationState eatAnimationState = new SmoothAnimationState(0.1F);
     public final AnimationState biteAnimationState = new AnimationState();
     public final AnimationState roarAnimationState = new AnimationState();
     public final AnimationState sideSlamAnimationState = new AnimationState();
@@ -93,7 +99,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
     private float prevTrail;
     private float trail = 0.0F;
-
+    private int eatProgress = 0;
 
     public MurkEntity(EntityType<? extends MurkEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -167,6 +173,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.goalSelector.addGoal(i++, new MurkAttackGoal(this));
         this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
         this.goalSelector.addGoal(i++, new FindAndEatFoodGoal(this, FOOD));
+        this.goalSelector.addGoal(i++, new TemptGoal(this, 1.1, Ingredient.of(HBItems.SKIB.get()), false));
         this.goalSelector.addGoal(i++, new NapGoal(this, false));
         this.goalSelector.addGoal(i++, new CustomSwimGoal(this, 1.0, 10, 4, 7, true));
         this.goalSelector.addGoal(i++, new RandomStrollGoal(this, 1.0) {
@@ -391,6 +398,10 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
             } else if (this.chargeProgress < 1F) {
                 this.chargeProgress = chargeProgress + 0.02F;
             }
+            if (this.eatAnimationState.isStarted() && this.tickCount % 5 == 0) {
+                this.playSound(SoundEvents.GENERIC_EAT);
+                this.addEatingParticles();
+            }
             this.tickTrailYaw();
         } else {
             this.attackCD = Math.max(this.attackCD - 1, 0);
@@ -407,6 +418,16 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
             LivingEntity target = this.getTarget();
             if (this.tickCount % 200 == 0 && target == null) {
                 this.heal(10);
+            }
+            if (!this.getMainHandItem().isEmpty()) {
+                this.eatProgress++;
+                if (this.eatProgress > 20) {
+                    this.eatProgress = 0;
+                    this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+                    this.heal(this.getMaxHealth() / 5);
+                } else if (this.eatProgress % 5 == 0) {
+                    this.playSound(SoundEvents.GENERIC_EAT);
+                }
             }
             if (this.getAnimState() > 0) {
                 this.animTicks++;
@@ -605,6 +626,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.clicksAnimationState.animateWhen(animState == 6, this.tickCount);
         this.yawnAnimationState.animateWhen(animState == 7, this.tickCount);
         this.napAnimationState.animateWhen(this.isNapping(), this.tickCount);
+        this.eatAnimationState.animateWhen(!this.getMainHandItem().isEmpty(), this.tickCount);
         this.sitAnimationState.animateWhen(this.isSitting() && !this.isDancing(), this.tickCount);
         this.danceAnimationState.animateWhen(this.isDancing(), this.tickCount);
     }

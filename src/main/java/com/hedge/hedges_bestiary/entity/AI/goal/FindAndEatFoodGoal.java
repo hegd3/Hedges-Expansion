@@ -47,10 +47,8 @@ public class FindAndEatFoodGoal extends Goal {
             return;
         }
         if (this.mob.distanceTo(list.get(0)) <= this.mob.getBbWidth()) {
+            this.mob.setItemSlot(EquipmentSlot.MAINHAND, list.get(0).getItem());
             list.get(0).discard();
-            this.mob.playSound(SoundEvents.GENERIC_EAT);
-            this.mob.heal(this.mob.getMaxHealth() / 10);
-            this.attemptTicks = 200;
         }
         else if (this.mob.getNavigation().isDone() && itemstack.isEmpty()) {
             this.mob.getNavigation().moveTo(list.get(0),1.2F);
