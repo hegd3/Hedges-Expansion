@@ -5,6 +5,7 @@ import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.registry.HBParticles;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -15,9 +16,9 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
-public class DawnDoveFireBall extends GenericProjectile {
+public class DragonFireBall extends GenericProjectile {
 
-    public DawnDoveFireBall(EntityType<? extends DawnDoveFireBall> pEntityType, Level pLevel) {
+    public DragonFireBall(EntityType<? extends DragonFireBall> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.setNoGravity(true);
     }
@@ -57,14 +58,15 @@ public class DawnDoveFireBall extends GenericProjectile {
                 entity.setRemainingFireTicks(60);
                 entity.hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), this.getDamage() - (float)entity.distanceToSqr(this.position()));
             }
-            // this.level().broadcastEntityEvent(this, (byte)39);
+            this.playSound(SoundEvents.GENERIC_EXPLODE);
+            this.level().broadcastEntityEvent(this, (byte)39);
         }
     }
 
     @Override
     public void handleEntityEvent(byte pId) {
         if (pId == 39) {
-            this.level().addParticle(ParticleTypes.LAVA, this.getX(), this.getY(), this.getZ(), 0.0D, 0.0D, 0.0D);
+            this.level().addParticle(HBParticles.FIREBALL_EXPLODE.get(), true, this.getX(), this.getY(), this.getZ(), 0.0D, 0.0D, 0.0D);
         } else {
             super.handleEntityEvent(pId);
         }
@@ -84,13 +86,12 @@ public class DawnDoveFireBall extends GenericProjectile {
     public void trailParticles() {
         Vec3 v = getDeltaMovement();
         double length = v.length();
-        int c = (int)Math.min(20, Math.round(length) * 3) + 1;
+        int c = (int)Math.min(10, Math.round(length) * 3) + 1;
         float f = (float)length / c / 2;
         for (int i = 0; i < c; i++) {
-            Vec3 rand = EntityHelpers.getRandomVec3(0.02);
             Vec3 p = v.scale(f * i);
-            this.level().addParticle(HBParticles.FIREBALL.get(), true, this.getX() + rand.x + p.x,
-                    this.getY() + rand.y + p.y, this.getZ() + rand.z + p.z, rand.x, rand.z, rand.y);
+            this.level().addParticle(HBParticles.FIREBALL.get(), true, this.getX() + p.x,
+                    this.getY() + p.y, this.getZ() + p.z, 0, 0, 0);
         }
     }
 

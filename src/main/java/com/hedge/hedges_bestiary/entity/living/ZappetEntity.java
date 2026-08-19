@@ -1,6 +1,7 @@
 package com.hedge.hedges_bestiary.entity.living;
 
 import com.hedge.hedges_bestiary.blocks.HBBlocks;
+import com.hedge.hedges_bestiary.client.HBSounds;
 import com.hedge.hedges_bestiary.entity.AI.control.FlyingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.*;
 import com.hedge.hedges_bestiary.entity.AI.navigation.MMPathNavigatorGround;
@@ -27,6 +28,7 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -34,9 +36,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntity>, EggLayer {
+
+    protected static final EntityDataAccessor<Optional<BlockPos>> TARGETED_BLOCK_POS = SynchedEntityData.defineId(ZappetEntity.class, EntityDataSerializers.OPTIONAL_BLOCK_POS);
 
     private static final EntityDataAccessor<Boolean> HAS_EGG = SynchedEntityData.defineId(ZappetEntity.class, EntityDataSerializers.BOOLEAN);
 
@@ -83,8 +88,11 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
+        this.entityData.define(TARGETED_BLOCK_POS, Optional.empty());
         this.entityData.define(HAS_EGG, false);
     }
+
+
 
     @Override
     protected void registerGoals() {
@@ -92,6 +100,7 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         this.goalSelector.addGoal(i++, new FloatGoal(this));
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this, false));
         this.goalSelector.addGoal(i++, new FlyerFollowOwnerGoal(this, 1.2D, 1.6D, 8.0f, 5.0f));
+        this.goalSelector.addGoal(i++, new ZappetProjectileShieldGoal(this));
         this.goalSelector.addGoal(i++, new FlockingGoal<>(this) {
             @Override
             public boolean canUse() {
@@ -140,6 +149,10 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
                     case 1 -> {
                         if (this.animTicks > 20) {
                             this.resetAnimState();
+                        } else if (this.animTicks == 5) {
+                            if (this.getTargetedPos() != null) {
+                                this.setTargetedPos(null);
+                            }
                         }
                     }
                     case 2 -> {
@@ -164,7 +177,7 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
             if (!this.pulse) {
 
                 if (this.glowProgress < 5.0F) {
-                    Vec3 rand = EntityHelpers.getRandomVec3(0.6);
+                    Vec3 rand = EntityHelpers.getRandomVec3(this.getRandom(), 0.6);
                     this.level().addParticle(HBParticles.ELECTRIC_SPARKS.get(), this.getX() + rand.x + rand.x,
                             this.getY() + rand.y + 0.5, this.getZ() + rand.z, rand.x, rand.y + 0.2, rand.z);
                     this.glowProgress += 0.5f;
@@ -197,6 +210,11 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         super.onSyncedDataUpdated(pKey);
         if (pKey == ANIM_STATE) {
             this.animTicks = 0;
+        } else if (pKey == TARGETED_BLOCK_POS && this.level().isClientSide()) {
+            BlockPos pos = this.getTargetedPos();
+            if (pos != null) {
+                this.level().addParticle(HBParticles.LIGHTNING_EXPLODE.get(), true, pos.getX(), pos.getY(), pos.getZ(), 0, 0, 0);
+            }
         }
     }
 
@@ -358,8 +376,40 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         return true;
     }
 
+    public void setTargetedPos(@Nullable BlockPos pos) {
+        this.entityData.set(TARGETED_BLOCK_POS, Optional.ofNullable(pos));
+    }
+
+    public BlockPos getTargetedPos() {
+        return this.entityData.get(TARGETED_BLOCK_POS).orElse(null);
+    }
+
     @Override
     public SleepType getSleepType() {
         return SleepType.RESTLESS;
+    }
+
+    private static class ZappetProjectileShieldGoal extends Goal {
+        private final ZappetEntity zappet;
+        private List<Projectile> found;
+        public ZappetProjectileShieldGoal(ZappetEntity zappet) {
+            this.zappet = zappet;
+        }
+        @Override
+        public boolean canUse() {
+            if (zappet.isBaby() || zappet.getTargetedPos() != null) return false;
+            found = this.zappet.level().getEntitiesOfClass(Projectile.class, this.zappet.getBoundingBox().inflate(5.0D));
+            return !found.isEmpty();
+        }
+
+
+        @Override
+        public void start() {
+            this.zappet.setTargetedPos(found.get(0).blockPosition());
+            this.zappet.resetAnimState();
+            this.zappet.setAnimState(1);
+            this.zappet.playSound(HBSounds.ZAP.get(), 1.0F, zappet.getRandom().nextFloat() * 0.4F + 1F);
+            found.get(0).discard();
+        }
     }
 }

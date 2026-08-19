@@ -130,7 +130,7 @@ public class SkibEntity extends HBAquaticMob implements IdleAnimMob {
             if (pSource.getEntity() != null) {
                 if (this.level().isClientSide()) {
                     for (int i = 0; i < 10; i++) {
-                        Vec3 rand = EntityHelpers.getRandomVec3(1);
+                        Vec3 rand = EntityHelpers.getRandomVec3(this.getRandom(), 1);
                         this.level().addParticle(HBParticles.MURK_CHARGE.get(), this.getX() + rand.x,
                                 this.getY() + rand.y / 2 + 0.7, this.getZ() + rand.z, rand.x, rand.y + 0.2, rand.z);
                     }

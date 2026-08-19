@@ -13,6 +13,7 @@ public class HBSounds {
 
     public static final RegistryObject<SoundEvent> MURK_CLICKS = createSoundEvent("murk_clicks");
 
+    public static final RegistryObject<SoundEvent> ZAP = createSoundEvent("zap");
 
 
     private static RegistryObject<SoundEvent> createSoundEvent(final String name) {

@@ -98,8 +98,7 @@ public class GenericMeleeGoal<T extends PathfinderMob & AttackStateMob> extends 
             if (this.attackReach < this.dist) {
                 this.tickPath(livingentity);
             } else {
-                this.mob.lookAt(livingentity, 30f, 30f);
-                this.mob.getLookControl().setLookAt(livingentity, 30f, 30f);
+                this.look(livingentity);
             }
         }
         if (this.mob.canUseAttack(livingentity, this.attackReach, this.dist)) {
@@ -108,10 +107,14 @@ public class GenericMeleeGoal<T extends PathfinderMob & AttackStateMob> extends 
 
     }
 
+    protected void look(LivingEntity target) {
+        this.mob.lookAt(target, 30f, 30f);
+        this.mob.getLookControl().setLookAt(target, 30f, 30f);
+    }
+
     protected void tickPath(LivingEntity livingentity) {
         if (this.shouldLookAt()) {
-            this.mob.lookAt(livingentity, 30f, 30f);
-            this.mob.getLookControl().setLookAt(livingentity, 30f, 30f);
+            this.look(livingentity);
         }
         double d0 = this.mob.getPerceivedTargetDistanceSquareForMeleeAttack(livingentity);
         this.ticksUntilNextPathRecalculation = Math.max(this.ticksUntilNextPathRecalculation - 1, 0);

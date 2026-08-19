@@ -131,7 +131,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     protected void tickNap() {
         if (this.isNapping()) {
             if (this.level().isClientSide() && this.tickCount % 30 == 0) {
-                Vec3 rand = this.getEyePosition().add(EntityHelpers.getRandomVec3(0.6));
+                Vec3 rand = this.getEyePosition().add(EntityHelpers.getRandomVec3(this.getRandom(), 0.6));
                 this.level().addParticle(HBParticles.SLEEP.get(), rand.x, rand.y + this.getBbHeight() / 2, rand.z, rand.x, 0.1, rand.z);
             } else if (this.getNavigation().isInProgress()) {
                 this.setNapping(false);

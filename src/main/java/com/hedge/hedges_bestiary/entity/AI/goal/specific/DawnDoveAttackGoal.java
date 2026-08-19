@@ -77,6 +77,11 @@ public class DawnDoveAttackGoal extends GenericMeleeGoal<DawnDoveEntity> {
         this.phaseTicks = 0;
     }
 
+    @Override
+    protected void look(LivingEntity target) {
+        this.mob.lookAt(target, 60F, 60F);
+        this.mob.getLookControl().setLookAt(target, 60.0F, 60.0F);
+    }
 
     @Override
     public void tick() {
@@ -109,7 +114,6 @@ public class DawnDoveAttackGoal extends GenericMeleeGoal<DawnDoveEntity> {
                     } else if (this.mob.canUseClawAttack(livingentity, attackReach, dist)) {
                         this.mob.setAnimState(3);
                         this.reachedDropPos = false;
-                        this.phaseTicks+=2;
                     } else if (this.mob.canUseAttack(livingentity, attackReach, dist)) {
                         this.mob.setAttacking();
                         this.phaseTicks+=2;

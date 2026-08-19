@@ -72,7 +72,7 @@ public class CustomSwimGoal extends RandomStrollGoal {
 
     @Override
     protected @Nullable Vec3 getPosition() {
-        this.pos = EntityHelpers.getSmartSwimTarget(this.mob, this.radius, this.height, this.preferSurface);
+        this.pos = EntityHelpers.getRandomSwimPos(this.mob, this.radius, this.height, this.preferSurface);
         return this.pos;
     }
 }

@@ -127,7 +127,7 @@ public class GildGliderEntity extends HBBucketableSchoolingMob {
             int groupSize = (int) (this.getMaxGroupSize() * this.getRandom().nextFloat());
             if (groupSize > 0 && !this.level().isClientSide()) {
                 for (int i = 0; i < groupSize; i++) {
-                    Vec3 rand = EntityHelpers.getRandomVec3(4);
+                    Vec3 rand = EntityHelpers.getRandomVec3(pLevel.getRandom(), 4);
                     GildGliderEntity entity = new GildGliderEntity(HBEntities.GILD_GLIDER.get(), this.level());
                     entity.moveTo(this.getX() + rand.x, this.getY() + rand.y, this.getZ() + rand.z);
                     entity.startFollowing(this);
@@ -158,9 +158,9 @@ public class GildGliderEntity extends HBBucketableSchoolingMob {
                 }
                 return this.canJump();
             } else if (((GildGliderEntity)this.mob.getLeader()).canJump()) {
-                return this.canJump();
+                return true;
             }
-            return false;
+            return super.canUse();
 
         }
 

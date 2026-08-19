@@ -100,7 +100,7 @@ public class ChubEntity extends HBBucketableSchoolingMob {
             int groupSize = (int) (this.getMaxGroupSize() * this.getRandom().nextFloat());
             if (groupSize > 0 && !this.level().isClientSide()) {
                 for (int i = 0; i < groupSize; i++) {
-                    Vec3 rand = EntityHelpers.getRandomVec3(4);
+                    Vec3 rand = EntityHelpers.getRandomVec3(pLevel.getRandom(), 4);
                     ChubEntity entity = new ChubEntity(HBEntities.CHUB.get(), this.level());
                     entity.moveTo(this.getX() + rand.x, this.getY() + rand.y, this.getZ() + rand.z);
                     entity.startFollowing(this);

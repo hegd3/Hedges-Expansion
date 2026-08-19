@@ -169,7 +169,7 @@ public class EndgelEntity extends HBMonster {
         this.tickTrailYaw();
         this.tickRoll();
         for (int i =0; i < 2; i++) {
-        Vec3 rand = EntityHelpers.getRandomVec3(1.5);
+        Vec3 rand = EntityHelpers.getRandomVec3(this.getRandom(), 1.5);
         this.level().addParticle(HBParticles.ENDGEL_TRAIL.get(), this.getX() + rand.x + rand.x,
                 this.getY() + rand.y + 1, this.getZ() + rand.z, rand.x, rand.y + 0.2, rand.z);
         }
@@ -230,15 +230,4 @@ public class EndgelEntity extends HBMonster {
         this.roll = prevRoll + (targetRoll - prevRoll) * 0.05F;
     }
 
-    @Override
-    public void handleEntityEvent(byte pId) {
-        if (pId == 39) {
-            Vec3 rand = EntityHelpers.getRandomVec3(3.5);
-            this.level().addParticle(HBParticles.ENDGEL_EXPLODE.get(), this.getX() + rand.x + rand.x,
-                    this.getY() + rand.y + 1, this.getZ() + rand.z, rand.x, rand.y + 0.2, rand.z);
-
-        } else {
-            super.handleEntityEvent(pId);
-        }
-    }
 }

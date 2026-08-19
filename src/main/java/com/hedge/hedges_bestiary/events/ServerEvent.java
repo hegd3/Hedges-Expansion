@@ -57,8 +57,12 @@ public class ServerEvent {
 
         event.registerSpriteSet(HBParticles.SMOKE.get(), SmokeParticle.Provider::new);
         event.registerSpriteSet(HBParticles.BANSHEE_SCREAM.get(), BansheeScreamParticle.Provider::new);
+
         event.registerSpriteSet(HBParticles.ELECTRIC_SPARKS.get(), AuraParticle.Provider::new);
+        event.registerSpriteSet(HBParticles.LIGHTNING_EXPLODE.get(), DynamicExplosionParticle.LightningExplodeProvider::new);
+
         event.registerSpriteSet(HBParticles.FIREBALL.get(), ProjectileTrailParticle.FireBallProvider::new);
+        event.registerSpriteSet(HBParticles.FIREBALL_EXPLODE.get(), DynamicExplosionParticle.FireBallExplodeProvider::new);
         event.registerSpriteSet(HBParticles.SLEEP.get(), SleepParticle.Provider::new);
 
         event.registerSpriteSet(HBParticles.ENDGEL_TRAIL.get(), AuraParticle.Provider::new);

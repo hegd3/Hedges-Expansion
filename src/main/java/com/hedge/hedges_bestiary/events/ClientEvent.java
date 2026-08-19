@@ -4,7 +4,6 @@ import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.client.EntityLayers;
 import com.hedge.hedges_bestiary.client.models.*;
 import com.hedge.hedges_bestiary.client.renderer.*;
-import com.hedge.hedges_bestiary.client.renderer.projectile.EndgelBulletRenderer;
 import com.hedge.hedges_bestiary.client.renderer.projectile.WaveRenderer;
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
 import com.hedge.hedges_bestiary.menu.HBTamableMenu;
@@ -77,7 +76,7 @@ public class ClientEvent {
         EntityRenderers.register(HBEntities.ENDGEL.get(), EndgelRenderer::new);
         EntityRenderers.register(HBEntities.ENDGEL_BULLET.get(), ModellessProjectileRenderer::new);
         EntityRenderers.register(HBEntities.DAWN_DOVE.get(), DawnDoveRenderer::new);
-        EntityRenderers.register(HBEntities.DAWN_DOVE_FIREBALL.get(), ModellessProjectileRenderer::new);
+        EntityRenderers.register(HBEntities.DRAGON_FIREBALL.get(), ModellessProjectileRenderer::new);
         EntityRenderers.register(HBEntities.SKIB.get(), SkibRenderer::new);
 
         // MenuScreens.register();

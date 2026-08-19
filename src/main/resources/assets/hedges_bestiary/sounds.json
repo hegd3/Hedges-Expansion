@@ -7,5 +7,20 @@
       }
     ],
     "subtitle": "hedgesbestiary.sound.subtitle.murk_clicks"
+  },
+  "zap": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "hedges_bestiary:zap_0"
+      },
+      {
+        "name": "hedges_bestiary:zap_1"
+      },
+      {
+        "name": "hedges_bestiary:zap_2"
+      }
+    ],
+    "subtitle": "hedgesbestiary.sound.subtitle.zap"
   }
 }

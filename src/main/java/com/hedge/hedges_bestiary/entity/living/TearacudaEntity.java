@@ -158,7 +158,7 @@ public class TearacudaEntity extends HBSchoolingMob implements AttackStateMob {
                         List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, v, 2, 2, 2, 5);
                         for (LivingEntity entity : hit) {
                             if (AttackHelpers.betterHurt(this, entity, 0.5f)) {
-                                Vec3 rand = EntityHelpers.getRandomVec3(0.5);
+                                Vec3 rand = EntityHelpers.getRandomVec3(this.getRandom(), 0.5);
                                 for (int i = 0; i < 3; i++) {
                                     ((ServerLevel) this.level()).sendParticles(
                                             new SmokeParticleOptions(1 + (float)rand.x, 30, 0xE8675D),
@@ -267,7 +267,7 @@ public class TearacudaEntity extends HBSchoolingMob implements AttackStateMob {
             int groupSize = (int) (this.getMaxGroupSize() * this.getRandom().nextFloat());
             if (groupSize > 0 && !this.level().isClientSide()) {
                 for (int i = 0; i < groupSize; i++) {
-                    Vec3 rand = EntityHelpers.getRandomVec3(4);
+                    Vec3 rand = EntityHelpers.getRandomVec3(pLevel.getRandom(), 4);
                     TearacudaEntity entity = new TearacudaEntity(HBEntities.TEARACUDA.get(), this.level());
                     entity.moveTo(this.getX() + rand.x, this.getY() + rand.y, this.getZ() + rand.z);
                     entity.startFollowing(this);

@@ -58,7 +58,7 @@ public class MurkSmoke extends GenericProjectile {
         int c = (int)Math.min(8, Math.round(length) * 3) + 1;
         float f = (float)length / c / 2;
         for (int i = 0; i < c; i++) {
-            Vec3 rand = EntityHelpers.getRandomVec3(0.02);
+            Vec3 rand = EntityHelpers.getRandomVec3(this.random, 0.02);
             Vec3 p = v.scale(f * i);
             this.level().addParticle(this.isCharged() ? HBParticles.MURK_CHARGE_SHOOT.get() : ParticleTypes.BUBBLE, true, this.getX() + rand.x + p.x,
                     this.getY() + rand.y + p.y, this.getZ() + rand.z + p.z, rand.x, rand.z, rand.y);

@@ -6,7 +6,7 @@ import com.hedge.hedges_bestiary.entity.living.ambientfish.GildGliderEntity;
 import com.hedge.hedges_bestiary.entity.living.ambientfish.ChubEntity;
 import com.hedge.hedges_bestiary.entity.living.ambientfish.SkibEntity;
 import com.hedge.hedges_bestiary.entity.projectile.EndgelBullet;
-import com.hedge.hedges_bestiary.entity.projectile.DawnDoveFireBall;
+import com.hedge.hedges_bestiary.entity.projectile.DragonFireBall;
 import com.hedge.hedges_bestiary.entity.projectile.MurkSmoke;
 import com.hedge.hedges_bestiary.entity.projectile.WaveEntity;
 import net.minecraft.world.entity.EntityType;
@@ -80,9 +80,9 @@ public class HBEntities {
             ENTITY_TYPES.register("dawn_dove", () -> EntityType.Builder.of(DawnDoveEntity::new, MobCategory.CREATURE)
                     .sized(2.8f, 2.5f).build("dawn_dove"));
 
-    public static final RegistryObject<EntityType<DawnDoveFireBall>> DAWN_DOVE_FIREBALL =
-            ENTITY_TYPES.register("dawn_dove_fireball", () -> EntityType.Builder.of(DawnDoveFireBall::new, MobCategory.MISC)
-                    .sized(1f, 1f).build("dawn_dove_fireball"));
+    public static final RegistryObject<EntityType<DragonFireBall>> DRAGON_FIREBALL =
+            ENTITY_TYPES.register("dragon_fireball", () -> EntityType.Builder.of(DragonFireBall::new, MobCategory.MISC)
+                    .sized(1f, 1f).build("dragon_fireball"));
 
     public static final RegistryObject<EntityType<SkibEntity>> SKIB =
             ENTITY_TYPES.register("skib", () -> EntityType.Builder.of(SkibEntity::new, MobCategory.WATER_CREATURE)

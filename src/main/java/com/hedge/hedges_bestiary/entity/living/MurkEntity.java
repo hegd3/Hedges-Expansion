@@ -14,6 +14,7 @@ import com.hedge.hedges_bestiary.entity.AI.navigation.MMPathNavigatorGround;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.TargetMonstersGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.TargetPlayersGoal;
+import com.hedge.hedges_bestiary.entity.AI.targeting.TargetWhenAwakeGoal;
 import com.hedge.hedges_bestiary.entity.living.ambientfish.SkibEntity;
 import com.hedge.hedges_bestiary.entity.projectile.MurkSmoke;
 import com.hedge.hedges_bestiary.entity.types.*;
@@ -175,7 +176,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.goalSelector.addGoal(i++, new FindAndEatFoodGoal(this, FOOD));
         this.goalSelector.addGoal(i++, new TemptGoal(this, 1.1, Ingredient.of(HBItems.SKIB.get()), false));
         this.goalSelector.addGoal(i++, new NapGoal(this, false));
-        this.goalSelector.addGoal(i++, new CustomSwimGoal(this, 1.0, 10, 4, 7, true));
+        this.goalSelector.addGoal(i, new CustomSwimGoal(this, 1.0, 10, 4, 7, true));
         this.goalSelector.addGoal(i++, new RandomStrollGoal(this, 1.0) {
             @Override
             public boolean canUse() {
@@ -198,7 +199,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.targetSelector.addGoal(2, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(3, new TargetPlayersGoal(this));
         this.targetSelector.addGoal(4, new TargetMonstersGoal(this));
-        this.targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(this, SkibEntity.class, true));
+        this.targetSelector.addGoal(5, new TargetWhenAwakeGoal<>(this, SkibEntity.class, null));
 
     }
 
@@ -386,7 +387,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
             this.setUpAnimStates();
             if (this.isCharged()) {
                 for (int i = 0; i < 3; i++) {
-                    Vec3 rand = EntityHelpers.getRandomVec3(2);
+                    Vec3 rand = EntityHelpers.getRandomVec3(this.getRandom(), 2);
                     this.level().addParticle(HBParticles.MURK_CHARGE.get(), this.getX() + rand.x,
                             this.getY() + rand.y / 2 + 2, this.getZ() + rand.z, rand.x, rand.y + 0.2, rand.z);
                 }

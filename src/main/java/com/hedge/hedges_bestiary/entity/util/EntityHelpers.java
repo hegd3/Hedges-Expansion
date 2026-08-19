@@ -3,16 +3,15 @@ package com.hedge.hedges_bestiary.entity.util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
-import net.minecraft.world.entity.ai.util.HoverRandomPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
@@ -45,20 +44,12 @@ public class EntityHelpers {
         level.getServer().getPlayerList().getPlayers().forEach(player -> ((ServerLevel) level).sendParticles(player, particle, force, x, y, z, count, deltaX, deltaY, deltaZ, speed));
     }
 
-    public static double getRandomScaled(double sc) {
-        return (2.0D * Math.random() - 1.0D) * sc;
+    public static double getRandomScaled(RandomSource random, double sc) {
+        return (2.0D * random.nextFloat() - 1.0D) * sc;
     }
 
-    public static Vec3 getRandomVec3(double sc) {
-        return new Vec3(getRandomScaled(sc), getRandomScaled(sc), getRandomScaled(sc));
-    }
-
-    public static void particleOnhitEffect(SimpleParticleType particle, Entity target, Level level, int count) {
-        ((ServerLevel)level).sendParticles(
-                particle,
-                target.getX(), target.getY(), target.getZ(),
-                count,
-                0.0, 0.0, 0.0, 0.0);
+    public static Vec3 getRandomVec3(RandomSource random, double sc) {
+        return new Vec3(getRandomScaled(random, sc), getRandomScaled(random, sc), getRandomScaled(random, sc));
     }
 
 
@@ -77,40 +68,11 @@ public class EntityHelpers {
     }
 
     @Nullable
-    public static Vec3 getSmartFlyingTarget(PathfinderMob mob, int radius, int verticalDistance, int targetDist, int blocksFromGround) {
+    public static Vec3 getRandomSwimPos(PathfinderMob mob, int radius, int verticalDistance, boolean preferSurface) {
         Level level = mob.level();
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
         int maxAttempts = radius * radius * radius;
-        boolean nearBoundary = blocksFromGround > targetDist;
-        for (int i = 0; i < maxAttempts; i++) {
-            Vec3 vec3 = mob.getViewVector(0.0f);
-            Vec3 candidate = HoverRandomPos.getPos(mob, radius * radius, verticalDistance, vec3.x, vec3.z, ((float)Math.PI / 2F), verticalDistance, 0);
-            if (candidate == null) continue;
-
-
-            Vec3 adjusted = candidate.add(0, nearBoundary ? -1 : 1, 0);
-            mutablePos.set(adjusted.x, adjusted.y, adjusted.z);
-            if (level.getBlockState(mutablePos).isAir()) {
-                return adjusted;
-            }
-
-
-            if (i == maxAttempts - 1) {
-                return candidate;
-            }
-        }
-
-        return null;
-    }
-
-    @Nullable
-    public static Vec3 getSmartSwimTarget(PathfinderMob mob, int radius, int verticalDistance, boolean preferSurface) {
-        Level level = mob.level();
-        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
-        int maxAttempts = radius * radius * radius;
-        boolean nearBoundary = preferSurface
-                ? EntityHelpers.closeToSurface(mob, verticalDistance)
-                : EntityHelpers.closeToBottom(mob, verticalDistance);
+        boolean nearBoundary = preferSurface ? EntityHelpers.closeToSurface(mob, verticalDistance) : EntityHelpers.closeToBottom(mob, verticalDistance);
 
         for (int i = 0; i < maxAttempts; i++) {
             Vec3 candidate = DefaultRandomPos.getPos(mob, radius * radius, verticalDistance);

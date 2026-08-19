@@ -63,6 +63,18 @@ public class DynamicExplosionParticle extends TextureSheetParticle {
     }
 
     @OnlyIn(Dist.CLIENT)
+    public static class LightningExplodeProvider implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet sprites;
+
+        public LightningExplodeProvider(SpriteSet pSprites) {
+            this.sprites = pSprites;
+        }
+        public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
+            return new DynamicExplosionParticle(pLevel, pX, pY, pZ, this.sprites, 9, 1.0f);
+        }
+    }
+
+    @OnlyIn(Dist.CLIENT)
     public static class EndgelExplodeProvider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
 
@@ -71,6 +83,18 @@ public class DynamicExplosionParticle extends TextureSheetParticle {
         }
         public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
             return new DynamicExplosionParticle(pLevel, pX, pY, pZ, this.sprites, 9, 3.3f);
+        }
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static class FireBallExplodeProvider implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet sprites;
+
+        public FireBallExplodeProvider(SpriteSet pSprites) {
+            this.sprites = pSprites;
+        }
+        public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
+            return new DynamicExplosionParticle(pLevel, pX, pY, pZ, this.sprites, 11, 6f);
         }
     }
 }

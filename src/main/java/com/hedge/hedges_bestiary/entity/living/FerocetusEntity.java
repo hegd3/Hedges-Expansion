@@ -332,7 +332,7 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
             int groupSize = (int) (this.getMaxGroupSize() * this.getRandom().nextFloat());
             if (groupSize > 0 && !this.level().isClientSide()) {
                 for (int i = 0; i < groupSize; i++) {
-                    Vec3 rand = EntityHelpers.getRandomVec3(6);
+                    Vec3 rand = EntityHelpers.getRandomVec3(pLevel.getRandom(), 6);
                     FerocetusEntity entity = new FerocetusEntity(HBEntities.FEROCETUS.get(), this.level());
                     entity.moveTo(this.getX() + rand.x, this.getY() + rand.y, this.getZ() + rand.z);
                     entity.startFollowing(this);

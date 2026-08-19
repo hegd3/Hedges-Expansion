@@ -10,7 +10,7 @@ import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.TargetMonstersGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.TargetPlayersGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.TargetWhenAwakeGoal;
-import com.hedge.hedges_bestiary.entity.projectile.DawnDoveFireBall;
+import com.hedge.hedges_bestiary.entity.projectile.DragonFireBall;
 import com.hedge.hedges_bestiary.entity.types.AttackStateMob;
 import com.hedge.hedges_bestiary.entity.types.EggLayer;
 import com.hedge.hedges_bestiary.entity.types.HUDMount;
@@ -48,7 +48,6 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -410,10 +409,10 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
                         }
                     } case 2 -> {
                         if (animTicks == 13) {
-                            DawnDoveFireBall fireball = HBEntities.DAWN_DOVE_FIREBALL.get().create(this.level());
+                            DragonFireBall fireball = HBEntities.DRAGON_FIREBALL.get().create(this.level());
                             fireball.setOwner(this);
                             fireball.moveTo(this.getEyePosition().add(this.getLookAngle().scale(1.2)));
-                            fireball.shootFromRotation(this, Mth.clamp(this.getXRot(), -45, 45), this.getYRot(), 0.0f, 3, 0);
+                            fireball.shootFromRotation(this, this.getXRot(), this.getYHeadRot(), 0.0f, 3, 0);
                             this.level().addFreshEntity(fireball);
                         } else if (animTicks > 23) {
                             this.resetAnimState();

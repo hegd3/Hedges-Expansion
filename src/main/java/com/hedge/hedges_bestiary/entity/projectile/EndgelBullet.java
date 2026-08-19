@@ -4,6 +4,7 @@ import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
 import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.hedge.hedges_bestiary.util.WorldHelpers;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
@@ -70,10 +71,11 @@ public class EndgelBullet extends GenericProjectile{
 
     private void explode() {
         if (!this.level().isClientSide) {
-            List<LivingEntity> hit = AttackHelpers.projectileZoneHitbox(this, this.position(), 3, 3, 3, 10);
+            List<LivingEntity> hit = AttackHelpers.projectileZoneHitbox(this, this.position(), 2, 2, 2, 10);
             for (LivingEntity entity : hit) {
                 entity.hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), this.getDamage() - (float)entity.distanceToSqr(this.position()));
             }
+            this.playSound(SoundEvents.GENERIC_EXPLODE);
             this.level().broadcastEntityEvent(this, (byte) 39);
         }
     }
