@@ -7,14 +7,14 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "hedges_bestiary:screamer_sac",
+          "name": "hedges_bestiary:endgelic_heart",
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
-                "max": 2
+                "max": 1
               },
               "add": false
             },

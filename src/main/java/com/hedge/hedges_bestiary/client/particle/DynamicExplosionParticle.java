@@ -70,7 +70,7 @@ public class DynamicExplosionParticle extends TextureSheetParticle {
             this.sprites = pSprites;
         }
         public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
-            return new DynamicExplosionParticle(pLevel, pX, pY, pZ, this.sprites, 9, 1.0f);
+            return new DynamicExplosionParticle(pLevel, pX, pY, pZ, this.sprites, 8, 1.0f);
         }
     }
 

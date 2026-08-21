@@ -3,6 +3,7 @@ package com.hedge.hedges_bestiary.entity.living.ambientfish;
 import com.hedge.hedges_bestiary.entity.AI.control.SwimmingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.GroupFollowLeaderGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.CustomSwimGoal;
+import com.hedge.hedges_bestiary.entity.AI.goal.LeaveGroupGoal;
 import com.hedge.hedges_bestiary.entity.living.TearacudaEntity;
 import com.hedge.hedges_bestiary.entity.types.HBBucketableSchoolingMob;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
@@ -53,8 +54,8 @@ public class ChubEntity extends HBBucketableSchoolingMob {
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new GroupFollowLeaderGoal<>(this));
         this.goalSelector.addGoal(1, new CustomSwimGoal(this, 1.0f, 10, 6, 10, true));
-        this.goalSelector.addGoal(2, new AvoidEntityGoal<>(this, TearacudaEntity.class, 10, 1.4f, 1.4f));
-        this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, Player.class, 6, 1.4f, 1.4f));
+        this.goalSelector.addGoal(2, new LeaveGroupGoal<>(this));
+
     }
 
     @Override

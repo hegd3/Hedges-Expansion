@@ -9,6 +9,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -43,7 +44,6 @@ public class EggBlock<E extends EntityType<?>> extends BaseEntityBlock {
         this.toHatch = toHatch;
         this.shape = shape;
         this.registerDefaultState(this.stateDefinition.any().setValue(HATCH, 0));
-
     }
 
     @Override
@@ -102,4 +102,5 @@ public class EggBlock<E extends EntityType<?>> extends BaseEntityBlock {
     public RenderShape getRenderShape(BlockState pState) {
         return RenderShape.MODEL;
     }
+
 }

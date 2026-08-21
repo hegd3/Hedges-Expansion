@@ -508,6 +508,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
 
     public void grab(Entity entity) {
         this.setGrabbedEntityID(entity.getId());
+        entity.stopRiding();
     }
 
     public boolean isGrabbing() {
@@ -528,7 +529,6 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
 
     private void tickGrab() {
         this.grabbedEntity.setDeltaMovement(this.getX() - grabbedEntity.getX(), this.getY() - grabbedEntity.getY() - grabbedEntity.getBbHeight(), this.getZ() - grabbedEntity.getZ());
-        //this.grabbedEntity.setPos(this.getX(), this.onGround() ? this.getY() : this.getY() - grabbedEntity.getBbHeight(), this.getZ());
         this.grabbedEntity.fallDistance = 0.0F;
         if (!this.level().isClientSide() && !this.grabbedEntity.isAlive()) {
             this.setGrabbedEntityID(-1);

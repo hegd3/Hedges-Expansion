@@ -18,6 +18,9 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -34,6 +37,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -41,9 +45,9 @@ import java.util.stream.Stream;
 
 public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntity>, EggLayer {
 
-    protected static final EntityDataAccessor<Optional<BlockPos>> TARGETED_BLOCK_POS = SynchedEntityData.defineId(ZappetEntity.class, EntityDataSerializers.OPTIONAL_BLOCK_POS);
-
+    private static final EntityDataAccessor<Optional<BlockPos>> TARGETED_BLOCK_POS = SynchedEntityData.defineId(ZappetEntity.class, EntityDataSerializers.OPTIONAL_BLOCK_POS);
     private static final EntityDataAccessor<Boolean> HAS_EGG = SynchedEntityData.defineId(ZappetEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> RIDDEN_ID = SynchedEntityData.defineId(ZappetEntity.class, EntityDataSerializers.INT);
 
     public final AnimationState idleAnimationState = new AnimationState();
     public final SmoothAnimationState shootAnimationState = new SmoothAnimationState();
@@ -51,6 +55,10 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
 
     @Nullable
     private ZappetEntity leader;
+
+    @Nullable
+    private Entity riddenHeadEntity;
+
     private int groupSize = 1;
 
     private float prevGlowProgress = 1.0f;
@@ -76,13 +84,30 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
     }
 
     @Override
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        InteractionResult type = super.mobInteract(player, hand);
+        if (type == InteractionResult.PASS && this.isTame()) {
+            if (this.getRiddenId() == -1) {
+                if (this.isFlying()) {
+                    this.setFlying(false);
+                }
+                this.setRiddenId(player.getId());
+            } else {
+                this.setRiddenId(-1);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        return type;
+    }
+
+    @Override
     protected boolean canOwnerMount(Player player) {
         return false;
     }
 
     @Override
     protected boolean canOwnerCommand(Player player) {
-        return true;
+        return player.isShiftKeyDown();
     }
 
     @Override
@@ -90,6 +115,7 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         super.defineSynchedData();
         this.entityData.define(TARGETED_BLOCK_POS, Optional.empty());
         this.entityData.define(HAS_EGG, false);
+        this.entityData.define(RIDDEN_ID, -1);
     }
 
 
@@ -98,6 +124,7 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
     protected void registerGoals() {
         int i = 0;
         this.goalSelector.addGoal(i++, new FloatGoal(this));
+        this.goalSelector.addGoal(i++, new ZappetOnHeadOverrideGoal());
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this, false));
         this.goalSelector.addGoal(i++, new FlyerFollowOwnerGoal(this, 1.2D, 1.6D, 8.0f, 5.0f));
         this.goalSelector.addGoal(i++, new ZappetProjectileShieldGoal(this));
@@ -119,6 +146,7 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         this.goalSelector.addGoal(i++, new LookAtPlayerGoal(this, LivingEntity.class, 10));
         this.goalSelector.addGoal(i++, new RandomLookAroundGoal(this));
         this.goalSelector.addGoal(i++, new IdleAnimationGoal<>(this));
+        this.goalSelector.addGoal(i++, new LeaveGroupGoal<>(this));
         this.goalSelector.addGoal(i, new DancingGoal(this));
 
         this.targetSelector.addGoal(2, new HBHurtByTargetGoal(this, true, TamableAnimal.class));
@@ -138,7 +166,7 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
     @Override
     public void tick() {
         super.tick();
-
+        this.tickOnHead();
         if (this.level().isClientSide()) {
             this.setUpAnimStates();
             this.tickGlow();
@@ -149,27 +177,40 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
                     case 1 -> {
                         if (this.animTicks > 20) {
                             this.resetAnimState();
-                        } else if (this.animTicks == 5) {
+                        }
+                    }
+                    case 2 -> {
+                        if (this.animTicks > 10) {
+                            this.resetAnimState();
+                        } else if (this.animTicks == 3) {
                             if (this.getTargetedPos() != null) {
                                 this.setTargetedPos(null);
                             }
                         }
                     }
-                    case 2 -> {
-                        if (this.animTicks > 15) {
-                            this.resetAnimState();
-                        }
-                    }
                 }
             }
         }
-        if (this.hasFollowers() && this.level().random.nextInt(200) == 1) {
-            List<? extends ZappetEntity> list = this.level().getEntitiesOfClass(this.getClass(), this.getBoundingBox().inflate(10.0D, 10.0D, 10.0D));
-            if (list.size() <= 1) {
-                this.groupSize = 1;
+    }
+
+    private void tickOnHead() {
+        if (this.getRiddenId() != -1) {
+            if (riddenHeadEntity != null && riddenHeadEntity.isAlive() && !this.isInFluidType()) {
+                this.setPos(riddenHeadEntity.getX(), riddenHeadEntity.getY() + riddenHeadEntity.getBbHeight(), riddenHeadEntity.getZ());
+                this.setXRot(riddenHeadEntity.getXRot() / 2);
+                this.setYRot(Mth.lerp(0.5F, this.getYRot(), riddenHeadEntity.getYRot()));
+                this.setYHeadRot(riddenHeadEntity.getYHeadRot());
+                this.yBodyRot = Mth.lerp(1F, yBodyRot, yHeadRot);
+                if (riddenHeadEntity.getDeltaMovement().y < 0) {
+                    riddenHeadEntity.setDeltaMovement(riddenHeadEntity.getDeltaMovement().multiply(1, 0.7, 1));
+                }
+                riddenHeadEntity.fallDistance = 0;
+            } else if (!this.level().isClientSide()) {
+                this.setRiddenId(-1);
             }
         }
     }
+
 
     private void tickGlow() {
         this.prevGlowProgress = this.glowProgress;
@@ -178,7 +219,7 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
 
                 if (this.glowProgress < 5.0F) {
                     Vec3 rand = EntityHelpers.getRandomVec3(this.getRandom(), 0.6);
-                    this.level().addParticle(HBParticles.ELECTRIC_SPARKS.get(), this.getX() + rand.x + rand.x,
+                    this.level().addParticle(HBParticles.ELECTRIC_SPARKS.get(), true, this.getX() + rand.x + rand.x,
                             this.getY() + rand.y + 0.5, this.getZ() + rand.z, rand.x, rand.y + 0.2, rand.z);
                     this.glowProgress += 0.5f;
                 } else {
@@ -204,10 +245,24 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         return (prevGlowProgress + (glowProgress - prevGlowProgress) * partialTicks) * 0.2F;
     }
 
+    @Override
+    public void stopRiding() {
+        if (this.getRiddenId() != -1) {
+            this.setRiddenId(-1);
+        }
+        super.stopRiding();
+    }
+
+    @Override
+    public boolean startRiding(Entity pEntity, boolean pForce) {
+        if (this.getRiddenId() != -1) {
+            this.setRiddenId(-1);
+        }
+        return super.startRiding(pEntity, pForce);
+    }
 
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
-        super.onSyncedDataUpdated(pKey);
         if (pKey == ANIM_STATE) {
             this.animTicks = 0;
         } else if (pKey == TARGETED_BLOCK_POS && this.level().isClientSide()) {
@@ -215,6 +270,15 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
             if (pos != null) {
                 this.level().addParticle(HBParticles.LIGHTNING_EXPLODE.get(), true, pos.getX(), pos.getY(), pos.getZ(), 0, 0, 0);
             }
+        } else if (pKey == RIDDEN_ID) {
+            if (this.getRiddenId() != -1) {
+                this.riddenHeadEntity = this.level().getEntity(this.getRiddenId());
+            } else if (this.riddenHeadEntity != null) {
+                this.riddenHeadEntity = null;
+            }
+        }
+        else {
+            super.onSyncedDataUpdated(pKey);
         }
     }
 
@@ -244,12 +308,22 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
 
     @Override
     public void travel(Vec3 pTravelVector) {
-        if (this.isEffectiveAi() && this.isFlying()) {
-            this.moveRelative(this.getSpeed(), pTravelVector);
-            this.move(MoverType.SELF, this.getDeltaMovement());
-            this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
+        if (this.getRiddenId() != -1) {
+            super.travel(Vec3.ZERO);
         } else {
             super.travel(pTravelVector);
+        }
+    }
+
+    @Override
+    public boolean isPushable() {
+        return this.getRiddenId() == -1 && super.isPushable();
+    }
+
+    @Override
+    public void push(Entity pEntity) {
+        if (this.getRiddenId() == -1) {
+            super.push(pEntity);
         }
     }
 
@@ -265,7 +339,7 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
     @Override
     public void setUpAnimStates() {
         this.idleAnimationState.animateWhen(this.isAlive(), this.tickCount);
-        this.sitAnimationState.animateWhen(this.isSitting() && !this.isDancing(), this.tickCount);
+        this.sitAnimationState.animateWhen((this.isSitting() || this.getRiddenId() != -1) && !this.isDancing(), this.tickCount);
         this.danceAnimationState.animateWhen(this.isDancing(), this.tickCount);
         this.callAnimationState.animateWhen(this.getAnimState() == 1, this.tickCount);
         this.shootAnimationState.animateWhen(this.getAnimState() == 2, this.tickCount);
@@ -284,6 +358,10 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         }
     }
 
+    @Override
+    public boolean canNeverFollow() {
+        return this.isTame();
+    }
 
     @Override
     public ZappetEntity getLeader() {
@@ -304,7 +382,7 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
 
     @Override
     public boolean canBeFollowed() {
-        if (this.getOwnerUUID() != null || this.isBaby()) {
+        if (this.isTame() || this.isBaby()) {
             return false;
         }
         return HBGroupMob.super.canBeFollowed();
@@ -337,14 +415,6 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         this.groupSize--;
     }
 
-    @Override
-    public void addFollowers(Stream<ZappetEntity> pFollowers) {
-        pFollowers.limit((long)(this.getMaxGroupSize() - this.groupSize)).filter((zappet) -> {
-            return zappet != this;
-        }).forEach((zappet) -> {
-            zappet.startFollowing(this);
-        });
-    }
 
     @Override
     public void playIdle() {
@@ -355,6 +425,8 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
     public @Nullable AgeableMob getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
         return HBEntities.ZAPPET.get().create(level);
     }
+
+
 
     @Override
     public BlockState getEgg() {
@@ -389,27 +461,73 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         return SleepType.RESTLESS;
     }
 
+
+
+    @Nullable
+    public Entity getRiddenHeadEntity() {
+        return this.riddenHeadEntity;
+    }
+
+    public void setRiddenId(int i) {
+        this.entityData.set(RIDDEN_ID, i);
+    }
+
+    public int getRiddenId() {
+        return this.entityData.get(RIDDEN_ID);
+    }
+
     private static class ZappetProjectileShieldGoal extends Goal {
         private final ZappetEntity zappet;
-        private List<Projectile> found;
+        private Projectile found;
         public ZappetProjectileShieldGoal(ZappetEntity zappet) {
             this.zappet = zappet;
         }
         @Override
         public boolean canUse() {
-            if (zappet.isBaby() || zappet.getTargetedPos() != null) return false;
-            found = this.zappet.level().getEntitiesOfClass(Projectile.class, this.zappet.getBoundingBox().inflate(5.0D));
-            return !found.isEmpty();
+            if (zappet.isBaby() || zappet.getAnimState() == 2) return false;
+            List<Projectile> list = this.zappet.level().getEntitiesOfClass(Projectile.class, this.zappet.getBoundingBox().inflate(5.0D));
+            if (list.isEmpty()) {
+                found = null;
+                return false;
+            } else {
+                for (Projectile proj : list) {
+                    if (proj.getOwner() == null || !zappet.isAlliedTo(proj.getOwner())) {
+                        found = proj;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
 
         @Override
         public void start() {
-            this.zappet.setTargetedPos(found.get(0).blockPosition());
+            this.zappet.setTargetedPos(found.blockPosition());
             this.zappet.resetAnimState();
-            this.zappet.setAnimState(1);
-            this.zappet.playSound(HBSounds.ZAP.get(), 1.0F, zappet.getRandom().nextFloat() * 0.4F + 1F);
-            found.get(0).discard();
+            this.zappet.lookAt(found, 90, 30);
+            this.zappet.getLookControl().setLookAt(found, 90, 30);
+            this.zappet.setAnimState(2);
+            this.zappet.playSound(HBSounds.ZAP.get(), 1.0F, zappet.getRandom().nextFloat() * 0.5F + 1F);
+            found.discard();
+            found = null;
+        }
+    }
+
+    private class ZappetOnHeadOverrideGoal extends Goal {
+
+        public ZappetOnHeadOverrideGoal() {
+            this.setFlags(EnumSet.of(Flag.LOOK, Flag.MOVE, Flag.JUMP));
+        }
+        @Override
+        public boolean canUse() {
+            return ZappetEntity.this.getRiddenId() != -1;
+        }
+        @Override
+        public boolean canContinueToUse() {
+            return ZappetEntity.this.getRiddenId() != -1;
+
         }
     }
 }

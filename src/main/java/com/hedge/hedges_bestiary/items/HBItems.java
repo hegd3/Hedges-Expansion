@@ -26,7 +26,7 @@ public class HBItems {
     public static final RegistryObject<Item> TEARACUDA_TOOTH = ITEMS.register("tearacuda_tooth",
             () -> new Item(new Item.Properties()));
 
-    public static final RegistryObject<Item> SCREAMER_SAC = ITEMS.register("screamer_sac",
+    public static final RegistryObject<Item> ENDGELIC_HEART = ITEMS.register("endgelic_heart",
             () -> new Item(new Item.Properties()));
 
 

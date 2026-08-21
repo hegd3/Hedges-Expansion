@@ -16,7 +16,7 @@ public class HBCreativeTab {
 
 
     public static final RegistryObject<CreativeModeTab> CREATIVE_TAB = CREATIVE_MODE_TABS.register("hedges_bestiary_tab",
-            () -> CreativeModeTab.builder().icon(() -> new ItemStack(HBItems.MURK_CLAW.get()))
+            () -> CreativeModeTab.builder().icon(() -> new ItemStack(HBItems.SEASONED_TREAT.get()))
                     .title(Component.translatable("creativetab.hedges_bestiary_tab"))
                     .displayItems((itemDisplayParameters, output) -> {
                         // blocks
@@ -28,7 +28,7 @@ public class HBCreativeTab {
                         // crafting items
                         output.accept(HBItems.MURK_CLAW.get());
                         output.accept(HBItems.MURK_SPIKE.get());
-                        output.accept(HBItems.SCREAMER_SAC.get());
+                        output.accept(HBItems.ENDGELIC_HEART.get());
                         output.accept(HBItems.TEARACUDA_TOOTH.get());
 
                         //crafted items

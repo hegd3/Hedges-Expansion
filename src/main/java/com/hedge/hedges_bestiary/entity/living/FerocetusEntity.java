@@ -1,6 +1,7 @@
 package com.hedge.hedges_bestiary.entity.living;
 
 import com.hedge.hedges_bestiary.entity.AI.control.SwimmingMoveControl;
+import com.hedge.hedges_bestiary.entity.AI.goal.LeaveGroupGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.IdleAnimationGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.FerocetusAttackGoal;
@@ -106,9 +107,10 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
     protected void registerGoals() {
 
         this.goalSelector.addGoal(0, new FerocetusAttackGoal(this));
-        this.goalSelector.addGoal(1, new GroupFollowLeaderGoal<>(this));
+        this.goalSelector.addGoal(1, new GroupFollowLeaderGoal<>(this,10F, 5F));
         this.goalSelector.addGoal(2, new CustomSwimGoal(this, 1.0f, 25, 5, 3, true));
         this.goalSelector.addGoal(3, new IdleAnimationGoal<>(this));
+        this.goalSelector.addGoal(4, new LeaveGroupGoal<>(this));
 
         this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, TearacudaEntity.class, true));
@@ -311,7 +313,7 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
 
     @Override
     public void pathToLeader() {
-        if (this.isFollower() && this.distanceToSqr(this.leader) >= 50.0) {
+        if (this.isFollower()) {
             Vec3 pos = this.leader.position().add(0, 5 * this.getRandom().nextDouble() - 5 * this.getRandom().nextDouble(), 0);
             this.getNavigation().moveTo(pos.x, pos.y, pos.z, 1.2f);
         }

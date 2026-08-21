@@ -74,7 +74,7 @@ public class DragonFireBall extends GenericProjectile {
 
     @Override
     public float getDamage() {
-        return 15;
+        return 20;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.hedge.hedges_bestiary.entity.living;
 
+import com.hedge.hedges_bestiary.client.particle.EndgelScreamParticleOptions;
 import com.hedge.hedges_bestiary.entity.AI.control.FlyingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.FlyingWanderGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.EndgelAttackGoal;
@@ -9,6 +10,7 @@ import com.hedge.hedges_bestiary.entity.types.HBMonster;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.registry.HBParticles;
+import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -39,10 +41,13 @@ public class EndgelEntity extends HBMonster {
     private float trail = 0.0f;
     private int spinCD = 0;
     private int attackCD = 0;
+    private int screamCD = 0;
     private int projAngle = 0;
 
     public final AnimationState spinAnimationState = new AnimationState();
     public final AnimationState shootAnimationState = new AnimationState();
+    public final SmoothAnimationState screamWindupAnimationState = new SmoothAnimationState(0.1f);
+    public final SmoothAnimationState screamAnimationState = new SmoothAnimationState();
 
     public EndgelEntity(EntityType<? extends EndgelEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -93,7 +98,10 @@ public class EndgelEntity extends HBMonster {
 
     @Override
     public void travel(Vec3 pTravelVector) {
-        if (this.isEffectiveAi()) {
+        if (this.getAnimState() > 2) {
+            super.travel(Vec3.ZERO);
+            this.setDeltaMovement(Vec3.ZERO);
+        } else if (this.isEffectiveAi()) {
             this.moveRelative(this.getSpeed(), pTravelVector);
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
@@ -101,6 +109,8 @@ public class EndgelEntity extends HBMonster {
             super.travel(pTravelVector);
         }
     }
+
+
 
     @Override
     protected void serverTick() {
@@ -110,6 +120,7 @@ public class EndgelEntity extends HBMonster {
 
                 case 1 -> {
                     if (this.animTicks == 25) {
+                        this.level().broadcastEntityEvent(this, (byte)39);
                         for (int i = -45; i < 45; i+=45) {
                             for (int j = -25; j < 25; j+=25) {
                                 EndgelBullet scream = new EndgelBullet(HBEntities.ENDGEL_BULLET.get(), this.level());
@@ -142,10 +153,42 @@ public class EndgelEntity extends HBMonster {
                         this.projAngle+= 36;
                     }
                 }
+                case 3 -> {
+                    if (this.animTicks > 40) {
+                        this.animTicks = 0;
+                        this.setAnimState(4);
+                    } else if (this.animTicks % 10 == 0) {
+                        this.level().broadcastEntityEvent(this, (byte)39);
+                        if (this.getTarget() != null) {
+                            this.lookAt(this.getTarget(), 60F, 60F);
+                            this.getLookControl().setLookAt(this.getTarget(), 60F, 60F);
+                        }
+                    }
+                }
+                case 4 -> {
+                    if (this.animTicks == 10) {
+                        for (int i = -60; i < 60; i+=30) {
+                            for (int j = -35; j < 35; j+=35) {
+                                EndgelBullet scream = new EndgelBullet(HBEntities.ENDGEL_BULLET.get(), this.level());
+                                scream.moveTo(this.position());
+                                scream.shootFromRotation(this, this.getXRot() + j, this.getYRot() + i, 0.0f, 2, 0);
+                                scream.setTarget(this.getTarget());
+                                level().addFreshEntity(scream);
+                            }
+                        }
+                        this.level().broadcastEntityEvent(this, (byte)39);
+                    }
+                    else if (this.animTicks > 23) {
+                        this.resetAnimState();
+                        this.screamCD = 200;
+                    }
+                }
             }
         }
         this.attackCD = Math.max(this.attackCD - 1, 0);
         this.spinCD = Math.max(this.spinCD - 1, 0);
+        this.screamCD = Math.max(this.screamCD - 1, 0);
+
     }
 
 
@@ -156,6 +199,8 @@ public class EndgelEntity extends HBMonster {
         this.idleAnimationState.animateWhen(true, this.tickCount);
         this.shootAnimationState.animateWhen(state == 1, this.tickCount);
         this.spinAnimationState.animateWhen(state == 2, this.tickCount);
+        this.screamWindupAnimationState.animateWhen(state == 3, this.tickCount);
+        this.screamAnimationState.animateWhen(state == 4, this.tickCount);
     }
 
     @Override
@@ -213,6 +258,10 @@ public class EndgelEntity extends HBMonster {
         this.setAnimState(1);
     }
 
+    public boolean canScream(double attackReach, double dist) {
+        return this.screamCD == 0 && attackReach * 0.75F > dist;
+    }
+
     @Override
     public boolean canUseAttack(LivingEntity entity, double attackReach, double dist) {
         return this.attackCD == 0 && attackReach >= dist;
@@ -230,4 +279,23 @@ public class EndgelEntity extends HBMonster {
         this.roll = prevRoll + (targetRoll - prevRoll) * 0.05F;
     }
 
+    @Override
+    public void handleEntityEvent(byte pId) {
+        if (pId == 39) {
+            Vec3 v = this.getEyePosition().add(this.getLookAngle().scale(3.5F));
+            this.level().addParticle(new EndgelScreamParticleOptions(Mth.clamp(-this.getXRot(), -35, 35), this.getYRot()), true, v.x, v.y, v.z, 0, 0, 0);
+            /*
+            for (int i = 0; i < 360; i+=45) {
+                Vec3 vec = new Vec3(Mth.sin(i * Mth.DEG_TO_RAD) * 4, Mth.cos(i * Mth.DEG_TO_RAD) * 4, 0);
+                vec = vec.yRot(-this.getYRot() * Mth.DEG_TO_RAD);
+                v = this.getEyePosition().add(vec);
+                this.level().addParticle(HBParticles.ENDGEL_BULLET.get(), v.x, v.y, v.z, 0, 0, 0);
+            }
+
+             */
+
+        } else {
+            super.handleEntityEvent(pId);
+        }
+    }
 }

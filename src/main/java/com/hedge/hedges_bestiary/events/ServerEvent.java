@@ -56,7 +56,7 @@ public class ServerEvent {
         event.registerSpriteSet(HBParticles.MURK_IMPACT.get(), DynamicExplosionParticle.MurkImpactProvider::new);
 
         event.registerSpriteSet(HBParticles.SMOKE.get(), SmokeParticle.Provider::new);
-        event.registerSpriteSet(HBParticles.BANSHEE_SCREAM.get(), BansheeScreamParticle.Provider::new);
+        event.registerSpriteSet(HBParticles.ENDGEL_SCREAM.get(), EndgelScreamParticle.Provider::new);
 
         event.registerSpriteSet(HBParticles.ELECTRIC_SPARKS.get(), AuraParticle.Provider::new);
         event.registerSpriteSet(HBParticles.LIGHTNING_EXPLODE.get(), DynamicExplosionParticle.LightningExplodeProvider::new);

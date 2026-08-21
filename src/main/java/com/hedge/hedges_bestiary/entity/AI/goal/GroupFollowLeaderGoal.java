@@ -3,20 +3,29 @@ package com.hedge.hedges_bestiary.entity.AI.goal;
 import com.hedge.hedges_bestiary.entity.types.HBGroupMob;
 import com.mojang.datafixers.DataFixUtils;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 
 import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class GroupFollowLeaderGoal<E extends LivingEntity & HBGroupMob<E>> extends Goal{
+public class GroupFollowLeaderGoal<E extends PathfinderMob & HBGroupMob<E>> extends Goal{
     protected final E mob;
+    private final float stopRange;
+    private final float startRange;
     private int timeToRecalcPath;
     private int nextStartTick;
 
     public GroupFollowLeaderGoal(E mob) {
+        this(mob, 8, 0);
+    }
+
+    public GroupFollowLeaderGoal(E mob, float startRange, float stopRange) {
         this.mob = mob;
         this.nextStartTick = this.nextStartTick(mob);
+        this.startRange = startRange * startRange;
+        this.stopRange = stopRange * stopRange;
         this.setFlags(EnumSet.of(Flag.MOVE));
     }
 
@@ -25,10 +34,12 @@ public class GroupFollowLeaderGoal<E extends LivingEntity & HBGroupMob<E>> exten
     }
 
     public boolean canUse() {
-        if (this.mob.hasFollowers()) {
+        if (this.mob.canNeverFollow()) {
+            return false;
+        } else if (this.mob.hasFollowers()) {
             return false;
         } else if (this.mob.isFollower()) {
-            return true;
+            return this.mob.distanceToSqr(this.mob.getLeader()) >= this.startRange;
         } else if (this.nextStartTick > 0) {
             --this.nextStartTick;
             return false;
@@ -42,23 +53,27 @@ public class GroupFollowLeaderGoal<E extends LivingEntity & HBGroupMob<E>> exten
             schoolingMob.addFollowers(list.stream().filter((p_25255_) -> {
                 return !p_25255_.isFollower();
             }));
-            return this.mob.isFollower();
+            return this.mob.isFollower() && this.mob.distanceToSqr(this.mob.getLeader()) >= this.startRange;
         }
     }
 
     public boolean canContinueToUse() {
-        return this.mob.isFollower() && this.mob.inRangeOfLeader();
+        if (!this.mob.isFollower()) {
+            return false;
+        }
+
+        return this.stopRange == 0 || this.mob.distanceToSqr(this.mob.getLeader()) > this.stopRange;
     }
 
+    @Override
+    public void stop() {
+        if (this.stopRange != 0) this.mob.getNavigation().stop();
+    }
 
     public void start() {
         this.timeToRecalcPath = 0;
     }
 
-
-    public void stop() {
-        this.mob.stopFollowing();
-    }
 
 
     public void tick() {

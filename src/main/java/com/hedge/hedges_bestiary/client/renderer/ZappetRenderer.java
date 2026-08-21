@@ -68,8 +68,8 @@ public class ZappetRenderer extends MobRenderer<ZappetEntity, ZappetModel> {
             int i = 1;
             float f7 = f1 * 0.05F * 1.5F;
             float f8 = 1F;
-            int j = (int) (f8 * 135.0F);
-            int k = (int) (f8 * 246.0F);
+            int j = (int) (f8 * 179.0F);
+            int k = (int) (f8 * 253.0F);
             int l = (int) (f8 * 255.0F);
             float f9 = 0.2F;
             float f10 = 0.282F;
@@ -119,7 +119,7 @@ public class ZappetRenderer extends MobRenderer<ZappetEntity, ZappetModel> {
     }
 
     private ResourceLocation getBeamTexture(ZappetEntity entity) {
-        int time = entity.tickCount % 2 / 3;
+        int time = entity.tickCount / 2 % 3;
         return switch(time) {
             case 0 -> BEAM_0;
             case 1 -> BEAM_1;

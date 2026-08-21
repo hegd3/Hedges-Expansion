@@ -4,6 +4,7 @@ import com.hedge.hedges_bestiary.entity.AI.control.SwimmingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.GroupFollowLeaderGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.CustomSwimGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.JumpFromWaterGoal;
+import com.hedge.hedges_bestiary.entity.AI.goal.LeaveGroupGoal;
 import com.hedge.hedges_bestiary.entity.types.HBBucketableSchoolingMob;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.items.HBItems;
@@ -55,7 +56,7 @@ public class GildGliderEntity extends HBBucketableSchoolingMob {
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new GroupFollowLeaderGoal<>(this));
         this.goalSelector.addGoal(1, new CustomSwimGoal(this, 1.0f, 10, 6, 5, true));
-        this.goalSelector.addGoal(2, new AvoidEntityGoal<>(this, Player.class, 10, 1.4f, 1.4f));
+        this.goalSelector.addGoal(2, new LeaveGroupGoal<>(this));
         this.goalSelector.addGoal(3, new GildGliderJumpGoal(this));
     }
 

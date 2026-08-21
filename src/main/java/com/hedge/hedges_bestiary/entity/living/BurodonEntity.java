@@ -10,6 +10,7 @@ import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.TargetMonstersGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.TargetPlayersGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.TargetWhenAwakeGoal;
+import com.hedge.hedges_bestiary.entity.types.HBGroupMob;
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
 import com.hedge.hedges_bestiary.entity.types.AttackStateMob;
 import com.hedge.hedges_bestiary.items.TreatItem;
@@ -42,10 +43,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
-public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurner {
-
+public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurner, HBGroupMob<BurodonEntity> {
 
     private static final Predicate<LivingEntity> BURODON_TARGETS = living -> living.getType().is(HBTags.BURODON_TARGETS);
 
@@ -58,7 +60,7 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
 
     public final SmoothAnimationState airAnimationState = new SmoothAnimationState();
 
-
+    private BurodonEntity leader;
     private TurnType turnType;
     private boolean jumpAway = false;
     private Vec3 jumpVector;
@@ -68,6 +70,7 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
     private int attackCD = 0;
     private int jumpCD = 0;
     private int roarCD = 0;
+    private int groupSize = 1;
 
     public static final int BITE_ANIM = 1;
     public static final int JUMP_ANIM = 2;
@@ -124,15 +127,17 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
         this.goalSelector.addGoal(i++, new FloatGoal(this));
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this));
         this.goalSelector.addGoal(i++, new AvoidTargetWhenLowGoal(this, 1.6D, 20, 15, 16, 7));
-        this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2D, 1.6D, 7.0f, 4.0f));
+        this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2D, 1.6D, 7.0f, 10.0f));
         this.goalSelector.addGoal(i++, new BurodonAttackGoal(this));
         this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
         this.goalSelector.addGoal(i++, new NapGoal(this));
+        this.goalSelector.addGoal(i++, new GroupFollowLeaderGoal<>(this, 10F, 5F));
         this.goalSelector.addGoal(i++, new RandomlySitGoal(this));
         this.goalSelector.addGoal(i++, new LookAtPlayerGoal(this, LivingEntity.class, 7));
         this.goalSelector.addGoal(i++, new WaterAvoidingRandomStrollGoal(this, 1.0, 20));
         this.goalSelector.addGoal(i++, new IdleAnimationGoal<>(this));
         this.goalSelector.addGoal(i++, new DancingGoal(this));
+        this.goalSelector.addGoal(i++, new LeaveGroupGoal<>(this));
         this.goalSelector.addGoal(i, new RandomLookAroundGoal(this));
 
         this.targetSelector.addGoal(0, new OwnerHurtTargetGoal(this));
@@ -355,5 +360,57 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
     @Override
     public TurnType getTurnType() {
         return this.turnType;
+    }
+
+    @Override
+    public boolean canNeverFollow() {
+        return this.isTame();
+    }
+
+    @Override
+    public boolean canBeFollowed() {
+        return !this.isBaby() && HBGroupMob.super.canBeFollowed();
+    }
+
+    @Override
+    public BurodonEntity getLeader() {
+        return this.leader;
+    }
+
+    @Override
+    public void setLeader(BurodonEntity leader) {
+        this.leader = leader;
+    }
+
+    @Override
+    public void pathToLeader() {
+        if (this.isFollower()) {
+            this.getNavigation().moveTo(this.leader, 1D);
+        }
+    }
+
+    @Override
+    public boolean inRangeOfLeader() {
+        return this.distanceToSqr(this.leader) <= 400.0D;
+    }
+
+    @Override
+    public int getGroupSize() {
+        return this.groupSize;
+    }
+
+    @Override
+    public int getMaxGroupSize() {
+        return 5;
+    }
+
+    @Override
+    public void addFollower() {
+        this.groupSize++;
+    }
+
+    @Override
+    public void removeFollower() {
+        this.groupSize--;
     }
 }

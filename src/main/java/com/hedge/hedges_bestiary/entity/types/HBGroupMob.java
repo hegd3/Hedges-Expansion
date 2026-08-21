@@ -8,44 +8,54 @@ import java.util.stream.Stream;
 public interface HBGroupMob<E extends LivingEntity & HBGroupMob<E>> {
 
 
-    public default boolean isFollower() {
+    default boolean isFollower() {
         return this.getLeader() != null && this.getLeader().isAlive();
     }
 
-    public E getLeader();
+    E getLeader();
 
-    public void setLeader(E leader);
+    void setLeader(E leader);
 
-    public default E startFollowing(E leader) {
+    default E startFollowing(E leader) {
         this.setLeader(leader);
         this.getLeader().addFollower();
         return leader;
     }
 
-    public default void stopFollowing() {
+    default void stopFollowing() {
         this.getLeader().removeFollower();
         this.setLeader(null);
     }
 
-    public default boolean canBeFollowed() {
+    default boolean canNeverFollow() {
+        return false;
+    }
+
+    default boolean canBeFollowed() {
         return this.hasFollowers() && this.getGroupSize() < this.getMaxGroupSize();
     }
-    public void pathToLeader();
+    void pathToLeader();
 
-    public boolean inRangeOfLeader();
+    boolean inRangeOfLeader();
 
-    public default boolean hasFollowers() {
+    default boolean hasFollowers() {
         return this.getGroupSize() > 1;
     }
 
-    public int getGroupSize();
+    int getGroupSize();
 
-    public int getMaxGroupSize();
+    int getMaxGroupSize();
 
-    public void addFollower();
+    void addFollower();
 
-    public void removeFollower();
+    void removeFollower();
 
-    public void addFollowers(Stream<E> pFollowers);
+    default void addFollowers(Stream<E> pFollowers) {
+        pFollowers.limit((long)(this.getMaxGroupSize() - this.getGroupSize())).filter((mob) -> {
+            return mob != this;
+        }).forEach((mob) -> {
+            mob.startFollowing((E) this);
+        });
+    };
 
 }

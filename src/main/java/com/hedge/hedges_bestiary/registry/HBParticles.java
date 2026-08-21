@@ -1,7 +1,7 @@
 package com.hedge.hedges_bestiary.registry;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
-import com.hedge.hedges_bestiary.client.particle.BansheeScreamParticleOptions;
+import com.hedge.hedges_bestiary.client.particle.EndgelScreamParticleOptions;
 import com.hedge.hedges_bestiary.client.particle.SmokeParticleOptions;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.particles.ParticleType;
@@ -39,10 +39,10 @@ public class HBParticles {
 
     });
 
-    public static final RegistryObject<ParticleType<BansheeScreamParticleOptions>> BANSHEE_SCREAM = DEF_REG.register("banshee_scream", ()-> new ParticleType<>(true, BansheeScreamParticleOptions.DESERIALIZER) {
+    public static final RegistryObject<ParticleType<EndgelScreamParticleOptions>> ENDGEL_SCREAM = DEF_REG.register("endgel_scream", ()-> new ParticleType<>(true, EndgelScreamParticleOptions.DESERIALIZER) {
         @Override
-        public Codec<BansheeScreamParticleOptions> codec() {
-            return BansheeScreamParticleOptions.CODEC;
+        public Codec<EndgelScreamParticleOptions> codec() {
+            return EndgelScreamParticleOptions.CODEC;
         }
 
     });

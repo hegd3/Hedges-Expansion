@@ -120,10 +120,20 @@ public class ZappetModel extends HBModel<ZappetEntity> {
 		this.animateSmooth(entity.shootAnimationState, ZappetAnimation.SHOOT, ageInTicks, 1f);
 		this.animateSmooth(entity.sitAnimationState, ZappetAnimation.SIT, ageInTicks, 1f);
 		this.animateSmooth(entity.danceAnimationState, ZappetAnimation.DANCE, ageInTicks, 1f);
-		if (entity.onGround()) {
-			this.animate(entity.idleAnimationState, ZappetAnimation.IDLE, ageInTicks, 0.5f);
+
+		if (entity.getRiddenHeadEntity() != null) {
+			if (entity.getRiddenHeadEntity().onGround()) {
+				this.animate(entity.idleAnimationState, ZappetAnimation.IDLE, ageInTicks, 0.5f);
+			} else {
+				this.animate(entity.idleAnimationState, ZappetAnimation.GLIDE, ageInTicks, 1 + limbSwingAmount);
+				this.animate(entity.idleAnimationState, ZappetAnimation.FLY, ageInTicks, 2 + limbSwingAmount);
+			}
 		} else {
-			this.animate(entity.idleAnimationState, ZappetAnimation.GLIDE, ageInTicks, 1 + limbSwingAmount);
+			if (entity.onGround()) {
+				this.animate(entity.idleAnimationState, ZappetAnimation.IDLE, ageInTicks, 0.5f);
+			} else {
+				this.animate(entity.idleAnimationState, ZappetAnimation.GLIDE, ageInTicks, 1 + limbSwingAmount);
+			}
 		}
 		if (entity.isFlying()) {
 			float partialTicks = ageInTicks - entity.tickCount;
@@ -134,7 +144,7 @@ public class ZappetModel extends HBModel<ZappetEntity> {
 			this.flycontrol.xRot = entity.getFlightPitch(partialTicks) / 57.295776F * flyProgress / 2;
 			this.flycontrol.zRot = entity.getFlightRoll(partialTicks) / 57.295776F * flyProgress / 2;
 
-		} else {
+		} else if (entity.getRiddenId() == -1) {
 			this.animateWalk(ZappetAnimation.WALK, limbSwing, limbSwingAmount, 1.8f, 2.5f);
 		}
 	}

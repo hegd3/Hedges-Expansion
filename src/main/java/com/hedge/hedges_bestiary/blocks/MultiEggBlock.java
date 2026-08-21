@@ -4,13 +4,18 @@ import com.hedge.hedges_bestiary.util.BlockHelpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.registries.RegistryObject;
@@ -49,5 +54,22 @@ public class MultiEggBlock<E extends EntityType<?>> extends EggBlock<E> {
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(EGGS);
+    }
+
+    private void removeEgg(Level level, BlockPos pos, BlockState state) {
+        int eggs =  state.getValue(EGGS);
+        if (eggs <= 1) {
+            level.destroyBlock(pos, true);
+        } else {
+            level.setBlockAndUpdate(pos, state.setValue(EGGS, eggs - 1));
+            level.gameEvent(GameEvent.BLOCK_DESTROY, pos, GameEvent.Context.of(state));
+            level.levelEvent(2001, pos, Block.getId(state));
+        }
+    }
+
+    @Override
+    public void playerDestroy(Level pLevel, Player pPlayer, BlockPos pPos, BlockState pState, @org.jetbrains.annotations.Nullable BlockEntity pBlockEntity, ItemStack pTool) {
+        super.playerDestroy(pLevel, pPlayer, pPos, pState, pBlockEntity, pTool);
+        this.removeEgg(pLevel, pPos, pState);
     }
 }

@@ -24,7 +24,6 @@ public class EndgelAttackGoal extends GenericMeleeGoal<EndgelEntity> {
     @Override
     protected void tickPath(LivingEntity livingentity) {
 
-
         if (this.attackReach * 0.75F < this.dist) {
             super.tickPath(livingentity);
             if (this.randomFlying) this.randomFlying = false;
@@ -39,17 +38,23 @@ public class EndgelAttackGoal extends GenericMeleeGoal<EndgelEntity> {
 
     @Override
     public void tick() {
-        LivingEntity livingentity = this.mob.getTarget();
-        this.attackReach = this.mob.getAttackReachSqr(livingentity);
-        this.dist = this.mob.distanceToSqr(livingentity);
-        this.tickPath(livingentity);
-        if (this.mob.getAnimState() == 0) {
-            if (this.mob.canSpin()) {
-                this.mob.setSpin();
-            } else if (this.mob.canUseAttack(livingentity, attackReach, dist)) {
-                this.mob.setAttacking();
+        if (this.mob.getAnimState() < 3) {
+            LivingEntity livingentity = this.mob.getTarget();
+            this.attackReach = this.mob.getAttackReachSqr(livingentity);
+            this.dist = this.mob.distanceToSqr(livingentity);
+            this.tickPath(livingentity);
+            if (this.mob.getAnimState() == 0) {
+                if (this.mob.canSpin()) {
+                    this.mob.setSpin();
+                } else if (this.mob.canUseAttack(livingentity, attackReach, dist)) {
+                    this.mob.setAttacking();
+                } else if (this.mob.canScream(attackReach, dist)) {
+                    this.mob.setAnimState(3);
+                    this.mob.getNavigation().stop();
+                }
             }
         }
+
     }
 
 

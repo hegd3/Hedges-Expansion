@@ -12,11 +12,11 @@ import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.Locale;
 
-public class BansheeScreamParticleOptions implements ParticleOptions {
+public class EndgelScreamParticleOptions implements ParticleOptions {
     private final float xRot;
     private final float yRot;
 
-    public BansheeScreamParticleOptions(float xRot, float yRot) {
+    public EndgelScreamParticleOptions(float xRot, float yRot) {
         this.xRot = xRot;
         this.yRot = yRot;
     }
@@ -27,42 +27,42 @@ public class BansheeScreamParticleOptions implements ParticleOptions {
     public float getYRot() {
         return this.yRot;
     }
-    public static final Codec<BansheeScreamParticleOptions> CODEC =
+    public static final Codec<EndgelScreamParticleOptions> CODEC =
             RecordCodecBuilder.create(instance ->
                     instance.group(
-                            Codec.FLOAT.fieldOf("xRot").forGetter(BansheeScreamParticleOptions::getXRot),
-                            Codec.FLOAT.fieldOf("yRot").forGetter(BansheeScreamParticleOptions::getYRot)
-                    ).apply(instance, BansheeScreamParticleOptions::new)
+                            Codec.FLOAT.fieldOf("xRot").forGetter(EndgelScreamParticleOptions::getXRot),
+                            Codec.FLOAT.fieldOf("yRot").forGetter(EndgelScreamParticleOptions::getYRot)
+                    ).apply(instance, EndgelScreamParticleOptions::new)
             );
 
-    public static final Deserializer<BansheeScreamParticleOptions> DESERIALIZER =
+    public static final Deserializer<EndgelScreamParticleOptions> DESERIALIZER =
             new Deserializer<>() {
             @Override
-            public BansheeScreamParticleOptions fromCommand(
-                    ParticleType<BansheeScreamParticleOptions> type,
+            public EndgelScreamParticleOptions fromCommand(
+                    ParticleType<EndgelScreamParticleOptions> type,
                     StringReader reader
             ) throws CommandSyntaxException {
                 reader.expect(' ');
                 float xRot = reader.readFloat();
                 reader.expect(' ');
                 float yRot = reader.readFloat();
-                return new BansheeScreamParticleOptions(xRot, yRot);
+                return new EndgelScreamParticleOptions(xRot, yRot);
             }
 
             @Override
-            public BansheeScreamParticleOptions fromNetwork(
-                    ParticleType<BansheeScreamParticleOptions> type,
+            public EndgelScreamParticleOptions fromNetwork(
+                    ParticleType<EndgelScreamParticleOptions> type,
                     FriendlyByteBuf buf
             )
                 {
-                return new BansheeScreamParticleOptions(buf.readFloat(), buf.readFloat());
+                return new EndgelScreamParticleOptions(buf.readFloat(), buf.readFloat());
                 }
             };
 
 
     @Override
     public ParticleType<?> getType() {
-        return HBParticles.BANSHEE_SCREAM.get();
+        return HBParticles.ENDGEL_SCREAM.get();
     }
 
     @Override
