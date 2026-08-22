@@ -85,4 +85,17 @@ public class ProjectileTrailParticle extends TextureSheetParticle {
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
+    public static class EndgelBlastExplodeProvider implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet sprites;
+
+        public EndgelBlastExplodeProvider(SpriteSet pSprites) {
+            this.sprites = pSprites;
+        }
+
+        public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
+            return new ProjectileTrailParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites, 6, 2f, 1.0f);
+        }
+    }
+
 }

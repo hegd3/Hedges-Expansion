@@ -15,10 +15,11 @@ import java.util.Locale;
 public class EndgelScreamParticleOptions implements ParticleOptions {
     private final float xRot;
     private final float yRot;
-
-    public EndgelScreamParticleOptions(float xRot, float yRot) {
+    private final float quadSize;
+    public EndgelScreamParticleOptions(float xRot, float yRot, float quadSize) {
         this.xRot = xRot;
         this.yRot = yRot;
+        this.quadSize = quadSize;
     }
 
     public float getXRot() {
@@ -27,12 +28,15 @@ public class EndgelScreamParticleOptions implements ParticleOptions {
     public float getYRot() {
         return this.yRot;
     }
+    public float getQuadSize() {return this.quadSize;}
     public static final Codec<EndgelScreamParticleOptions> CODEC =
             RecordCodecBuilder.create(instance ->
                     instance.group(
                             Codec.FLOAT.fieldOf("xRot").forGetter(EndgelScreamParticleOptions::getXRot),
-                            Codec.FLOAT.fieldOf("yRot").forGetter(EndgelScreamParticleOptions::getYRot)
-                    ).apply(instance, EndgelScreamParticleOptions::new)
+                            Codec.FLOAT.fieldOf("yRot").forGetter(EndgelScreamParticleOptions::getYRot),
+                            Codec.FLOAT.fieldOf("quadSize").forGetter(EndgelScreamParticleOptions::getQuadSize)
+
+                            ).apply(instance, EndgelScreamParticleOptions::new)
             );
 
     public static final Deserializer<EndgelScreamParticleOptions> DESERIALIZER =
@@ -46,7 +50,9 @@ public class EndgelScreamParticleOptions implements ParticleOptions {
                 float xRot = reader.readFloat();
                 reader.expect(' ');
                 float yRot = reader.readFloat();
-                return new EndgelScreamParticleOptions(xRot, yRot);
+                reader.expect(' ');
+                float quadSize = reader.readFloat();
+                return new EndgelScreamParticleOptions(xRot, yRot, quadSize);
             }
 
             @Override
@@ -55,7 +61,7 @@ public class EndgelScreamParticleOptions implements ParticleOptions {
                     FriendlyByteBuf buf
             )
                 {
-                return new EndgelScreamParticleOptions(buf.readFloat(), buf.readFloat());
+                return new EndgelScreamParticleOptions(buf.readFloat(), buf.readFloat(), buf.readFloat());
                 }
             };
 
@@ -69,11 +75,12 @@ public class EndgelScreamParticleOptions implements ParticleOptions {
     public void writeToNetwork(FriendlyByteBuf pBuffer) {
         pBuffer.writeFloat(this.xRot);
         pBuffer.writeFloat(this.yRot);
+        pBuffer.writeFloat(this.quadSize);
 
     }
 
     @Override
     public String writeToString() {
-        return String.format(Locale.ROOT, "%s %.2f %.2f", BuiltInRegistries.PARTICLE_TYPE.getKey(this.getType()), this.xRot, this.yRot);
+        return String.format(Locale.ROOT, "%s %.2f %.2f %.2f", BuiltInRegistries.PARTICLE_TYPE.getKey(this.getType()), this.xRot, this.yRot, this.quadSize);
     }
 }

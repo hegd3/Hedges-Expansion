@@ -10,8 +10,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class EndgelScreamParticle extends AngledParticle {
 
-    public EndgelScreamParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, SpriteSet pSprites, float xRot, float yRot) {
-        super(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, pSprites, 4, 3f, 1f, xRot, yRot);
+    public EndgelScreamParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, SpriteSet pSprites, float xRot, float yRot, float quadSize) {
+        super(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, pSprites, 4, quadSize, 1f, xRot, yRot);
 
     }
 
@@ -36,7 +36,7 @@ public class EndgelScreamParticle extends AngledParticle {
         }
 
         public Particle createParticle(EndgelScreamParticleOptions options, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
-            EndgelScreamParticle p = new EndgelScreamParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites, options.getXRot(), options.getYRot());
+            EndgelScreamParticle p = new EndgelScreamParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites, options.getXRot(), options.getYRot(), options.getQuadSize());
             p.pickSprite(this.sprites);
             return p;
         }

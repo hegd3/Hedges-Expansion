@@ -22,6 +22,7 @@ import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.entity.util.MathHelpers;
 import com.hedge.hedges_bestiary.items.HBItems;
+import com.hedge.hedges_bestiary.items.TreatItem;
 import com.hedge.hedges_bestiary.message.EntityKeyMessage;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.registry.HBKeyMappings;
@@ -41,7 +42,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -63,6 +68,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -101,6 +107,9 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     private float prevTrail;
     private float trail = 0.0F;
     private int eatProgress = 0;
+
+    private int tameAttempts = 3;
+    private boolean ateSkib = false;
 
     public MurkEntity(EntityType<? extends MurkEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -358,6 +367,44 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     }
 
     @Override
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        InteractionResult result = super.mobInteract(player, hand);
+        if (result == InteractionResult.PASS && !this.isTame() && this.isCharged() && this.getMainHandItem().isEmpty()) {
+            ItemStack stack = player.getItemInHand(hand);
+            if (!ateSkib) {
+                if (stack.is(HBItems.SKIB_BUCKET.get())) {
+                    this.setItemSlot(EquipmentSlot.MAINHAND, stack);
+                    if (!player.getAbilities().instabuild) {
+                        stack.shrink(1);
+                    }
+                }
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
+
+            } else {
+                if (stack.getItem() instanceof TreatItem treat && treat.getTier() > 0) {
+                    if (!this.level().isClientSide) {
+                        if (!player.getAbilities().instabuild) {
+                            stack.shrink(1);
+                        }
+                        if (this.tameAttempts-- <= 0 && !ForgeEventFactory.onAnimalTame(this, player)) {
+                            this.level().broadcastEntityEvent(this, (byte) 7);
+                            this.tame(player);
+                            this.heal(this.getMaxHealth());
+                        } else {
+                            this.level().broadcastEntityEvent(this, (byte)6);
+                            this.ateSkib = false;
+                        }
+                    }
+                    this.playSound(SoundEvents.GENERIC_EAT);
+                    return InteractionResult.sidedSuccess(this.level().isClientSide);
+                }
+            }
+
+        }
+        return result;
+    }
+
+    @Override
     public void tick() {
         super.tick();
         if (this.getAnimState() > 1 && this.getAnimState() < 6) {
@@ -424,6 +471,9 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                 this.eatProgress++;
                 if (this.eatProgress > 20) {
                     this.eatProgress = 0;
+                    if (this.getMainHandItem().is(HBItems.SKIB_BUCKET.get())) {
+                        this.ateSkib = true;
+                    }
                     this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
                     this.heal(this.getMaxHealth() / 5);
                 } else if (this.eatProgress % 5 == 0) {
@@ -514,7 +564,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                             }
                             List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, v, 3, 3, 3, 8);
                             for (LivingEntity entity : hit) {
-                                if (!AttackHelpers.blockBreak(this, entity)) {
+                                if (!AttackHelpers.blockBreak(entity)) {
                                     AttackHelpers.betterHurt(this, entity, 1.2f, 1.4f);
                                 }
                             }
@@ -554,7 +604,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
             List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, v, 2, 2, 2, 8);
 
             for (LivingEntity entity : hit) {
-                if (!AttackHelpers.blockBreak(this, entity)) {
+                if (!AttackHelpers.blockBreak(entity)) {
                     AttackHelpers.betterHurt(this, entity, 1.8f, 1.5f);
                 } else {
                     AttackHelpers.betterHurt(this, entity, 0.8f, 0.8f);
@@ -563,7 +613,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         } else {
             List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, v, 2, 2, 2, 8);
             for (LivingEntity entity : hit) {
-                if (!AttackHelpers.blockBreak(this, entity)) {
+                if (!AttackHelpers.blockBreak(entity)) {
                     AttackHelpers.betterHurt(this, entity, 1.8f, 1.5f);
                 }
             }

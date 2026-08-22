@@ -1,0 +1,29 @@
+{
+  "parent": "item/bow",
+  "textures": {
+    "layer0": "hedges_bestiary:item/endgelic_judgement_0"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "pulling": 1
+      },
+      "model": "hedges_bestiary:item/endgelic_judgement_1"
+    },
+    {
+      "predicate": {
+        "pulling": 1,
+        "pull": 0.65
+      },
+      "model": "hedges_bestiary:item/endgelic_judgement_2"
+    },
+    {
+      "predicate": {
+        "pulling": 1,
+        "pull": 0.9
+      },
+      "model": "hedges_bestiary:item/endgelic_judgement_3"
+    }
+  ]
+
+}

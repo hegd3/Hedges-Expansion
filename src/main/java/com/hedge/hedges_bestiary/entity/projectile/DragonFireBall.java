@@ -2,9 +2,7 @@ package com.hedge.hedges_bestiary.entity.projectile;
 
 
 import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
-import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.registry.HBParticles;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -56,7 +54,7 @@ public class DragonFireBall extends GenericProjectile {
             List<LivingEntity> hit = AttackHelpers.projectileZoneHitbox(this, this.position(), 3, 3, 3, 10);
             for (LivingEntity entity : hit) {
                 entity.setRemainingFireTicks(60);
-                entity.hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), this.getDamage() - (float)entity.distanceToSqr(this.position()));
+                entity.hurt(this.damageSources().explosion(this.getOwner(), this), this.getDamage() - (float)entity.distanceToSqr(this.position()));
             }
             this.playSound(SoundEvents.GENERIC_EXPLODE);
             this.level().broadcastEntityEvent(this, (byte)39);

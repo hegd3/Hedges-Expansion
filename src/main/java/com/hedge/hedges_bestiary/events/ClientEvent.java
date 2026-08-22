@@ -6,6 +6,7 @@ import com.hedge.hedges_bestiary.client.models.*;
 import com.hedge.hedges_bestiary.client.renderer.*;
 import com.hedge.hedges_bestiary.client.renderer.projectile.WaveRenderer;
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
+import com.hedge.hedges_bestiary.items.HBItems;
 import com.hedge.hedges_bestiary.menu.HBTamableMenu;
 import com.hedge.hedges_bestiary.menu.HBTamableMenuScreen;
 import com.hedge.hedges_bestiary.message.OpenTamableScreenMessage;
@@ -14,6 +15,8 @@ import com.hedge.hedges_bestiary.registry.HBKeyMappings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
@@ -75,11 +78,39 @@ public class ClientEvent {
         EntityRenderers.register(HBEntities.WAVE.get(), WaveRenderer::new);
         EntityRenderers.register(HBEntities.ENDGEL.get(), EndgelRenderer::new);
         EntityRenderers.register(HBEntities.ENDGEL_BULLET.get(), ModellessProjectileRenderer::new);
+        EntityRenderers.register(HBEntities.ENDGEL_BLAST.get(), ModellessProjectileRenderer::new);
         EntityRenderers.register(HBEntities.DAWN_DOVE.get(), DawnDoveRenderer::new);
         EntityRenderers.register(HBEntities.DRAGON_FIREBALL.get(), ModellessProjectileRenderer::new);
         EntityRenderers.register(HBEntities.SKIB.get(), SkibRenderer::new);
 
         // MenuScreens.register();
+    }
+
+    @SubscribeEvent
+    public static void registerItemRenderers(FMLClientSetupEvent event) {
+        ItemProperties.register(
+                HBItems.ENDGELIC_JUDGEMENT.get(),
+                new ResourceLocation("pulling"),
+                (stack, level, entity, seed) -> {
+                    if (entity == null) return 0.0F;
+
+                    return entity.getUseItem() == stack && entity.isUsingItem()
+                            ? 1.0F
+                            : 0.0F;
+                }
+        );
+
+        ItemProperties.register(
+                HBItems.ENDGELIC_JUDGEMENT.get(),
+                new ResourceLocation("pull"),
+                (stack, level, entity, seed) -> {
+                    if (entity == null) return 0.0F;
+
+                    return entity.getUseItem() == stack
+                            ? (stack.getUseDuration() - entity.getUseItemRemainingTicks()) / 20.0F
+                            : 0.0F;
+                }
+        );
     }
 
     public static void openTamableScreen(OpenTamableScreenMessage packet) {

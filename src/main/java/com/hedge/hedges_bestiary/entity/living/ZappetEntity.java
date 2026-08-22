@@ -12,6 +12,7 @@ import com.hedge.hedges_bestiary.entity.types.*;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.registry.HBParticles;
+import com.hedge.hedges_bestiary.registry.HBTags;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -21,6 +22,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -153,6 +156,14 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         this.targetSelector.addGoal(3, new TargetPlayersGoal(this));
         this.targetSelector.addGoal(4, new TargetMonstersGoal(this));
 
+    }
+
+    @Override
+    public boolean isInvulnerableTo(DamageSource source) {
+        if (source.is(DamageTypes.LIGHTNING_BOLT)) {
+            return true;
+        }
+        return super.isInvulnerableTo(source);
     }
 
     @Override
@@ -491,6 +502,9 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
                 return false;
             } else {
                 for (Projectile proj : list) {
+                    if (proj.getType().is(HBTags.BYPASSES_ZAPPET_SHIELD)) {
+                        continue;
+                    }
                     if (proj.getOwner() == null || !zappet.isAlliedTo(proj.getOwner())) {
                         found = proj;
                         return true;
@@ -509,7 +523,7 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
             this.zappet.lookAt(found, 90, 30);
             this.zappet.getLookControl().setLookAt(found, 90, 30);
             this.zappet.setAnimState(2);
-            this.zappet.playSound(HBSounds.ZAP.get(), 1.0F, zappet.getRandom().nextFloat() * 0.5F + 1F);
+            this.zappet.playSound(HBSounds.ZAP.get(), 2.0F, zappet.getRandom().nextFloat() * 0.5F + 1F);
             found.discard();
             found = null;
         }
@@ -520,6 +534,7 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         public ZappetOnHeadOverrideGoal() {
             this.setFlags(EnumSet.of(Flag.LOOK, Flag.MOVE, Flag.JUMP));
         }
+
         @Override
         public boolean canUse() {
             return ZappetEntity.this.getRiddenId() != -1;

@@ -55,7 +55,6 @@ public class AttackHelpers {
 
     }
 
-    // positive = right, negative = left
     public static List<LivingEntity> zoneHitbox(LivingEntity entity, Vec3 offset, double sideOffset, double pX, double pY, double pZ, int limit) {
 
         Vec3 sideVec = offset.cross(EntityHelpers.UP).normalize();
@@ -114,7 +113,7 @@ public class AttackHelpers {
 
     }
 
-    public static boolean blockBreak(LivingEntity entity, LivingEntity target) {
+    public static boolean blockBreak(LivingEntity target) {
         if (target instanceof Player player && player.isBlocking()) {
             player.disableShield(true);
             return true;

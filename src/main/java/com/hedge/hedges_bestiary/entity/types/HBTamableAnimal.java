@@ -202,6 +202,9 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
 
     @Override
     public boolean isInvulnerableTo(DamageSource source) {
+        if (this.isTame() && source.getEntity() != null && source.getEntity() == this.getOwner()) {
+            return true;
+        }
         if (source.is(DamageTypes.IN_WALL)) {
             return true;
         }

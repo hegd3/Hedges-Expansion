@@ -36,7 +36,7 @@ public class HBCreativeTab {
                         output.accept(HBItems.PLAIN_TREAT.get());
                         output.accept(HBItems.SEASONED_TREAT.get());
                         output.accept(HBItems.HEARTY_TREAT.get());
-
+                        output.accept(HBItems.ENDGELIC_JUDGEMENT.get());
 
                         // foods
                         output.accept(HBItems.RAW_URKMEAT.get());
@@ -45,8 +45,8 @@ public class HBCreativeTab {
 
                         // buckets
                         output.accept(HBItems.GILD_GLIDER_BUCKET.get());
-                        output.accept(HBItems.SMARM_BUCKET.get());
-
+                        output.accept(HBItems.SKIB_BUCKET.get());
+                        output.accept(HBItems.CHUB_BUCKET.get());
                         // spawn eggs
                         output.accept(HBItems.BURODON_SPAWN_EGG.get());
                         output.accept(HBItems.SPOTTED_STRIKER_SPAWN_EGG.get());

@@ -11,10 +11,8 @@ public class FlockingGoal<E extends TamableFlyer & HBGroupMob<E>> extends GroupF
     @Override
     public void tick() {
         super.tick();
-        if (this.mob.tickCount % 10 == 0) {
-            if (this.mob.getLeader().isFlying() && !this.mob.isFlying()) {
-                this.mob.setFlying(true);
-            }
+        if (this.mob.getLeader().isFlying() && !this.mob.isFlying()) {
+            this.mob.setFlying(true);
         }
     }
 }

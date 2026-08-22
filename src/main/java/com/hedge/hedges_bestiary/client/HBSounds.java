@@ -15,6 +15,10 @@ public class HBSounds {
 
     public static final RegistryObject<SoundEvent> ZAP = createSoundEvent("zap");
 
+    public static final RegistryObject<SoundEvent> ENDGEL_SHOOT = createSoundEvent("endgel_shoot");
+
+    public static final RegistryObject<SoundEvent> ENDGEL_EXPLOSION = createSoundEvent("endgel_explosion");
+
 
     private static RegistryObject<SoundEvent> createSoundEvent(final String name) {
         return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(HedgesBestiary.MODID, name)));

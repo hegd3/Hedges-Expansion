@@ -4,6 +4,7 @@ import com.hedge.hedges_bestiary.client.particle.SmokeParticleOptions;
 import com.hedge.hedges_bestiary.entity.AI.control.SwimmingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.CustomSwimGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.GroupFollowLeaderGoal;
+import com.hedge.hedges_bestiary.entity.AI.goal.LeaveGroupGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.TearacudaAttackGoal;
 import com.hedge.hedges_bestiary.entity.AI.navigation.FluidPathNavigation;
@@ -87,7 +88,7 @@ public class TearacudaEntity extends HBSchoolingMob implements AttackStateMob {
         this.goalSelector.addGoal(1, new TearacudaAttackGoal(this));
         this.goalSelector.addGoal(2, new GroupFollowLeaderGoal<>(this));
         this.goalSelector.addGoal(3, new CustomSwimGoal(this, 1.0f, 10, 6, 5, true));
-
+        this.goalSelector.addGoal(4, new LeaveGroupGoal<>(this));
         this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, AbstractSchoolingFish.class, true));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, HBBucketableSchoolingMob.class, true));

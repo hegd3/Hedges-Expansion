@@ -22,5 +22,23 @@
       }
     ],
     "subtitle": "hedgesbestiary.sound.subtitle.zap"
+  },
+  "endgel_shoot": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "hedges_bestiary:endgel_shoot"
+      }
+    ],
+    "subtitle": "hedgesbestiary.sound.subtitle.endgel_shoot"
+  },
+  "endgel_explosion": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "hedges_bestiary:endgel_explosion"
+      }
+    ],
+    "subtitle": "hedgesbestiary.sound.subtitle.endgel_explosion"
   }
 }

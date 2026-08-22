@@ -1,0 +1,5 @@
+{
+  "parent": "item/bow",
+  "textures": {
+    "layer0": "hedges_bestiary:item/endgelic_judgement_3"
+  }}

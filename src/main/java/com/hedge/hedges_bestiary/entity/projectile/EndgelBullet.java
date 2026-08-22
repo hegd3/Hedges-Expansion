@@ -1,5 +1,6 @@
 package com.hedge.hedges_bestiary.entity.projectile;
 
+import com.hedge.hedges_bestiary.client.HBSounds;
 import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
 import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.hedge.hedges_bestiary.util.WorldHelpers;
@@ -17,11 +18,10 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
-public class EndgelBullet extends GenericProjectile{
+public class EndgelBullet extends HomingProjectile {
 
-    private LivingEntity target;
 
-    public EndgelBullet(EntityType<? extends Projectile> pEntityType, Level pLevel) {
+    public EndgelBullet(EntityType<? extends EndgelBullet> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.setNoGravity(true);
     }
@@ -31,30 +31,6 @@ public class EndgelBullet extends GenericProjectile{
 
     }
 
-    @Override
-    public void tick() {
-        super.tick();
-        if (this.target != null && !this.target.isAlive()) {
-            this.target = null;
-        }
-    }
-
-    public void travel() {
-        setPos(position().add(getDeltaMovement()));
-        Vec3 motion = this.getDeltaMovement();
-        float xRot;
-        float yRot;
-        if (this.target != null) {
-            Vec3 v = target.position().subtract(this.position()).normalize().scale(3);
-            motion = WorldHelpers.lerpVec3(0.08F, motion, v);
-            this.setDeltaMovement(motion);
-        }
-        xRot = -((float) (Mth.atan2(motion.horizontalDistance(), motion.y) * (double) (180F / (float) Math.PI)) - 90.0F);
-        yRot = -((float) (Mth.atan2(motion.z, motion.x) * (double) (180F / (float) Math.PI)) + 90.0F);
-
-        this.setXRot(Mth.wrapDegrees(xRot));
-        this.setYRot(Mth.wrapDegrees(yRot));
-    }
     protected void onHitEntity(EntityHitResult hit) {
         super.onHitEntity(hit);
         hit.getEntity().hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), this.getDamage());
@@ -73,9 +49,9 @@ public class EndgelBullet extends GenericProjectile{
         if (!this.level().isClientSide) {
             List<LivingEntity> hit = AttackHelpers.projectileZoneHitbox(this, this.position(), 2, 2, 2, 10);
             for (LivingEntity entity : hit) {
-                entity.hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), this.getDamage() - (float)entity.distanceToSqr(this.position()));
+                entity.hurt(this.damageSources().explosion(this.getOwner(), this), this.getDamage() - (float) entity.distanceToSqr(this.position()));
             }
-            this.playSound(SoundEvents.GENERIC_EXPLODE);
+            this.playSound(HBSounds.ENDGEL_EXPLOSION.get(), 1.4F, this.random.nextFloat() * 0.5F + 0.4F);
             this.level().broadcastEntityEvent(this, (byte) 39);
         }
     }
@@ -98,16 +74,21 @@ public class EndgelBullet extends GenericProjectile{
 
     @Override
     public void trailParticles() {
+        this.level().addParticle(HBParticles.ENDGEL_BULLET.get(), true, this.getX(),
+                this.getY(), this.getZ(), 0, 0, 0);
+
 
         Vec3 v = getDeltaMovement();
         double length = v.length();
-        int c = (int)Math.min(5, Math.round(length) * 3) + 1;
-        float f = (float)length / c / 2;
+        int c = (int)Math.min(5, Math.round(length)) + 1;
+        float f = (float)length / c / 1.5F;
         for (int i = 0; i < c; i++) {
             Vec3 p = v.scale(f * i);
             this.level().addParticle(HBParticles.ENDGEL_BULLET.get(), true, this.getX() + p.x,
                     this.getY() + p.y, this.getZ() + p.z, 0, 0, 0);
         }
+
+
     }
 
     @Override
@@ -115,9 +96,7 @@ public class EndgelBullet extends GenericProjectile{
         return 30;
     }
 
-    public void setTarget(LivingEntity target) {
-        this.target = target;
-    }
+
 
     @Override
     public void handleEntityEvent(byte pId) {

@@ -1,10 +1,12 @@
 package com.hedge.hedges_bestiary.entity.living;
 
+import com.hedge.hedges_bestiary.client.HBSounds;
 import com.hedge.hedges_bestiary.client.particle.EndgelScreamParticleOptions;
 import com.hedge.hedges_bestiary.entity.AI.control.FlyingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.FlyingWanderGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.EndgelAttackGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
+import com.hedge.hedges_bestiary.entity.projectile.EndgelBlast;
 import com.hedge.hedges_bestiary.entity.projectile.EndgelBullet;
 import com.hedge.hedges_bestiary.entity.types.HBMonster;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
@@ -57,7 +59,7 @@ public class EndgelEntity extends HBMonster {
 
     public static AttributeSupplier.Builder bakeAttributes(){
         return Monster.createLivingAttributes()
-                .add(Attributes.MAX_HEALTH, 100.0D)
+                .add(Attributes.MAX_HEALTH, 150.0D)
                 .add(Attributes.ATTACK_DAMAGE, 6.0D)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.2D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.5)
@@ -65,9 +67,12 @@ public class EndgelEntity extends HBMonster {
                 .add(Attributes.MOVEMENT_SPEED, 0.18F);
     }
 
+    /*
     public int getMaxHeadXRot() {
         return 1;
     }
+
+     */
 
     public int getMaxHeadYRot() {
         return 1;
@@ -121,15 +126,16 @@ public class EndgelEntity extends HBMonster {
                 case 1 -> {
                     if (this.animTicks == 25) {
                         this.level().broadcastEntityEvent(this, (byte)39);
-                        for (int i = -45; i < 45; i+=45) {
-                            for (int j = -25; j < 25; j+=25) {
+                        for (int i = -45; i <= 45; i+=45) {
+                            for (int j = -25; j <= 25; j+=25) {
                                 EndgelBullet scream = new EndgelBullet(HBEntities.ENDGEL_BULLET.get(), this.level());
                                 scream.moveTo(this.position());
-                                scream.shootFromRotation(this, this.getXRot() + j, this.getYRot() + i, 0.0f, 2, 0);
+                                scream.shootFromRotation(this, this.getXRot() + j, this.getYRot() + i, 0.0f, 1.5F, 0);
                                 scream.setTarget(this.getTarget());
                                 level().addFreshEntity(scream);
                             }
                         }
+                        this.playSound(HBSounds.ENDGEL_SHOOT.get(), 2.5F, this.getRandom().nextFloat() * 0.5F + 1.0F);
                     } else if (this.animTicks > 34) {
                         this.resetAnimState();
                         this.attackCD = 200;
@@ -141,6 +147,7 @@ public class EndgelEntity extends HBMonster {
                         this.setLeft(this.getRandom().nextBoolean());
                         this.spinCD = 100 + this.getRandom().nextInt(60);
                     } else if (this.animTicks < 50 && this.animTicks % 5 == 0) {
+                        this.playSound(HBSounds.ENDGEL_SHOOT.get(), 2.5F, this.getRandom().nextFloat() * 0.5F + 0.75F);
                         EndgelBullet scream = new EndgelBullet(HBEntities.ENDGEL_BULLET.get(), this.level());
                         Vec3 v = new Vec3(Mth.sin(projAngle * Mth.DEG_TO_RAD) * 2, Mth.cos(projAngle * Mth.DEG_TO_RAD) * 2, 0);
 
@@ -154,28 +161,32 @@ public class EndgelEntity extends HBMonster {
                     }
                 }
                 case 3 -> {
+
                     if (this.animTicks > 40) {
                         this.animTicks = 0;
                         this.setAnimState(4);
                     } else if (this.animTicks % 10 == 0) {
                         this.level().broadcastEntityEvent(this, (byte)39);
-                        if (this.getTarget() != null) {
-                            this.lookAt(this.getTarget(), 60F, 60F);
-                            this.getLookControl().setLookAt(this.getTarget(), 60F, 60F);
-                        }
+                        this.playSound(HBSounds.ENDGEL_EXPLOSION.get(), 2.5F, 0.1F + animTicks / 40F);
+                    }
+                    if (this.getTarget() != null && this.animTicks % 2 == 0) {
+                        this.lookAt(this.getTarget(), 60F, 60F);
+                        this.getLookControl().setLookAt(this.getTarget(), 60F, 60F);
                     }
                 }
                 case 4 -> {
-                    if (this.animTicks == 10) {
-                        for (int i = -60; i < 60; i+=30) {
-                            for (int j = -35; j < 35; j+=35) {
-                                EndgelBullet scream = new EndgelBullet(HBEntities.ENDGEL_BULLET.get(), this.level());
-                                scream.moveTo(this.position());
-                                scream.shootFromRotation(this, this.getXRot() + j, this.getYRot() + i, 0.0f, 2, 0);
-                                scream.setTarget(this.getTarget());
-                                level().addFreshEntity(scream);
-                            }
-                        }
+                    if (this.animTicks < 10 && this.getTarget() != null && this.animTicks % 2 == 0) {
+                        this.lookAt(this.getTarget(), 60F, 60F);
+                        this.getLookControl().setLookAt(this.getTarget(), 60F, 60F);
+                    } else if (this.animTicks == 10) {
+
+                        EndgelBlast scream = new EndgelBlast(HBEntities.ENDGEL_BLAST.get(), this.level());
+                        scream.moveTo(this.getEyePosition().add(this.getLookAngle().scale(2F)));
+                        scream.shootFromRotation(this, this.getXRot() * 0.92F, this.getYRot(), 0.0f, 1, 0);
+                        scream.setTarget(this.getTarget());
+                        level().addFreshEntity(scream);
+
+                        this.playSound(HBSounds.ENDGEL_SHOOT.get(), 2.5F, this.getRandom().nextFloat() * 0.25F + 0.75F);
                         this.level().broadcastEntityEvent(this, (byte)39);
                     }
                     else if (this.animTicks > 23) {
@@ -283,7 +294,7 @@ public class EndgelEntity extends HBMonster {
     public void handleEntityEvent(byte pId) {
         if (pId == 39) {
             Vec3 v = this.getEyePosition().add(this.getLookAngle().scale(3.5F));
-            this.level().addParticle(new EndgelScreamParticleOptions(Mth.clamp(-this.getXRot(), -35, 35), this.getYRot()), true, v.x, v.y, v.z, 0, 0, 0);
+            this.level().addParticle(new EndgelScreamParticleOptions(Mth.clamp(-this.getXRot(), -35, 35), this.getYRot(), 3F), true, v.x, v.y, v.z, 0, 0, 0);
             /*
             for (int i = 0; i < 360; i+=45) {
                 Vec3 vec = new Vec3(Mth.sin(i * Mth.DEG_TO_RAD) * 4, Mth.cos(i * Mth.DEG_TO_RAD) * 4, 0);

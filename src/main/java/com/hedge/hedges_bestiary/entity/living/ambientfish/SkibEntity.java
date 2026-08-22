@@ -2,14 +2,25 @@ package com.hedge.hedges_bestiary.entity.living.ambientfish;
 
 import com.hedge.hedges_bestiary.entity.AI.goal.IdleInPlaceGoal;
 import com.hedge.hedges_bestiary.entity.types.HBAquaticMob;
+import com.hedge.hedges_bestiary.entity.types.HBBucketableSchoolingMob;
 import com.hedge.hedges_bestiary.entity.types.IdleAnimMob;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
+import com.hedge.hedges_bestiary.items.HBItems;
 import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
@@ -22,12 +33,19 @@ import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.Bucketable;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 
-public class SkibEntity extends HBAquaticMob implements IdleAnimMob {
+public class SkibEntity extends HBAquaticMob implements IdleAnimMob, Bucketable {
+
+    public static final EntityDataAccessor<Boolean> FROM_BUCKET = SynchedEntityData.defineId(SkibEntity.class, EntityDataSerializers.BOOLEAN);
+
     private float prevGlowProgress = 0.0f;
     public float glowProgress = 0.0f;
 
@@ -45,6 +63,7 @@ public class SkibEntity extends HBAquaticMob implements IdleAnimMob {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
+        this.entityData.define(FROM_BUCKET, false);
     }
 
     @Override
@@ -54,6 +73,52 @@ public class SkibEntity extends HBAquaticMob implements IdleAnimMob {
         this.goalSelector.addGoal(2, new RandomStrollGoal(this, 1.0f));
         this.goalSelector.addGoal(3, new RandomLookAroundGoal(this));
     }
+
+    @Override
+    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        return Bucketable.bucketMobPickup(pPlayer, pHand, this).orElse(super.mobInteract(pPlayer, pHand));
+    }
+
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putBoolean("FromBucket", this.fromBucket());
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.setFromBucket(pCompound.getBoolean("FromBucket"));
+    }
+
+    public void saveToBucketTag(ItemStack pStack) {
+        Bucketable.saveDefaultDataToBucketTag(this, pStack);
+    }
+
+    public void loadFromBucketTag(CompoundTag pTag) {
+        Bucketable.loadDefaultDataFromBucketTag(this, pTag);
+    }
+
+    @Override
+    public ItemStack getBucketItemStack() {
+        return new ItemStack(HBItems.SKIB_BUCKET.get());
+    }
+
+    @Override
+    public boolean fromBucket() {
+        return this.entityData.get(FROM_BUCKET);
+    }
+
+    @Override
+    public void setFromBucket(boolean pFromBucket) {
+        this.entityData.set(FROM_BUCKET, pFromBucket);
+    }
+
+    public SoundEvent getPickupSound() {
+        return SoundEvents.BUCKET_FILL_FISH;
+    }
+
 
     public static AttributeSupplier.Builder bakeAttributes() {
         return Animal.createLivingAttributes()
@@ -192,7 +257,7 @@ public class SkibEntity extends HBAquaticMob implements IdleAnimMob {
 
     @Override
     public boolean canPlayStaticIdle() {
-        return this.getAnimState() == 0 && this.getLastHurtMob() == null;
+        return this.getAnimState() == 0 && this.getLastHurtMob() == null && this.getBlockStateOn().is(BlockTags.MINEABLE_WITH_SHOVEL);
     }
 
     @Override

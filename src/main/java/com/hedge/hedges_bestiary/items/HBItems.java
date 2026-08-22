@@ -5,6 +5,7 @@ import com.hedge.hedges_bestiary.registry.HBEntities;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -34,13 +35,14 @@ public class HBItems {
 
     public static final RegistryObject<Item> PLAIN_TREAT = ITEMS.register("plain_treat",
             () -> new TreatItem(0));
-
     public static final RegistryObject<Item> SEASONED_TREAT = ITEMS.register("seasoned_treat",
             () -> new TreatItem(1));
 
     public static final RegistryObject<Item> HEARTY_TREAT = ITEMS.register("hearty_treat",
             () -> new TreatItem(2));
 
+    public static final RegistryObject<Item> ENDGELIC_JUDGEMENT = ITEMS.register("endgelic_judgement",
+            () -> new EndgelicJudgementItem(new Item.Properties().defaultDurability(500)));
     // FOODS
 
     public static final RegistryObject<Item> RAW_URKMEAT = ITEMS.register("raw_urkmeat",
@@ -53,9 +55,13 @@ public class HBItems {
             () -> new Item(new Item.Properties().food(HBFoodTypes.SKIB)));
 
     // BUCKETS
+
+    public static final RegistryObject<Item> CHUB_BUCKET = createBucket("chub", HBEntities.CHUB);
+
     public static final RegistryObject<Item> GILD_GLIDER_BUCKET = createBucket("gild_glider", HBEntities.GILD_GLIDER);
 
-    public static final RegistryObject<Item> SMARM_BUCKET = createBucket("chub", HBEntities.CHUB);
+    public static final RegistryObject<Item> SKIB_BUCKET = createBucket("skib", HBEntities.SKIB);
+
 
     // SPAWN EGGS
     public static final RegistryObject<Item> BURODON_SPAWN_EGG = ITEMS.register("burodon_spawn_egg",

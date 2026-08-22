@@ -134,7 +134,7 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
         this.goalSelector.addGoal(i++, new GroupFollowLeaderGoal<>(this, 10F, 5F));
         this.goalSelector.addGoal(i++, new RandomlySitGoal(this));
         this.goalSelector.addGoal(i++, new LookAtPlayerGoal(this, LivingEntity.class, 7));
-        this.goalSelector.addGoal(i++, new WaterAvoidingRandomStrollGoal(this, 1.0, 20));
+        this.goalSelector.addGoal(i++, new WaterAvoidingRandomStrollGoal(this, 1.0));
         this.goalSelector.addGoal(i++, new IdleAnimationGoal<>(this));
         this.goalSelector.addGoal(i++, new DancingGoal(this));
         this.goalSelector.addGoal(i++, new LeaveGroupGoal<>(this));
@@ -385,7 +385,7 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
     @Override
     public void pathToLeader() {
         if (this.isFollower()) {
-            this.getNavigation().moveTo(this.leader, 1D);
+            this.getNavigation().moveTo(this.leader, 1.4D);
         }
     }
 

@@ -1,0 +1,6 @@
+{
+  "__comment": "all projectiles that cannot be destroyed by the zappet",
+  "values": [
+    "minecraft:trident"
+  ]
+}

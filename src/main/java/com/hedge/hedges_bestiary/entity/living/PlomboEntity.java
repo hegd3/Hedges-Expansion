@@ -180,7 +180,7 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
                     } else if (this.animTicks == 48) {
                         List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, EntityHelpers.bodyAngle(this).scale(1.3), 2, 2, 2, 8);
                         for (LivingEntity entity : hit) {
-                            if (!AttackHelpers.blockBreak(this, entity)) {
+                            if (!AttackHelpers.blockBreak(entity)) {
                                 AttackHelpers.betterHurt(this, entity, 2f, 1f);
                             }
                         }

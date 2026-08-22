@@ -144,7 +144,7 @@ public class SpottedStrikerEntity extends HBAquaticMob implements AttackStateMob
                         this.addDeltaMovement(v.scale(0.6));
                         List<LivingEntity> hit = AttackHelpers.zoneHitbox(this, v.scale(1.5), 2, 2, 2, 5);
                         for (LivingEntity entity : hit) {
-                            if (!AttackHelpers.blockBreak(this, entity)) {
+                            if (!AttackHelpers.blockBreak(entity)) {
                                 AttackHelpers.betterHurt(this, entity, 2f, 1.4f);
                             }
                         }

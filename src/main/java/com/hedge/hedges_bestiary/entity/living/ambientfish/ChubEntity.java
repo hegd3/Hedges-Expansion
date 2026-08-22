@@ -4,7 +4,6 @@ import com.hedge.hedges_bestiary.entity.AI.control.SwimmingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.GroupFollowLeaderGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.CustomSwimGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.LeaveGroupGoal;
-import com.hedge.hedges_bestiary.entity.living.TearacudaEntity;
 import com.hedge.hedges_bestiary.entity.types.HBBucketableSchoolingMob;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.items.HBItems;
@@ -20,12 +19,10 @@ import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
-import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -92,7 +89,7 @@ public class ChubEntity extends HBBucketableSchoolingMob {
 
     @Override
     public ItemStack getBucketItemStack() {
-        return new ItemStack(HBItems.SMARM_BUCKET.get());
+        return new ItemStack(HBItems.CHUB_BUCKET.get());
     }
 
     @Nullable

@@ -17,6 +17,8 @@ public class HBTags {
 
     public static final TagKey<EntityType<?>> TEARACUDA_AVOIDS = registerEntityTag("tearacuda_avoids");
 
+    public static final TagKey<EntityType<?>> BYPASSES_ZAPPET_SHIELD = registerEntityTag("bypasses_zappet_shield");
+
     public static final TagKey<Item> DAWN_DOVE_FOOD = registerItemTag("dawn_dove_food");
 
 

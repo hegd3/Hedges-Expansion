@@ -30,6 +30,7 @@ public class HBParticles {
     public static final RegistryObject<SimpleParticleType> ENDGEL_TRAIL = DEF_REG.register("endgel_trail", ()-> new SimpleParticleType(false));
     public static final RegistryObject<SimpleParticleType> ENDGEL_EXPLODE = DEF_REG.register("endgel_explode", ()-> new SimpleParticleType(false));
     public static final RegistryObject<SimpleParticleType> ENDGEL_BULLET = DEF_REG.register("endgel_bullet", ()-> new SimpleParticleType(false));
+    public static final RegistryObject<SimpleParticleType> ENDGEL_BLAST_EXPLODE = DEF_REG.register("endgel_blast_explode", ()-> new SimpleParticleType(false));
 
     public static final RegistryObject<ParticleType<SmokeParticleOptions>> SMOKE = DEF_REG.register("smoke", ()-> new ParticleType<>(true, SmokeParticleOptions.DESERIALIZER) {
         @Override

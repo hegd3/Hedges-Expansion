@@ -55,9 +55,9 @@ public class AngledParticle extends TextureSheetParticle {
 
     private void renderSignal(VertexConsumer consumer, Camera camera, float partialTicks, Consumer<Quaternionf> rots) {
         Vec3 vec3 = camera.getPosition();
-        float f = (float) (Mth.lerp((double) partialTicks, this.xo, this.x) - vec3.x());
-        float f1 = (float) (Mth.lerp((double) partialTicks, this.yo, this.y) - vec3.y());
-        float f2 = (float) (Mth.lerp((double) partialTicks, this.zo, this.z) - vec3.z());
+        float f = (float) (Mth.lerp(partialTicks, this.xo, this.x) - vec3.x());
+        float f1 = (float) (Mth.lerp(partialTicks, this.yo, this.y) - vec3.y());
+        float f2 = (float) (Mth.lerp(partialTicks, this.zo, this.z) - vec3.z());
         Vector3f vector3f = (new Vector3f(0.5F, 0.5F, 0.5F)).normalize();
         Quaternionf quaternionf = (new Quaternionf()).setAngleAxis(0.0F, vector3f.x(), vector3f.y(), vector3f.z());
         rots.accept(quaternionf);

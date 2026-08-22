@@ -433,7 +433,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
                             } else {
                                 for (LivingEntity e : hit) {
                                     if (e == this.getTarget() && this.canGrab(e)) {
-                                        if (!AttackHelpers.blockBreak(this, e)) {
+                                        if (!AttackHelpers.blockBreak(e)) {
                                             this.grab(e);
                                         }
                                     } else {
