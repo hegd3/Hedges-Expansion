@@ -1,5 +1,6 @@
 package com.hedge.hedges_bestiary.entity.AI.goal;
 
+import com.hedge.hedges_bestiary.config.HBConfig;
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
@@ -16,8 +17,11 @@ public class HBTemptGoal extends TemptGoal {
     @Override
     public boolean canUse() {
         if (super.canUse()) {
-            if (this.animal.isTame() && this.animal.getOwner() == player) {
+            if (!HBConfig.BREEDING_REQUIRES_TAME) {
                 return true;
+            }
+            if (this.animal.isTamable()) {
+                return this.animal.isTame() && this.animal.getOwner() == player;
             }
         }
         return false;

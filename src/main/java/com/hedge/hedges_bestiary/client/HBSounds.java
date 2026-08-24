@@ -11,6 +11,14 @@ import net.minecraftforge.registries.RegistryObject;
 public class HBSounds {
     public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, HedgesBestiary.MODID);
 
+
+    public static final RegistryObject<SoundEvent> GURK_AMBIENT = createSoundEvent("gurk_ambient");
+
+    public static final RegistryObject<SoundEvent> GURK_HURT = createSoundEvent("gurk_hurt");
+
+    public static final RegistryObject<SoundEvent> GURK_DIE = createSoundEvent("gurk_die");
+
+
     public static final RegistryObject<SoundEvent> MURK_CLICKS = createSoundEvent("murk_clicks");
 
     public static final RegistryObject<SoundEvent> ZAP = createSoundEvent("zap");

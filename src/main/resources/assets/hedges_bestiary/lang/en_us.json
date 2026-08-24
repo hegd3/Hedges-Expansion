@@ -68,7 +68,12 @@
   "block.hedges_bestiary.gurk_egg": "Gurk Egg",
   "block.hedges_bestiary.murk_egg": "Murk Egg",
   "block.hedges_bestiary.zappet_egg": "Zappet Egg",
-  "creativetab.hedges_bestiary_tab": "Hedge's Bestiary"
+  "creativetab.hedges_bestiary_tab": "Hedge's Bestiary",
 
+  "hedgesbestiary.sound.subtitle.gurk_ambient": "Gurk gurks",
+  "hedgesbestiary.sound.subtitle.gurk_hurt": "Gurk hurts",
+  "hedgesbestiary.sound.subtitle.gurk_die": "Gurk dies",
+  "hedgesbestiary.sound.subtitle.murk_clicks": "Murk clicks",
+  "hedgesbestiary.sound.subtitle.endgel_shoot": "Endgel shoots"
 
 }

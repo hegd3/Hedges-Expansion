@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item":"minecraft:cookie"
+    },
+    {
+      "item":"minecraft:cake"
+    },
+    {
+      "tag":"hedges_bestiary:hearty_treat_ingredient"
+    }
+  ],
+  "result": {
+    "item": "hedges_bestiary:hearty_treat"
+  }
+}

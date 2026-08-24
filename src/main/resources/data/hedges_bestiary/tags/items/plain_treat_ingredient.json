@@ -1,0 +1,7 @@
+{
+  "__comment": "interchangeable crafting ingredient for the plain treat",
+  "values": [
+    "minecraft:egg",
+    "minecraft:turtle_egg"
+  ]
+}
