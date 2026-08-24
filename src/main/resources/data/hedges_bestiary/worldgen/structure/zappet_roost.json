@@ -1,7 +1,7 @@
 {
   "type": "hedges_bestiary:zappet_roost",
   "cannot_spawn_in_liquid": true,
-  "biomes": ["minecraft:badlands", "minecraft:eroded_badlands"],
+  "biomes": "#minecraft:is_badlands",
   "step": "surface_structures",
   "terrain_adaptation": "beard_thin",
   "project_start_to_heightmap": "MOTION_BLOCKING_NO_LEAVES",

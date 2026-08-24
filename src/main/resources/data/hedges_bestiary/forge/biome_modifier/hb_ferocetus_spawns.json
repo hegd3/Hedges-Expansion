@@ -9,6 +9,7 @@
     "type": "hedges_bestiary:ferocetus",
     "weight": 5,
     "minCount": 1,
-    "maxCount": 1
+    "maxCount": 1,
+    "category": "water_creature"
   }
 }

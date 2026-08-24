@@ -1,5 +1,6 @@
 package com.hedge.hedges_bestiary.entity.living;
 
+import com.hedge.hedges_bestiary.config.HBConfig;
 import com.hedge.hedges_bestiary.blocks.HBBlocks;
 import com.hedge.hedges_bestiary.entity.AI.control.SemiaquaticLookControl;
 import com.hedge.hedges_bestiary.entity.AI.control.SemiaquaticMoveControl;
@@ -11,10 +12,7 @@ import com.hedge.hedges_bestiary.entity.types.VariantMob;
 import com.hedge.hedges_bestiary.items.TreatItem;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -166,7 +164,7 @@ public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer 
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
         InteractionResult type = super.mobInteract(player, hand);
-        if (!this.isTame() && itemStack.getItem() instanceof TreatItem treat && treat.getTier() >= 0) {
+        if (!this.isTame() && this.isTamable() && itemStack.getItem() instanceof TreatItem treat && treat.getTier() >= 0) {
             if (!this.level().isClientSide) {
                 if (!player.getAbilities().instabuild) {
                     itemStack.shrink(1);
@@ -232,6 +230,10 @@ public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer 
     public void playIdle() {
     }
 
+    @Override
+    public boolean isTamable() {
+        return super.isTamable() && HBConfig.GURK_IS_TAMABLE;
+    }
 
     @Override
     public @Nullable AgeableMob getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
@@ -240,7 +242,7 @@ public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer 
 
     @Override
     public boolean isFood(ItemStack stack) {
-        return this.isTame() && stack.is(Blocks.SEAGRASS.asItem());
+        return super.isFood(stack) && stack.is(Blocks.SEAGRASS.asItem());
     }
 
     @Override

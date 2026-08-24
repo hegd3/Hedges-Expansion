@@ -3,6 +3,7 @@ package com.hedge.hedges_bestiary.entity.living;
 import com.hedge.hedges_bestiary.client.particle.SmokeParticleOptions;
 import com.hedge.hedges_bestiary.entity.AI.control.SwimmingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.CustomSwimGoal;
+import com.hedge.hedges_bestiary.entity.AI.goal.FindAndPickitemGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.GroupFollowLeaderGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.LeaveGroupGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
@@ -12,12 +13,14 @@ import com.hedge.hedges_bestiary.entity.types.HBBucketableSchoolingMob;
 import com.hedge.hedges_bestiary.entity.types.HBSchoolingMob;
 import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
 import com.hedge.hedges_bestiary.entity.types.AttackStateMob;
+import com.hedge.hedges_bestiary.entity.util.CommonPredicates;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.registry.HBTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
@@ -32,6 +35,7 @@ import net.minecraft.world.entity.animal.AbstractSchoolingFish;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -42,7 +46,6 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class TearacudaEntity extends HBSchoolingMob implements AttackStateMob {
-
 
 
     private static final Predicate<LivingEntity> TEARACUDA_AVOIDS = living -> living.getType().is(HBTags.TEARACUDA_AVOIDS);
@@ -83,12 +86,14 @@ public class TearacudaEntity extends HBSchoolingMob implements AttackStateMob {
 
     @Override
     protected void registerGoals() {
+        int i = 0;
+        this.goalSelector.addGoal(i++, new AvoidEntityGoal<>(this, LivingEntity.class,10.0F, 1.0D, 1.0D, TEARACUDA_AVOIDS));
+        this.goalSelector.addGoal(i++, new FindAndPickitemGoal(this, CommonPredicates.EATS_FISH));
+        this.goalSelector.addGoal(i++, new TearacudaAttackGoal(this));
+        this.goalSelector.addGoal(i++, new GroupFollowLeaderGoal<>(this));
+        this.goalSelector.addGoal(i++, new CustomSwimGoal(this, 1.0f, 10, 6, 5, true));
+        this.goalSelector.addGoal(i, new LeaveGroupGoal<>(this));
 
-        this.goalSelector.addGoal(0, new AvoidEntityGoal<>(this, LivingEntity.class,10.0F, 1.0D, 1.0D, TEARACUDA_AVOIDS));
-        this.goalSelector.addGoal(1, new TearacudaAttackGoal(this));
-        this.goalSelector.addGoal(2, new GroupFollowLeaderGoal<>(this));
-        this.goalSelector.addGoal(3, new CustomSwimGoal(this, 1.0f, 10, 6, 5, true));
-        this.goalSelector.addGoal(4, new LeaveGroupGoal<>(this));
         this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, AbstractSchoolingFish.class, true));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, HBBucketableSchoolingMob.class, true));
@@ -124,6 +129,11 @@ public class TearacudaEntity extends HBSchoolingMob implements AttackStateMob {
         this.attackCD = Math.max(this.attackCD - 1, 0);
         this.frenzyCD = Math.max(this.frenzyCD - 1, 0);
         this.jumpCD = Math.max(this.jumpCD - 1, 0);
+        if (!this.getMainHandItem().isEmpty()) {
+            this.heal(5);
+            this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+            this.playSound(SoundEvents.GENERIC_EAT);
+        }
         if (!this.isInFluidType() && !this.onGround()) {
             Vec3 vec3 = this.getDeltaMovement();
             if (vec3.y * vec3.y < (double)0.03F && this.getXRot() != 0.0F) {

@@ -3,17 +3,22 @@ package com.hedge.hedges_bestiary.entity.living;
 import com.hedge.hedges_bestiary.entity.AI.control.SwimmingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.AvoidTargetWhenLowGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.CustomSwimGoal;
+import com.hedge.hedges_bestiary.entity.AI.goal.FindAndPickitemGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.SpottedStrikerAttackGoal;
 import com.hedge.hedges_bestiary.entity.AI.navigation.FluidPathNavigation;
 import com.hedge.hedges_bestiary.entity.types.AttackStateMob;
 import com.hedge.hedges_bestiary.entity.types.HBAquaticMob;
-import com.hedge.hedges_bestiary.entity.types.HBSchoolingMob;
 import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
+import com.hedge.hedges_bestiary.entity.util.CommonPredicates;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
+import com.hedge.hedges_bestiary.registry.HBTags;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -22,13 +27,19 @@ import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 public class SpottedStrikerEntity extends HBAquaticMob implements AttackStateMob {
 
+    private static final Predicate<LivingEntity> SPOTTED_STRIKER_TARGETS = living -> living.getType().is(HBTags.SPOTTED_STRIKER_TARGETS);
 
     private static final EntityDataAccessor<Boolean> CLOAKED = SynchedEntityData.defineId(SpottedStrikerEntity.class, EntityDataSerializers.BOOLEAN);
 
@@ -81,11 +92,14 @@ public class SpottedStrikerEntity extends HBAquaticMob implements AttackStateMob
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new SpottedStrikerFleeGoal(this));
-        this.goalSelector.addGoal(1, new SpottedStrikerAttackGoal(this));
+        this.goalSelector.addGoal(1, new FindAndPickitemGoal(this, CommonPredicates.EATS_FISH));
+
+        this.goalSelector.addGoal(2, new SpottedStrikerAttackGoal(this));
         this.goalSelector.addGoal(4, new CustomSwimGoal(this, 1.0f, 30, 4, 5, false));
 
         this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this, false, null));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, HBSchoolingMob.class, true));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, LivingEntity.class, true, SPOTTED_STRIKER_TARGETS));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
 
     }
 
@@ -96,6 +110,9 @@ public class SpottedStrikerEntity extends HBAquaticMob implements AttackStateMob
 
     @Override
     public boolean isInvisible() {
+        if (!this.level().isClientSide && this.isCloaked()) {
+            return true;
+        }
         if (this.cloakProgress == 5.0F) {
             return true;
         }
@@ -120,6 +137,11 @@ public class SpottedStrikerEntity extends HBAquaticMob implements AttackStateMob
     public void serverTick() {
         this.attackCD = Math.max(attackCD - 1, 0);
         this.superBiteCD = Math.max(superBiteCD - 1, 0);
+        if (!this.getMainHandItem().isEmpty()) {
+            this.heal(10);
+            this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+            this.playSound(SoundEvents.GENERIC_EAT);
+        }
         if (!this.isCloaked()) {
             this.cloakCD = Math.max(cloakCD - 1, 0);
         }
@@ -250,6 +272,17 @@ public class SpottedStrikerEntity extends HBAquaticMob implements AttackStateMob
     }
 
     public void setCloaked(boolean cloaked) {
+        if (cloaked) {
+            List<PathfinderMob> mobs = this.level().getEntitiesOfClass(PathfinderMob.class, this.getBoundingBox().inflate(10.0D));
+            for (PathfinderMob entity : mobs) {
+                if (entity.getTarget() == this) {
+                    entity.setTarget(null);
+                    if (entity.getLastHurtByMob() == this) {
+                        entity.setLastHurtByMob(null);
+                    }
+                }
+            }
+        }
         this.entityData.set(CLOAKED, cloaked);
     }
 
@@ -268,6 +301,10 @@ public class SpottedStrikerEntity extends HBAquaticMob implements AttackStateMob
     @Override
     public double getAttackReachSqr(LivingEntity entity) {
         return this.getBbWidth() * 2.2 * this.getBbWidth() * 2.2 + entity.getBbWidth();
+    }
+
+    public static boolean canSpawn(EntityType<SpottedStrikerEntity> entity, LevelAccessor level, MobSpawnType reason, BlockPos pos, RandomSource random) {
+        return WaterAnimal.checkSurfaceWaterAnimalSpawnRules(entity, level, reason, pos, random);
     }
 
     @Override

@@ -2,12 +2,12 @@ package com.hedge.hedges_bestiary.entity.living.ambientfish;
 
 import com.hedge.hedges_bestiary.entity.AI.goal.IdleInPlaceGoal;
 import com.hedge.hedges_bestiary.entity.types.HBAquaticMob;
-import com.hedge.hedges_bestiary.entity.types.HBBucketableSchoolingMob;
 import com.hedge.hedges_bestiary.entity.types.IdleAnimMob;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.items.HBItems;
 import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -18,12 +18,14 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -38,6 +40,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
@@ -263,5 +266,9 @@ public class SkibEntity extends HBAquaticMob implements IdleAnimMob, Bucketable 
     @Override
     public boolean isStaticIdling() {
         return this.getAnimState() > 0;
+    }
+
+    public static boolean canSpawn(EntityType<? extends SkibEntity> skib, LevelAccessor pLevel, MobSpawnType pSpawnType, BlockPos pPos, RandomSource pRandom) {
+        return pLevel.getFluidState(pPos).is(FluidTags.WATER) && pPos.getY() < pLevel.getSeaLevel() - 5;
     }
 }

@@ -26,7 +26,6 @@ public class HBCreativeTab {
                         output.accept(HBBlocks.MURK_EGG.get());
 
                         // crafting items
-                        output.accept(HBItems.MURK_CLAW.get());
                         output.accept(HBItems.MURK_SPIKE.get());
                         output.accept(HBItems.ENDGELIC_HEART.get());
                         output.accept(HBItems.TEARACUDA_TOOTH.get());

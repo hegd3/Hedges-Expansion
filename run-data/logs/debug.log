@@ -343,7 +343,7 @@ java.lang.IllegalAccessException: class io.netty.util.internal.PlatformDependent
 [16Jul2026 13:15:21.824] [modloading-worker-0/DEBUG] [net.minecraftforge.fml.javafmlmod.AutomaticEventSubscriber/LOADING]: Attempting to inject @EventBusSubscriber classes into the eventbus for hedges_expansion
 [16Jul2026 13:15:21.830] [modloading-worker-0/DEBUG] [net.minecraftforge.fml.javafmlmod.AutomaticEventSubscriber/LOADING]: Auto-subscribing com.hedge.hedges_bestiary.client.ClientProxy to FORGE
 [16Jul2026 13:15:21.832] [modloading-worker-0/DEBUG] [net.minecraftforge.fml.javafmlmod.AutomaticEventSubscriber/LOADING]: Auto-subscribing com.hedge.hedges_bestiary.CommonProxy to MOD
-[16Jul2026 13:15:21.832] [modloading-worker-0/DEBUG] [net.minecraftforge.fml.javafmlmod.AutomaticEventSubscriber/LOADING]: Auto-subscribing com.hedge.hedges_bestiary.Config to MOD
+[16Jul2026 13:15:21.832] [modloading-worker-0/DEBUG] [net.minecraftforge.fml.javafmlmod.AutomaticEventSubscriber/LOADING]: Auto-subscribing com.hedge.hedges_bestiary.config.HBConfig to MOD
 [16Jul2026 13:15:21.835] [modloading-worker-0/DEBUG] [net.minecraftforge.fml.javafmlmod.AutomaticEventSubscriber/LOADING]: Auto-subscribing com.hedge.hedges_bestiary.data.datagen.HBDataGenerators to MOD
 [16Jul2026 13:15:21.838] [modloading-worker-0/DEBUG] [net.minecraftforge.fml.javafmlmod.AutomaticEventSubscriber/LOADING]: Auto-subscribing com.hedge.hedges_bestiary.events.ClientEvent to MOD
 [16Jul2026 13:15:21.866] [modloading-worker-0/DEBUG] [net.minecraftforge.fml.javafmlmod.AutomaticEventSubscriber/LOADING]: Auto-subscribing com.hedge.hedges_bestiary.events.ForgeClientEvent to FORGE

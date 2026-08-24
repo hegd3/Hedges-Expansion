@@ -24,7 +24,7 @@
     "subtitle": "hedgesbestiary.sound.subtitle.zap"
   },
   "endgel_shoot": {
-    "category": "neutral",
+    "category": "hostile",
     "sounds": [
       {
         "name": "hedges_bestiary:endgel_shoot"
@@ -33,7 +33,7 @@
     "subtitle": "hedgesbestiary.sound.subtitle.endgel_shoot"
   },
   "endgel_explosion": {
-    "category": "neutral",
+    "category": "hostile",
     "sounds": [
       {
         "name": "hedges_bestiary:endgel_explosion"

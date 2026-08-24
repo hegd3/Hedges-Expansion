@@ -15,13 +15,17 @@ public class HBTags {
 
     public static final TagKey<EntityType<?>> DAWN_DOVE_TARGETS = registerEntityTag("dawn_dove_targets");
 
+    public static final TagKey<EntityType<?>> FEROCETUS_TARGETS = registerEntityTag("ferocetus_targets");
+
+    public static final TagKey<EntityType<?>> SPOTTED_STRIKER_TARGETS = registerEntityTag("spotted_striker_targets");
+
     public static final TagKey<EntityType<?>> TEARACUDA_AVOIDS = registerEntityTag("tearacuda_avoids");
 
     public static final TagKey<EntityType<?>> BYPASSES_ZAPPET_SHIELD = registerEntityTag("bypasses_zappet_shield");
 
     public static final TagKey<Item> DAWN_DOVE_FOOD = registerItemTag("dawn_dove_food");
 
-
+    public static final TagKey<Item> TREATS = registerItemTag("treats");
 
     private static TagKey<EntityType<?>> registerEntityTag(String name) {
         return TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(HedgesBestiary.MODID, name));

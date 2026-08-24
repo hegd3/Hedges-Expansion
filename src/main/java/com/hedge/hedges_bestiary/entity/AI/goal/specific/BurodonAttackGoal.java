@@ -7,7 +7,7 @@ import net.minecraft.world.entity.LivingEntity;
 public class BurodonAttackGoal extends GenericMeleeGoal<BurodonEntity> {
 
     public BurodonAttackGoal(BurodonEntity entity) {
-        super(entity, 1.6D);
+        super(entity, 1.4D);
     }
 
     @Override

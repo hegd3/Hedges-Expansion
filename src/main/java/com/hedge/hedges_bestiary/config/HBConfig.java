@@ -1,0 +1,89 @@
+package com.hedge.hedges_bestiary.config;
+
+import com.hedge.hedges_bestiary.HedgesBestiary;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.config.ModConfig;
+
+public class HBConfig
+{
+
+
+    public static final ForgeConfigSpec SPEC;
+
+    public static final ForgeConfigSpec.BooleanValue VALUE_TAMING_DISABLED;
+    public static final ForgeConfigSpec.BooleanValue VALUE_BREEDING_REQUIRES_TAME;
+
+    public static final ForgeConfigSpec.BooleanValue VALUE_GURK_TAMABLE;
+    public static final ForgeConfigSpec.BooleanValue VALUE_BURODON_TAMABLE;
+    public static final ForgeConfigSpec.BooleanValue VALUE_ZAPPET_TAMABLE;
+    public static final ForgeConfigSpec.BooleanValue VALUE_PLOMBO_TAMABLE;
+    public static final ForgeConfigSpec.BooleanValue VALUE_MURK_TAMABLE;
+    public static final ForgeConfigSpec.BooleanValue VALUE_DAWN_DOVE_TAMABLE;
+    public static final ForgeConfigSpec.IntValue VALUE_DAWN_DOVE_NEST_WEIGHT;
+    public static final ForgeConfigSpec.IntValue VALUE_ZAPPET_ROOST_WEIGHT;
+    public static final ForgeConfigSpec.IntValue VALUE_PLOMBO_TERRITORY_WEIGHT;
+
+
+    public static boolean TAMING_DISABLED = false;
+    public static boolean BREEDING_REQUIRES_TAME = true;
+    public static boolean GURK_IS_TAMABLE = true;
+    public static boolean BURODON_IS_TAMABLE = true;
+    public static boolean ZAPPET_IS_TAMABLE = true;
+    public static boolean PLOMBO_IS_TAMABLE = true;
+    public static boolean MURK_IS_TAMABLE = true;
+    public static boolean DAWN_DOVE_IS_TAMABLE = true;
+    public static int dawnDoveNestWeight = 10;
+    public static int zappetRoostWeight = 20;
+    public static int plomboTerritoryWeight = 10;
+
+    static {
+        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+        builder.push("Hedge's Bestiary");
+        VALUE_TAMING_DISABLED = buildBoolean(builder, "Disable all taming", false, "Disables ALL Hedge's Bestiary pets from being tamed. DEFAULT: false");
+        VALUE_BREEDING_REQUIRES_TAME = buildBoolean(builder, "Only breed when tamed", true, "Whether Hedge's Bestiary pets must be tame in order to breed. Ignored by mobs configured to be untamable. DEFAULT: true");
+        VALUE_GURK_TAMABLE = buildBoolean(builder, "Gurk taming enabled", true, "Whether gurks can be tamed or not. DEFAULT: true");
+        VALUE_BURODON_TAMABLE = buildBoolean(builder, "Burodon taming enabled", true, "Whether burodons can be tamed or not. DEFAULT: true");
+        VALUE_ZAPPET_TAMABLE = buildBoolean(builder, "Zappet taming enabled", true, "Whether zappets can be tamed or not. DEFAULT: true");
+        VALUE_PLOMBO_TAMABLE = buildBoolean(builder, "Plombo taming enabled", true, "Whether plombos can be tamed or not. DEFAULT: true");
+        VALUE_DAWN_DOVE_TAMABLE = buildBoolean(builder, "Dawn Dove taming enabled", true, "Whether dawn doves can be tamed or not. DEFAULT: true");
+        VALUE_MURK_TAMABLE = buildBoolean(builder, "Murk taming enabled", true, "Whether murks can be tamed or not. DEFAULT: true");
+        VALUE_DAWN_DOVE_NEST_WEIGHT = buildInt(builder, "Dawn Dove Nest Weight", dawnDoveNestWeight, 0, 1000, "Defines the weight of dawn dove nests in savannas. Higher number = higher chance of generating. 0 = structure disabled. DEFAULT: 10");
+        VALUE_ZAPPET_ROOST_WEIGHT = buildInt(builder, "Zappet Roost Weight", zappetRoostWeight, 0, 1000, "Defines the weight of zappet roosts in badlands. Higher number = higher chance of generating. 0 = structure disabled. DEFAULT: 15");
+        VALUE_PLOMBO_TERRITORY_WEIGHT = buildInt(builder, "Plombo Territory Weight", plomboTerritoryWeight, 0, 1000, "Defines the weight of plombo territories in birch forests. Higher number = higher chance of generating. 0 = structure disabled. DEFAULT: 10");
+
+        builder.pop();
+        SPEC = builder.build();
+
+    }
+
+    public static void bake() {
+        try {
+            TAMING_DISABLED = VALUE_TAMING_DISABLED.get();
+            BREEDING_REQUIRES_TAME = VALUE_BREEDING_REQUIRES_TAME.get();
+            GURK_IS_TAMABLE = VALUE_GURK_TAMABLE.get();
+            BURODON_IS_TAMABLE = VALUE_BURODON_TAMABLE.get();
+            ZAPPET_IS_TAMABLE = VALUE_ZAPPET_TAMABLE.get();
+            PLOMBO_IS_TAMABLE = VALUE_PLOMBO_TAMABLE.get();
+            MURK_IS_TAMABLE = VALUE_MURK_TAMABLE.get();
+            DAWN_DOVE_IS_TAMABLE = VALUE_DAWN_DOVE_TAMABLE.get();
+            dawnDoveNestWeight = VALUE_DAWN_DOVE_NEST_WEIGHT.get();
+            zappetRoostWeight = VALUE_ZAPPET_ROOST_WEIGHT.get();
+            plomboTerritoryWeight = VALUE_PLOMBO_TERRITORY_WEIGHT.get();
+        } catch (Exception e) {
+            HedgesBestiary.LOGGER.warn("An exception was caused trying to load the config for Hedge's Bestiary", e);
+            e.printStackTrace();
+        }
+
+    }
+
+
+    private static ForgeConfigSpec.BooleanValue buildBoolean(ForgeConfigSpec.Builder builder, String name, boolean defaultValue, String comment) {
+        return builder.comment(comment).define(name, defaultValue);
+    }
+
+
+    private static ForgeConfigSpec.IntValue buildInt(ForgeConfigSpec.Builder builder, String name, int defaultValue, int min, int max, String comment) {
+        return builder.comment(comment).translation(name).defineInRange(name, defaultValue, min, max);
+    }
+
+}

@@ -34,8 +34,8 @@ public class HBEntities {
                     .sized(1.0f, 0.7f).build("gurk"));
 
     public static final RegistryObject<EntityType<MurkEntity>> MURK =
-            ENTITY_TYPES.register("murk", () -> EntityType.Builder.of(MurkEntity::new, MobCategory.CREATURE)
-                    .sized(2.45f, 2.18f).build("murk"));
+            ENTITY_TYPES.register("murk", () -> EntityType.Builder.of(MurkEntity::new, MobCategory.WATER_CREATURE)
+                    .sized(2.45f, 2.18f).fireImmune().build("murk"));
 
     public static final RegistryObject<EntityType<MurkSmoke>> MURK_SMOKE =
             ENTITY_TYPES.register("murk_smoke", () -> EntityType.Builder.of(MurkSmoke::new, MobCategory.MISC)
@@ -47,14 +47,14 @@ public class HBEntities {
 
     public static final RegistryObject<EntityType<ZappetEntity>> ZAPPET =
             ENTITY_TYPES.register("zappet", () -> EntityType.Builder.of(ZappetEntity::new, MobCategory.CREATURE)
-                    .sized(0.8f, 1.3f).build("zappet"));
+                    .sized(0.8f, 1.3f).fireImmune().build("zappet"));
 
     public static final RegistryObject<EntityType<GildGliderEntity>> GILD_GLIDER =
-            ENTITY_TYPES.register("gild_glider", () -> EntityType.Builder.of(GildGliderEntity::new, MobCategory.WATER_CREATURE)
+            ENTITY_TYPES.register("gild_glider", () -> EntityType.Builder.of(GildGliderEntity::new, MobCategory.WATER_AMBIENT)
                     .sized(0.8f, 0.25f).build("gild_glider"));
 
     public static final RegistryObject<EntityType<ChubEntity>> CHUB =
-            ENTITY_TYPES.register("chub", () -> EntityType.Builder.of(ChubEntity::new, MobCategory.WATER_CREATURE)
+            ENTITY_TYPES.register("chub", () -> EntityType.Builder.of(ChubEntity::new, MobCategory.WATER_AMBIENT)
                     .sized(0.8f, 0.57f).build("chub"));
 
     public static final RegistryObject<EntityType<FerocetusEntity>> FEROCETUS =
@@ -67,27 +67,28 @@ public class HBEntities {
 
     public static final RegistryObject<EntityType<EndgelEntity>> ENDGEL =
             ENTITY_TYPES.register("endgel", () -> EntityType.Builder.of(EndgelEntity::new, MobCategory.MONSTER)
-                    .sized(2.8f, 2.4f).build("endgel"));
+                    .sized(2.8f, 2.4f).fireImmune().build("endgel"));
 
     public static final RegistryObject<EntityType<EndgelBullet>> ENDGEL_BULLET =
             ENTITY_TYPES.register("endgel_bullet", () -> EntityType.Builder.of(EndgelBullet::new, MobCategory.MISC)
-                    .sized(0.8f, 0.8f).build("endgel_bullet"));
+                    .sized(0.8f, 0.8f).fireImmune().build("endgel_bullet"));
 
     public static final RegistryObject<EntityType<EndgelBlast>> ENDGEL_BLAST =
             ENTITY_TYPES.register("endgel_blast", () -> EntityType.Builder.of(EndgelBlast::new, MobCategory.MISC)
-                    .sized(1.5f, 1.5f).build("endgel_blast"));
+                    .sized(1.5f, 1.5f).fireImmune().build("endgel_blast"));
 
     public static final RegistryObject<EntityType<DawnDoveEntity>> DAWN_DOVE =
             ENTITY_TYPES.register("dawn_dove", () -> EntityType.Builder.of(DawnDoveEntity::new, MobCategory.CREATURE)
-                    .sized(2.8f, 2.5f).build("dawn_dove"));
+                    .sized(2.8f, 2.5f).fireImmune().build("dawn_dove"));
 
     public static final RegistryObject<EntityType<DragonFireBall>> DRAGON_FIREBALL =
             ENTITY_TYPES.register("dragon_fireball", () -> EntityType.Builder.of(DragonFireBall::new, MobCategory.MISC)
-                    .sized(1f, 1f).build("dragon_fireball"));
+                    .sized(1f, 1f).fireImmune().build("dragon_fireball"));
 
     public static final RegistryObject<EntityType<SkibEntity>> SKIB =
-            ENTITY_TYPES.register("skib", () -> EntityType.Builder.of(SkibEntity::new, MobCategory.WATER_CREATURE)
+            ENTITY_TYPES.register("skib", () -> EntityType.Builder.of(SkibEntity::new, MobCategory.WATER_AMBIENT)
                     .sized(0.68f, 0.47f).build("skib"));
+
     public static void register(IEventBus eventbus) {
         ENTITY_TYPES.register(eventbus);
     }

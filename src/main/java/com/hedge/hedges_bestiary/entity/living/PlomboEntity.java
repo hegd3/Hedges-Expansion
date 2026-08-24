@@ -1,5 +1,6 @@
 package com.hedge.hedges_bestiary.entity.living;
 
+import com.hedge.hedges_bestiary.config.HBConfig;
 import com.hedge.hedges_bestiary.entity.AI.control.ATMLookControl;
 import com.hedge.hedges_bestiary.entity.AI.control.ATMMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.control.AdvancedTurner;
@@ -31,12 +32,10 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -302,6 +301,11 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
     @Override
     public void playIdle() {
         this.setAnimState(this.getRandom().nextInt(3) + 3);
+    }
+
+    @Override
+    public boolean isTamable() {
+        return super.isTamable() && HBConfig.PLOMBO_IS_TAMABLE;
     }
 
     @Override

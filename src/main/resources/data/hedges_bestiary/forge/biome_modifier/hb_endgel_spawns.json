@@ -1,15 +1,14 @@
 {
   "type": "forge:add_spawns",
   "biomes": [
-    "minecraft:deep_ocean",
-    "minecraft:ocean"
+    "#minecraft:has_end_city"
   ],
   "spawners":
   {
-    "type": "hedges_bestiary:tearacuda",
+    "type": "hedges_bestiary:endgel",
     "weight": 6,
     "minCount": 1,
     "maxCount": 1,
-    "category": "water_creature"
+    "category": "monster"
   }
 }

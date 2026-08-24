@@ -1,5 +1,6 @@
 package com.hedge.hedges_bestiary.entity.types;
 
+import com.hedge.hedges_bestiary.config.HBConfig;
 import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.menu.HBTamableMenu;
@@ -15,6 +16,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -76,7 +78,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         InteractionResult type = super.mobInteract(player, hand);
 
-        if (!type.consumesAction()) {
+        if (!type.consumesAction() && this.isTamable()) {
             return this.interactTameCommands(player, hand);
         }
         return type;
@@ -121,6 +123,10 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     protected abstract boolean canOwnerMount(Player player);
 
     protected abstract boolean canOwnerCommand(Player player);
+
+    public boolean isTamable() {
+        return !HBConfig.TAMING_DISABLED;
+    }
 
     @Override
     public void tick() {
@@ -202,7 +208,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
 
     @Override
     public boolean isInvulnerableTo(DamageSource source) {
-        if (this.isTame() && source.getEntity() != null && source.getEntity() == this.getOwner()) {
+        if (this.isTame() && this.getOwner() != null && source.getEntity() == this.getOwner() && !this.getOwner().isCrouching()) {
             return true;
         }
         if (source.is(DamageTypes.IN_WALL)) {
@@ -276,7 +282,10 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
 
     @Override
     public boolean canMate(Animal otherAnimal) {
-        return this.isTame() && super.canMate(otherAnimal);
+        if (this.isTamable() && !this.isTame()) {
+            return false;
+        }
+        return super.canMate(otherAnimal);
     }
 
     @Nullable
@@ -369,6 +378,11 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
         return this.getAnimState() == 1;
     }
 
+    @Override
+    public boolean isFood(ItemStack pStack) {
+        return !HBConfig.BREEDING_REQUIRES_TAME || !this.isTamable() || this.isTame();
+    }
+
     protected void addEatingParticles() {
         float radius = this.getBbWidth() * 0.55F;
         float particleCount = (2 + random.nextInt(2)) * radius;
@@ -381,6 +395,15 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
             double extraX = radius * Mth.sin((float) (Math.PI + angle));
             double extraZ = radius * Mth.cos(angle);
             level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, this.getMainHandItem()), true, v.x + extraX, v.y, v.z + extraZ, motionX, motionY, motionZ);
+        }
+    }
+
+    @Override
+    public void finalizeSpawnChildFromBreeding(ServerLevel pLevel, Animal pAnimal, @org.jetbrains.annotations.Nullable AgeableMob pBaby) {
+        super.finalizeSpawnChildFromBreeding(pLevel, pAnimal, pBaby);
+        if (this.isTame() && pBaby instanceof HBTamableAnimal animal) {
+            animal.setOwnerUUID(this.getOwnerUUID());
+            animal.setTame(true);
         }
     }
 

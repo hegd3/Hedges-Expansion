@@ -1,25 +1,25 @@
 package com.hedge.hedges_bestiary.entity.living;
 
 import com.hedge.hedges_bestiary.entity.AI.control.SwimmingMoveControl;
-import com.hedge.hedges_bestiary.entity.AI.goal.LeaveGroupGoal;
+import com.hedge.hedges_bestiary.entity.AI.goal.*;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
-import com.hedge.hedges_bestiary.entity.AI.goal.IdleAnimationGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.FerocetusAttackGoal;
-import com.hedge.hedges_bestiary.entity.AI.goal.GroupFollowLeaderGoal;
-import com.hedge.hedges_bestiary.entity.AI.goal.CustomSwimGoal;
 import com.hedge.hedges_bestiary.entity.AI.navigation.FluidPathNavigation;
 import com.hedge.hedges_bestiary.entity.types.HBSchoolingMob;
 import com.hedge.hedges_bestiary.entity.types.IdleAnimMob;
 import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
 import com.hedge.hedges_bestiary.entity.types.AttackStateMob;
+import com.hedge.hedges_bestiary.entity.util.CommonPredicates;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.registry.HBEntities;
+import com.hedge.hedges_bestiary.registry.HBTags;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
@@ -31,14 +31,18 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
+import java.util.function.Predicate;
 
 public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, IdleAnimMob {
+
+    private static final Predicate<LivingEntity> FEROCETUS_TARGETS = living -> living.getType().is(HBTags.FEROCETUS_TARGETS);
 
     private float prevTrail;
     private float trail = 0.0f;
@@ -90,7 +94,7 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
 
     @Override
     public int getMaxGroupSize() {
-        return 6;
+        return 4;
     }
 
     public static AttributeSupplier.Builder bakeAttributes() {
@@ -106,15 +110,16 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
     @Override
     protected void registerGoals() {
 
-        this.goalSelector.addGoal(0, new FerocetusAttackGoal(this));
-        this.goalSelector.addGoal(1, new GroupFollowLeaderGoal<>(this,10F, 5F));
-        this.goalSelector.addGoal(2, new CustomSwimGoal(this, 1.0f, 25, 5, 3, true));
-        this.goalSelector.addGoal(3, new IdleAnimationGoal<>(this));
-        this.goalSelector.addGoal(4, new LeaveGroupGoal<>(this));
+        int i = 0;
+        this.goalSelector.addGoal(i++, new FerocetusAttackGoal(this));
+        this.goalSelector.addGoal(i++, new FindAndPickitemGoal(this, CommonPredicates.EATS_FISH));
+        this.goalSelector.addGoal(i++, new GroupFollowLeaderGoal<>(this,10F, 7F));
+        this.goalSelector.addGoal(i++, new CustomSwimGoal(this, 1.0f, 25, 5, 3, true));
+        this.goalSelector.addGoal(i++, new IdleAnimationGoal<>(this));
+        this.goalSelector.addGoal(i, new LeaveGroupGoal<>(this));
 
         this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, TearacudaEntity.class, true));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, MurkEntity.class, true));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, LivingEntity.class, true, FEROCETUS_TARGETS));
 
 
     }
@@ -185,6 +190,11 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
         this.jumpCD = Math.max(this.jumpCD - 1, 0);
         if (this.tickCount % 200 == 0) {
             this.heal(10);
+        }
+        if (!this.getMainHandItem().isEmpty()) {
+            this.heal(10);
+            this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+            this.playSound(SoundEvents.GENERIC_EAT);
         }
         if (this.getAnimState() > 0) {
             this.animTicks++;

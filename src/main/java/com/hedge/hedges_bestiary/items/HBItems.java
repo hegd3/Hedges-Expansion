@@ -17,10 +17,6 @@ import java.util.function.Supplier;
 public class HBItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, HedgesBestiary.MODID);
 
-
-    public static final RegistryObject<Item> MURK_CLAW = ITEMS.register("murk_claw",
-            () -> new Item(new Item.Properties()));
-
     public static final RegistryObject<Item> MURK_SPIKE = ITEMS.register("murk_spike",
             () -> new Item(new Item.Properties()));
 

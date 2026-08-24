@@ -1,5 +1,6 @@
 package com.hedge.hedges_bestiary.entity.living;
 
+import com.hedge.hedges_bestiary.config.HBConfig;
 import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.blocks.HBBlocks;
 import com.hedge.hedges_bestiary.client.HBSounds;
@@ -30,23 +31,19 @@ import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ItemParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -54,7 +51,6 @@ import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -62,8 +58,12 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec2;
@@ -182,7 +182,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2, 1.6, 7.0f, 4.0f));
         this.goalSelector.addGoal(i++, new MurkAttackGoal(this));
         this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
-        this.goalSelector.addGoal(i++, new FindAndEatFoodGoal(this, FOOD));
+        this.goalSelector.addGoal(i++, new FindAndPickitemGoal(this, FOOD));
         this.goalSelector.addGoal(i++, new TemptGoal(this, 1.1, Ingredient.of(HBItems.SKIB.get()), false));
         this.goalSelector.addGoal(i++, new NapGoal(this, false));
         this.goalSelector.addGoal(i, new CustomSwimGoal(this, 1.0, 10, 4, 7, true));
@@ -317,10 +317,10 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                 float f1;
                 float f2;
                 if (this.isInWater()) {
-                    f1 = pPlayer.zza * 2F;
+                    f1 = pPlayer.zza * 1.5F;
 
                     float angle= Mth.wrapDegrees(this.getYRot() - this.getYHeadRot());
-                    f2 = Mth.sin(angle * Mth.DEG_TO_RAD) * f1;
+                    f2 = Mth.sin(angle * Mth.DEG_TO_RAD) * (float)this.getDeltaMovement().length();
                 } else {
                     f1 = pPlayer.zza * 0.5F;
                     f2 = pPlayer.xxa * 0.2F;
@@ -359,6 +359,15 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         }
     }
 
+    @Override
+    protected void ageBoundaryReached() {
+        super.ageBoundaryReached();
+        if (!this.isBaby() && this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+            this.spawnAtLocation(new ItemStack(HBItems.MURK_SPIKE.get(), this.getRandom().nextInt(4) + 1), 1);
+        }
+
+    }
+
 
 
     @Override
@@ -369,35 +378,35 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         InteractionResult result = super.mobInteract(player, hand);
-        if (result == InteractionResult.PASS && !this.isTame() && this.isCharged() && this.getMainHandItem().isEmpty()) {
+        if (result == InteractionResult.PASS && this.isTamable() && !this.isTame() && this.isCharged() && this.getMainHandItem().isEmpty()) {
             ItemStack stack = player.getItemInHand(hand);
-            if (!ateSkib) {
-                if (stack.is(HBItems.SKIB_BUCKET.get())) {
-                    this.setItemSlot(EquipmentSlot.MAINHAND, stack);
-                    if (!player.getAbilities().instabuild) {
-                        stack.shrink(1);
+            if (stack.is(HBItems.SKIB_BUCKET.get())) {
+                if (!this.level().isClientSide && !ateSkib) {
+                    if (stack.is(HBItems.SKIB_BUCKET.get())) {
+                        this.setItemSlot(EquipmentSlot.MAINHAND, stack);
+                        if (!player.getAbilities().instabuild) {
+                            player.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.WATER_BUCKET));
+                        }
                     }
                 }
                 return InteractionResult.sidedSuccess(this.level().isClientSide);
-
-            } else {
-                if (stack.getItem() instanceof TreatItem treat && treat.getTier() > 0) {
-                    if (!this.level().isClientSide) {
-                        if (!player.getAbilities().instabuild) {
-                            stack.shrink(1);
-                        }
-                        if (this.tameAttempts-- <= 0 && !ForgeEventFactory.onAnimalTame(this, player)) {
-                            this.level().broadcastEntityEvent(this, (byte) 7);
-                            this.tame(player);
-                            this.heal(this.getMaxHealth());
-                        } else {
-                            this.level().broadcastEntityEvent(this, (byte)6);
-                            this.ateSkib = false;
-                        }
+            } else if (stack.getItem() instanceof TreatItem treat && treat.getTier() > 0) {
+                if (!this.level().isClientSide && ateSkib) {
+                    if (!player.getAbilities().instabuild) {
+                        stack.shrink(1);
+                    }
+                    if (this.tameAttempts-- <= 0 && !ForgeEventFactory.onAnimalTame(this, player)) {
+                        this.level().broadcastEntityEvent(this, (byte) 7);
+                        this.tame(player);
+                        player.startRiding(this);
+                        this.heal(this.getMaxHealth());
+                    } else {
+                        this.level().broadcastEntityEvent(this, (byte)6);
+                        this.ateSkib = false;
                     }
                     this.playSound(SoundEvents.GENERIC_EAT);
-                    return InteractionResult.sidedSuccess(this.level().isClientSide);
                 }
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
             }
 
         }
@@ -745,6 +754,8 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     }
 
 
+
+
     @Override
     public void playIdle() {
         if (this.getRandom().nextBoolean()) {
@@ -854,6 +865,11 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     }
 
     @Override
+    public boolean isTamable() {
+        return super.isTamable() && HBConfig.MURK_IS_TAMABLE;
+    }
+
+    @Override
     public Vec2 getUVOffset() {
         return new Vec2(0, 156);
     }
@@ -888,6 +904,17 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
         }
 
+    }
+
+    public static boolean canSpawn(EntityType<? extends MurkEntity> murk, LevelAccessor pLevel, MobSpawnType pSpawnType, BlockPos pPos, RandomSource pRandom) {
+        int i = pLevel.getSeaLevel();
+        int j = i - 13;
+        return pLevel.getFluidState(pPos).is(FluidTags.WATER) && pPos.getY() >= j && pPos.getY() <= i + 1;
+    }
+
+    @Override
+    public boolean checkSpawnObstruction(LevelReader worldIn) {
+        return worldIn.isUnobstructed(this);
     }
 }
 

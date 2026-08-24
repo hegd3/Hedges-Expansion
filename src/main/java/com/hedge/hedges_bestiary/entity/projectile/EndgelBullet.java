@@ -33,7 +33,9 @@ public class EndgelBullet extends HomingProjectile {
 
     protected void onHitEntity(EntityHitResult hit) {
         super.onHitEntity(hit);
-        hit.getEntity().hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), this.getDamage());
+        if (hit.getEntity().hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), this.getDamage()) && this.getOwner() != null) {
+            ((LivingEntity) this.getOwner()).setLastHurtMob(hit.getEntity());
+        }
         this.explode();
         this.discard();
     }

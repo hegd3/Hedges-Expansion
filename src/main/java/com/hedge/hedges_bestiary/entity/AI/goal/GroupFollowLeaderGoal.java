@@ -58,6 +58,9 @@ public class GroupFollowLeaderGoal<E extends PathfinderMob & HBGroupMob<E>> exte
     }
 
     public boolean canContinueToUse() {
+        if (this.mob.canNeverFollow()) {
+            return false;
+        }
         if (!this.mob.isFollower()) {
             return false;
         }

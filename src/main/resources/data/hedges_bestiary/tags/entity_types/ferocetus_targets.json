@@ -1,0 +1,10 @@
+{
+  "__comment": "all entities naturally targeted by the ferocetus.",
+  "values": [
+    "minecraft:drowned",
+    "minecraft:dolphin",
+    "hedges_bestiary:tearacuda",
+    "hedges_bestiary:spotted_striker",
+    "hedges_bestiary:murk"
+  ]
+}

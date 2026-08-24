@@ -1,5 +1,6 @@
 package com.hedge.hedges_bestiary.entity.living;
 
+import com.hedge.hedges_bestiary.config.HBConfig;
 import com.hedge.hedges_bestiary.entity.AI.control.AdvancedTurner;
 import com.hedge.hedges_bestiary.entity.AI.goal.*;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.BurodonAttackGoal;
@@ -17,7 +18,6 @@ import com.hedge.hedges_bestiary.items.TreatItem;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.registry.HBTags;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
@@ -29,23 +29,18 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.NonTameRandomTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurner, HBGroupMob<BurodonEntity> {
 
@@ -103,7 +98,7 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
         InteractionResult type = super.mobInteract(player, hand);
-        if (!this.isTame() && itemStack.getItem() instanceof TreatItem treat && treat.getTier() > 0) {
+        if (!this.isTame() && this.isTamable() && itemStack.getItem() instanceof TreatItem treat && treat.getTier() > 0) {
             if (this.getAnimState() == ROAR_ANIM) {
                 if (!this.level().isClientSide) {
                     if (!player.getAbilities().instabuild) {
@@ -126,8 +121,8 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
         int i = 0;
         this.goalSelector.addGoal(i++, new FloatGoal(this));
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this));
-        this.goalSelector.addGoal(i++, new AvoidTargetWhenLowGoal(this, 1.6D, 20, 15, 16, 7));
-        this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2D, 1.6D, 7.0f, 10.0f));
+        this.goalSelector.addGoal(i++, new AvoidTargetWhenLowGoal(this, 1.4D, 20, 15, 16, 7));
+        this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2D, 1.4D, 7.0f, 10.0f));
         this.goalSelector.addGoal(i++, new BurodonAttackGoal(this));
         this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
         this.goalSelector.addGoal(i++, new NapGoal(this));
@@ -288,6 +283,17 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
     @Override
     protected int calculateFallDamage(float pFallDistance, float pDamageMultiplier) {
         return 0;
+    }
+
+    @Override
+    public boolean isTamable() {
+
+        return super.isTamable() && HBConfig.BURODON_IS_TAMABLE;
+    }
+
+    @Override
+    public boolean isFood(ItemStack pStack) {
+        return super.isFood(pStack);
     }
 
     @Override

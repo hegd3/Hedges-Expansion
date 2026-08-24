@@ -1,5 +1,6 @@
 package com.hedge.hedges_bestiary.entity.living;
 
+import com.hedge.hedges_bestiary.config.HBConfig;
 import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.blocks.HBBlocks;
 import com.hedge.hedges_bestiary.entity.AI.control.FlyingMoveControl;
@@ -112,7 +113,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         this.goalSelector.addGoal(i++, new FlyerFollowOwnerGoal(this, 1.2D, 1.6D, 8.0f, 8.0f));
         this.goalSelector.addGoal(i++, new DawnDoveAttackGoal(this));
         this.goalSelector.addGoal(i++, new HBTemptGoal(this, 1.1f, Ingredient.of(HBTags.DAWN_DOVE_FOOD), false));
-        this.goalSelector.addGoal(i++, new FindAndEatFoodGoal(this, FOOD_ENTITIES));
+        this.goalSelector.addGoal(i++, new FindAndPickitemGoal(this, FOOD_ENTITIES));
         this.goalSelector.addGoal(i++, new FlyerMoveToHomePosGoal(this, 1.0D, 32, 2d));
         this.goalSelector.addGoal(i++, new NapGoal(this, false));
         this.goalSelector.addGoal(i++, new RandomlySitGoal(this));
@@ -216,7 +217,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
         InteractionResult type = super.mobInteract(player, hand);
-        if (!this.isTame() && this.grabbedEntity == player) {
+        if (!this.isTame() && this.grabbedEntity == player && this.isTamable()) {
             if (itemStack.getItem() instanceof TreatItem treat && treat.getTier() > 0) {
                 if (!this.level().isClientSide) {
                     this.releaseGrab();
@@ -296,10 +297,6 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
 
     }
 
-    @Override
-    public boolean fireImmune() {
-        return true;
-    }
 
     @Override
     public boolean hurt(DamageSource source, float pAmount) {
@@ -547,7 +544,10 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
 
     }
 
-
+    @Override
+    public boolean isTamable() {
+        return super.isTamable() && HBConfig.DAWN_DOVE_IS_TAMABLE;
+    }
 
     @Override
     protected void switchNav(boolean flying) {

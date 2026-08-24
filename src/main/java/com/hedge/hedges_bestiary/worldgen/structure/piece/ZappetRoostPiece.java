@@ -1,6 +1,5 @@
 package com.hedge.hedges_bestiary.worldgen.structure.piece;
 
-import com.hedge.hedges_bestiary.entity.living.DawnDoveEntity;
 import com.hedge.hedges_bestiary.entity.living.ZappetEntity;
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
 import com.hedge.hedges_bestiary.registry.HBEntities;
@@ -26,7 +25,6 @@ public class ZappetRoostPiece extends TemplateStructurePiece {
 
     public ZappetRoostPiece(StructureTemplateManager manager, ResourceLocation re, StructurePlaceSettings pPlaceSettings, BlockPos pos) {
         super(HBStructurePieces.ZAPPET_ROOST.get(), 0, manager, re, re.toString(), pPlaceSettings, pos);
-
     }
 
     public ZappetRoostPiece(StructureTemplateManager manager, CompoundTag tag) {

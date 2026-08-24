@@ -120,13 +120,13 @@ public class ZappetModel extends HBModel<ZappetEntity> {
 		this.animateSmooth(entity.shootAnimationState, ZappetAnimation.SHOOT, ageInTicks, 1f);
 		this.animateSmooth(entity.sitAnimationState, ZappetAnimation.SIT, ageInTicks, 1f);
 		this.animateSmooth(entity.danceAnimationState, ZappetAnimation.DANCE, ageInTicks, 1f);
+		this.animateSmooth(entity.rideAnimationState, ZappetAnimation.FLY, ageInTicks, 2 + limbSwingAmount);
 
-		if (entity.getRiddenHeadEntity() != null) {
-			if (entity.getRiddenHeadEntity().onGround()) {
+		if (entity.isPassenger()) {
+			if (entity.getVehicle().onGround()) {
 				this.animate(entity.idleAnimationState, ZappetAnimation.IDLE, ageInTicks, 0.5f);
 			} else {
 				this.animate(entity.idleAnimationState, ZappetAnimation.GLIDE, ageInTicks, 1 + limbSwingAmount);
-				this.animate(entity.idleAnimationState, ZappetAnimation.FLY, ageInTicks, 2 + limbSwingAmount);
 			}
 		} else {
 			if (entity.onGround()) {
@@ -144,7 +144,7 @@ public class ZappetModel extends HBModel<ZappetEntity> {
 			this.flycontrol.xRot = entity.getFlightPitch(partialTicks) / 57.295776F * flyProgress / 2;
 			this.flycontrol.zRot = entity.getFlightRoll(partialTicks) / 57.295776F * flyProgress / 2;
 
-		} else if (entity.getRiddenId() == -1) {
+		} else if (!entity.isPassenger()) {
 			this.animateWalk(ZappetAnimation.WALK, limbSwing, limbSwingAmount, 1.8f, 2.5f);
 		}
 	}

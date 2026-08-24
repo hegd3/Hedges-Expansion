@@ -7,8 +7,8 @@
   ],
   "spawners":
   {
-    "type": "hedges_bestiary:gild_glider",
-    "weight": 3,
+    "type": "hedges_bestiary:spotted_striker",
+    "weight": 5,
     "minCount": 1,
     "maxCount": 1,
     "category": "water_creature"

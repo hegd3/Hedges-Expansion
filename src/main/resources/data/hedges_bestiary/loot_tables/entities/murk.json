@@ -51,14 +51,14 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "hedges_bestiary:murk_claw",
+          "name": "hedges_bestiary:murk_spike",
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 0,
-                "max": 4
+                "max": 2
               },
               "add": false
             },
@@ -68,35 +68,6 @@
                 "type": "minecraft:uniform",
                 "min": 0,
                 "max": 1
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "rolls": 1,
-      "bonus_rolls": 0,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "hedges_bestiary:murk_spike",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 0,
-                "max": 6
-              },
-              "add": false
-            },
-            {
-              "function": "minecraft:looting_enchant",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 0,
-                "max": 3
               }
             }
           ]

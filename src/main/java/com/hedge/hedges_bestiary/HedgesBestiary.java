@@ -3,6 +3,7 @@ package com.hedge.hedges_bestiary;
 import com.hedge.hedges_bestiary.blocks.HBBlocks;
 import com.hedge.hedges_bestiary.client.ClientProxy;
 import com.hedge.hedges_bestiary.client.HBSounds;
+import com.hedge.hedges_bestiary.config.HBConfig;
 import com.hedge.hedges_bestiary.items.HBCreativeTab;
 import com.hedge.hedges_bestiary.items.HBItems;
 import com.hedge.hedges_bestiary.message.DanceJukeboxMessage;
@@ -17,6 +18,8 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
@@ -27,11 +30,12 @@ import org.slf4j.Logger;
 import static org.antlr.runtime.debug.DebugEventListener.PROTOCOL_VERSION;
 
 @Mod(HedgesBestiary.MODID)
+@Mod.EventBusSubscriber(modid = HedgesBestiary.MODID)
 public class HedgesBestiary
 {
     public static final String MODID = "hedges_bestiary";
 
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
     public static CommonProxy PROXY = DistExecutor.runForDist(() -> ClientProxy::new, () -> CommonProxy::new);
     private static final ResourceLocation PACKET_NETWORK_NAME = new ResourceLocation(MODID + ":main_channel");
 
@@ -45,7 +49,9 @@ public class HedgesBestiary
     public HedgesBestiary(FMLJavaModLoadingContext context)
     {
         IEventBus modEventBus = context.getModEventBus();
+        context.registerConfig(ModConfig.Type.COMMON, HBConfig.SPEC, "hedges_bestiary.toml");
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::onModConfigEvent);
         MinecraftForge.EVENT_BUS.register(this);
         HBEntities.register(modEventBus);
 
@@ -59,6 +65,14 @@ public class HedgesBestiary
         HBCreativeTab.register(modEventBus);
         PROXY.init();
 
+    }
+
+    @SubscribeEvent
+    public void onModConfigEvent(final ModConfigEvent event) {
+        final ModConfig config = event.getConfig();
+        if (config.getSpec() == HBConfig.SPEC) {
+            HBConfig.bake();
+        }
     }
 
     public static <MSG> void sendMSGToServer(MSG message) {

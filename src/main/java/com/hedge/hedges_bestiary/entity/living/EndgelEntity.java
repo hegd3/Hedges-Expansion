@@ -17,11 +17,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.AnimationState;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MoverType;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
@@ -30,6 +29,8 @@ import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
@@ -295,18 +296,20 @@ public class EndgelEntity extends HBMonster {
         if (pId == 39) {
             Vec3 v = this.getEyePosition().add(this.getLookAngle().scale(3.5F));
             this.level().addParticle(new EndgelScreamParticleOptions(Mth.clamp(-this.getXRot(), -35, 35), this.getYRot(), 3F), true, v.x, v.y, v.z, 0, 0, 0);
-            /*
-            for (int i = 0; i < 360; i+=45) {
-                Vec3 vec = new Vec3(Mth.sin(i * Mth.DEG_TO_RAD) * 4, Mth.cos(i * Mth.DEG_TO_RAD) * 4, 0);
-                vec = vec.yRot(-this.getYRot() * Mth.DEG_TO_RAD);
-                v = this.getEyePosition().add(vec);
-                this.level().addParticle(HBParticles.ENDGEL_BULLET.get(), v.x, v.y, v.z, 0, 0, 0);
-            }
-
-             */
 
         } else {
             super.handleEntityEvent(pId);
         }
     }
+
+    public static boolean canSpawn(EntityType<? extends EndgelEntity> endgel, LevelAccessor pLevel, MobSpawnType pSpawnType, BlockPos pPos, RandomSource pRandom) {
+
+        return pLevel.getBlockState(pPos).isAir() && pPos.getY() >= 64 && pPos.getY() <= 72;
+    }
+
+    @Override
+    public boolean checkSpawnObstruction(LevelReader worldIn) {
+        return worldIn.isUnobstructed(this);
+    }
+
 }
