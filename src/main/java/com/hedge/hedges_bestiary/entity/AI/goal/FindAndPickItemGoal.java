@@ -10,11 +10,11 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class FindAndPickitemGoal extends Goal {
+public class FindAndPickItemGoal extends Goal {
     private final PathfinderMob mob;
     private final Predicate<ItemEntity> item;
     private int attemptTicks;
-    public FindAndPickitemGoal(PathfinderMob mob, Predicate<ItemEntity> item) {
+    public FindAndPickItemGoal(PathfinderMob mob, Predicate<ItemEntity> item) {
         this.mob = mob;
         this.item = item;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));

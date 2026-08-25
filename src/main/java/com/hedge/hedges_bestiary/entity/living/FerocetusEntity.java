@@ -112,7 +112,7 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
 
         int i = 0;
         this.goalSelector.addGoal(i++, new FerocetusAttackGoal(this));
-        this.goalSelector.addGoal(i++, new FindAndPickitemGoal(this, CommonPredicates.EATS_FISH));
+        this.goalSelector.addGoal(i++, new FindAndPickItemGoal(this, CommonPredicates.EATS_FISH));
         this.goalSelector.addGoal(i++, new GroupFollowLeaderGoal<>(this,10F, 7F));
         this.goalSelector.addGoal(i++, new CustomSwimGoal(this, 1.0f, 25, 5, 3, true));
         this.goalSelector.addGoal(i++, new IdleAnimationGoal<>(this));

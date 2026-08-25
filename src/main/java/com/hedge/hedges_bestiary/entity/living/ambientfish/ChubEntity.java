@@ -40,6 +40,8 @@ public class ChubEntity extends HBBucketableSchoolingMob {
         this.lookControl = new SmoothSwimmingLookControl(this, 20);
     }
 
+
+
     public static AttributeSupplier.Builder bakeAttributes() {
         return Animal.createLivingAttributes()
                 .add(Attributes.MAX_HEALTH, 4.0D)
@@ -57,7 +59,7 @@ public class ChubEntity extends HBBucketableSchoolingMob {
 
     @Override
     public int getMaxGroupSize() {
-        return 30;
+        return 15;
     }
 
     @Override

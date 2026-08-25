@@ -113,7 +113,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         this.goalSelector.addGoal(i++, new FlyerFollowOwnerGoal(this, 1.2D, 1.6D, 8.0f, 8.0f));
         this.goalSelector.addGoal(i++, new DawnDoveAttackGoal(this));
         this.goalSelector.addGoal(i++, new HBTemptGoal(this, 1.1f, Ingredient.of(HBTags.DAWN_DOVE_FOOD), false));
-        this.goalSelector.addGoal(i++, new FindAndPickitemGoal(this, FOOD_ENTITIES));
+        this.goalSelector.addGoal(i++, new FindAndPickItemGoal(this, FOOD_ENTITIES));
         this.goalSelector.addGoal(i++, new FlyerMoveToHomePosGoal(this, 1.0D, 32, 2d));
         this.goalSelector.addGoal(i++, new NapGoal(this, false));
         this.goalSelector.addGoal(i++, new RandomlySitGoal(this));

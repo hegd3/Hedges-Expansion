@@ -8,7 +8,7 @@
   "spawners":
   {
     "type": "hedges_bestiary:spotted_striker",
-    "weight": 5,
+    "weight": 8,
     "minCount": 1,
     "maxCount": 1,
     "category": "water_creature"

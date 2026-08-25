@@ -36,6 +36,7 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Bucketable;
+import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -62,6 +63,8 @@ public class SkibEntity extends HBAquaticMob implements IdleAnimMob, Bucketable 
         this.setPathfindingMalus(BlockPathTypes.WATER_BORDER, 0.0F);
         this.setMaxUpStep(1.25f);
     }
+
+
 
     @Override
     protected void defineSynchedData() {

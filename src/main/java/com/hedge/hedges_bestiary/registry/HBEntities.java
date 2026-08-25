@@ -30,7 +30,7 @@ public class HBEntities {
                     .sized(1.8f, 2.2f).build("plombo"));
 
     public static final RegistryObject<EntityType<GurkEntity>> GURK =
-            ENTITY_TYPES.register("gurk", () -> EntityType.Builder.of(GurkEntity::new, MobCategory.CREATURE)
+            ENTITY_TYPES.register("gurk", () -> EntityType.Builder.of(GurkEntity::new, MobCategory.WATER_CREATURE)
                     .sized(1.0f, 0.7f).build("gurk"));
 
     public static final RegistryObject<EntityType<MurkEntity>> MURK =

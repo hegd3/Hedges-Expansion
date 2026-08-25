@@ -3,7 +3,7 @@ package com.hedge.hedges_bestiary.entity.living;
 import com.hedge.hedges_bestiary.entity.AI.control.SwimmingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.AvoidTargetWhenLowGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.CustomSwimGoal;
-import com.hedge.hedges_bestiary.entity.AI.goal.FindAndPickitemGoal;
+import com.hedge.hedges_bestiary.entity.AI.goal.FindAndPickItemGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.SpottedStrikerAttackGoal;
 import com.hedge.hedges_bestiary.entity.AI.navigation.FluidPathNavigation;
@@ -53,6 +53,7 @@ public class SpottedStrikerEntity extends HBAquaticMob implements AttackStateMob
     private float prevTrail;
     private float trail = 0.0f;
     private int pulseCD = 100;
+    private int eatTicks = 0;
     private boolean pulse = false;
 
     public final AnimationState biteAnimationState = new AnimationState();
@@ -92,7 +93,7 @@ public class SpottedStrikerEntity extends HBAquaticMob implements AttackStateMob
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new SpottedStrikerFleeGoal(this));
-        this.goalSelector.addGoal(1, new FindAndPickitemGoal(this, CommonPredicates.EATS_FISH));
+        this.goalSelector.addGoal(1, new FindAndPickItemGoal(this, CommonPredicates.EATS_FISH));
 
         this.goalSelector.addGoal(2, new SpottedStrikerAttackGoal(this));
         this.goalSelector.addGoal(4, new CustomSwimGoal(this, 1.0f, 30, 4, 5, false));
@@ -138,9 +139,12 @@ public class SpottedStrikerEntity extends HBAquaticMob implements AttackStateMob
         this.attackCD = Math.max(attackCD - 1, 0);
         this.superBiteCD = Math.max(superBiteCD - 1, 0);
         if (!this.getMainHandItem().isEmpty()) {
-            this.heal(10);
-            this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-            this.playSound(SoundEvents.GENERIC_EAT);
+            this.eatTicks++;
+            if (this.eatTicks >= 17) {
+                this.heal(10);
+                this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+                this.playSound(SoundEvents.GENERIC_EAT);
+            }
         }
         if (!this.isCloaked()) {
             this.cloakCD = Math.max(cloakCD - 1, 0);
@@ -250,7 +254,7 @@ public class SpottedStrikerEntity extends HBAquaticMob implements AttackStateMob
     @Override
     public void setUpAnimStates() {
         super.setUpAnimStates();
-        this.biteAnimationState.animateWhen(this.getAnimState() == 1, this.tickCount);
+        this.biteAnimationState.animateWhen(this.getAnimState() == 1 || !this.getMainHandItem().isEmpty(), this.tickCount);
         this.superBiteAnimationState.animateWhen(this.getAnimState() == 2, this.tickCount);
 
     }

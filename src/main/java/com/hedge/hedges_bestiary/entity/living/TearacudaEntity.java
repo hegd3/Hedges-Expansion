@@ -3,7 +3,7 @@ package com.hedge.hedges_bestiary.entity.living;
 import com.hedge.hedges_bestiary.client.particle.SmokeParticleOptions;
 import com.hedge.hedges_bestiary.entity.AI.control.SwimmingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.CustomSwimGoal;
-import com.hedge.hedges_bestiary.entity.AI.goal.FindAndPickitemGoal;
+import com.hedge.hedges_bestiary.entity.AI.goal.FindAndPickItemGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.GroupFollowLeaderGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.LeaveGroupGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
@@ -88,7 +88,7 @@ public class TearacudaEntity extends HBSchoolingMob implements AttackStateMob {
     protected void registerGoals() {
         int i = 0;
         this.goalSelector.addGoal(i++, new AvoidEntityGoal<>(this, LivingEntity.class,10.0F, 1.0D, 1.0D, TEARACUDA_AVOIDS));
-        this.goalSelector.addGoal(i++, new FindAndPickitemGoal(this, CommonPredicates.EATS_FISH));
+        this.goalSelector.addGoal(i++, new FindAndPickItemGoal(this, CommonPredicates.EATS_FISH));
         this.goalSelector.addGoal(i++, new TearacudaAttackGoal(this));
         this.goalSelector.addGoal(i++, new GroupFollowLeaderGoal<>(this));
         this.goalSelector.addGoal(i++, new CustomSwimGoal(this, 1.0f, 10, 6, 5, true));

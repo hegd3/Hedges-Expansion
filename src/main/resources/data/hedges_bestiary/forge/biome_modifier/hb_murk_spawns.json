@@ -7,7 +7,7 @@
   "spawners":
   {
     "type": "hedges_bestiary:murk",
-    "weight": 5,
+    "weight": 10,
     "minCount": 1,
     "maxCount": 1,
     "category": "water_creature"

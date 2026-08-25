@@ -9,6 +9,7 @@ import com.hedge.hedges_bestiary.entity.living.ambientfish.SkibEntity;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.registry.HBParticles;
 import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -40,6 +41,8 @@ public class ServerEvent {
 
     @SubscribeEvent
     public static void entitySpawn(SpawnPlacementRegisterEvent event) {
+        event.register(HBEntities.BURODON.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Animal::checkAnimalSpawnRules, SpawnPlacementRegisterEvent.Operation.AND);
+        event.register(HBEntities.GURK.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, GurkEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.AND);
         event.register(HBEntities.GILD_GLIDER.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, GildGliderEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.AND);
         event.register(HBEntities.CHUB.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ChubEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.AND);
         event.register(HBEntities.TEARACUDA.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, TearacudaEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.AND);
@@ -47,6 +50,7 @@ public class ServerEvent {
         event.register(HBEntities.MURK.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, MurkEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.AND);
         event.register(HBEntities.SPOTTED_STRIKER.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, SpottedStrikerEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.AND);
         event.register(HBEntities.ENDGEL.get(), SpawnPlacements.Type.NO_RESTRICTIONS, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndgelEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.AND);
+        event.register(HBEntities.SKIB.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.OCEAN_FLOOR, SkibEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.AND);
 
     }
 

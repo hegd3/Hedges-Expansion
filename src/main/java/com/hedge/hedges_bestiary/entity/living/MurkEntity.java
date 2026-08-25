@@ -76,7 +76,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class MurkEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurner, EggLayer, HUDMount {
+public class MurkEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurner, EggLayer, HUDMount{
     private static final EntityDataAccessor<Boolean> CHARGED = SynchedEntityData.defineId(MurkEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> LEFT = SynchedEntityData.defineId(MurkEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> HAS_EGG = SynchedEntityData.defineId(MurkEntity.class, EntityDataSerializers.BOOLEAN);
@@ -107,7 +107,6 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     private float prevTrail;
     private float trail = 0.0F;
     private int eatProgress = 0;
-
     private int tameAttempts = 3;
     private boolean ateSkib = false;
 
@@ -182,7 +181,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2, 1.6, 7.0f, 4.0f));
         this.goalSelector.addGoal(i++, new MurkAttackGoal(this));
         this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
-        this.goalSelector.addGoal(i++, new FindAndPickitemGoal(this, FOOD));
+        this.goalSelector.addGoal(i++, new FindAndPickItemGoal(this, FOOD));
         this.goalSelector.addGoal(i++, new TemptGoal(this, 1.1, Ingredient.of(HBItems.SKIB.get()), false));
         this.goalSelector.addGoal(i++, new NapGoal(this, false));
         this.goalSelector.addGoal(i, new CustomSwimGoal(this, 1.0, 10, 4, 7, true));
@@ -913,8 +912,11 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     }
 
     @Override
-    public boolean checkSpawnObstruction(LevelReader worldIn) {
-        return worldIn.isUnobstructed(this);
+    public boolean checkSpawnObstruction(LevelReader levelReader) {
+        return levelReader.isUnobstructed(this);
     }
+
+
+
 }
 

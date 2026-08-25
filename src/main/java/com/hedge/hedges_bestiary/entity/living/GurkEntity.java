@@ -13,6 +13,7 @@ import com.hedge.hedges_bestiary.entity.types.VariantMob;
 import com.hedge.hedges_bestiary.items.TreatItem;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -22,7 +23,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -39,6 +42,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
@@ -77,6 +82,16 @@ public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer 
     protected boolean canOwnerCommand(Player player) {
         return true;
     }
+
+    public static boolean canSpawn(EntityType<? extends GurkEntity> gurk, LevelAccessor pLevel, MobSpawnType pSpawnType, BlockPos pPos, RandomSource pRandom) {
+        return pSpawnType == MobSpawnType.SPAWNER || pLevel.getFluidState(pPos).is(FluidTags.WATER) && pPos.getY() > pLevel.getSeaLevel() - 10;
+    }
+
+    @Override
+    public boolean checkSpawnObstruction(LevelReader levelReader) {
+        return levelReader.isUnobstructed(this);
+    }
+
 
     @Override
     protected void defineSynchedData() {
