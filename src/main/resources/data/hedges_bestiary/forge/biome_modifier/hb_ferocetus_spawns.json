@@ -2,7 +2,9 @@
   "type": "forge:add_spawns",
   "biomes": [
     "minecraft:deep_ocean",
-    "minecraft:ocean"
+    "minecraft:ocean",
+    "minecraft:deep_cold_ocean",
+    "minecraft:cold_ocean"
   ],
   "spawners":
   {

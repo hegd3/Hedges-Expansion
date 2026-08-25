@@ -3,6 +3,7 @@ package com.hedge.hedges_bestiary.client.renderer;
 import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.client.EntityLayers;
 import com.hedge.hedges_bestiary.client.models.PlomboModel;
+import com.hedge.hedges_bestiary.client.renderer.layer.PlomboRiderLayer;
 import com.hedge.hedges_bestiary.entity.living.PlomboEntity;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
@@ -15,6 +16,7 @@ public class PlomboRenderer extends MobRenderer<PlomboEntity, PlomboModel> {
 
     public PlomboRenderer(EntityRendererProvider.Context pContext) {
         super(pContext, new PlomboModel(pContext.bakeLayer(EntityLayers.PLOMBO_LAYER)), 1.5f);
+        this.addLayer(new PlomboRiderLayer(this));
     }
 
     @Override

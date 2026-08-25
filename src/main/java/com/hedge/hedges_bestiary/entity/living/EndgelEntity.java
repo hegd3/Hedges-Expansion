@@ -6,6 +6,7 @@ import com.hedge.hedges_bestiary.entity.AI.control.FlyingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.FlyingWanderGoal;
 import com.hedge.hedges_bestiary.entity.AI.goal.specific.EndgelAttackGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
+import com.hedge.hedges_bestiary.entity.AI.targeting.TargetBelowGoal;
 import com.hedge.hedges_bestiary.entity.projectile.EndgelBlast;
 import com.hedge.hedges_bestiary.entity.projectile.EndgelBullet;
 import com.hedge.hedges_bestiary.entity.types.HBMonster;
@@ -82,10 +83,10 @@ public class EndgelEntity extends HBMonster {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new EndgelAttackGoal(this));
-        this.goalSelector.addGoal(1, new FlyingWanderGoal(this, 1.0f, 35, 25));
+        this.goalSelector.addGoal(1, new FlyingWanderGoal(this, 1.0f, 35, 25, 60));
 
         this.targetSelector.addGoal(0, new HBHurtByTargetGoal(this));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, LivingEntity.class, true));
+        this.targetSelector.addGoal(1, new TargetBelowGoal<>(this, LivingEntity.class, null));
 
     }
 

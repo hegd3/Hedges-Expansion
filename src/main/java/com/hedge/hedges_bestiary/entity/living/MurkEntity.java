@@ -242,42 +242,36 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     public void travel(Vec3 pTravelVector) {
 
 
-        if (isControlledByLocalInstance() && getControllingPassenger() != null && getControllingPassenger() instanceof Player rider) {
+        if (isControlledByLocalInstance() && getControllingPassenger() instanceof Player rider) {
             float speed = (float) this.getAttributeValue(Attributes.MOVEMENT_SPEED);
 
-            if (isControlledByLocalInstance()) {
-                if (this.isInWater()) {
-                    speed*= 1.5f;
-                    if (Minecraft.getInstance().options.keyJump.isDown()) {
-                        this.setDeltaMovement(this.getDeltaMovement().add(0, 0.03, 0));
-                    } else if (Minecraft.getInstance().options.keySprint.isDown()) {
-                        this.setDeltaMovement(this.getDeltaMovement().add(0, -0.03, 0));
-                    }
+            if (this.isInWater()) {
+                //speed*= 1.25f;
+                if (Minecraft.getInstance().options.keyJump.isDown()) {
+                    this.setDeltaMovement(this.getDeltaMovement().add(0, 0.03, 0));
+                } else if (Minecraft.getInstance().options.keySprint.isDown()) {
+                    this.setDeltaMovement(this.getDeltaMovement().add(0, -0.03, 0));
                 }
-
-                if (this.getAnimState() == 0) {
-
-                    if (Minecraft.getInstance().options.keyAttack.isDown()) {
-                        HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 4));
-                    } else if (HBKeyMappings.MOUNT_ABILITY_KEY.isDown()) {
-                        if (!this.isCharged() && this.chargeProgress >= 1F) {
-                            HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 5));
-                            this.chargeProgress = 1F;
-                            this.roarCD = 0F;
-                        } else {
-                            HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 6));
-                        }
-                    }
-
-
-                }
-
-                this.setSpeed(speed);
-            } else if (rider instanceof Player) {
-                calculateEntityAnimation(true);
-                setDeltaMovement(Vec3.ZERO);
-                return;
             }
+
+            if (this.getAnimState() == 0) {
+
+                if (Minecraft.getInstance().options.keyAttack.isDown()) {
+                    HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 4));
+                } else if (HBKeyMappings.MOUNT_ABILITY_KEY.isDown()) {
+                    if (!this.isCharged() && this.chargeProgress >= 1F) {
+                        HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 5));
+                        this.chargeProgress = 1F;
+                        this.roarCD = 0F;
+                    } else {
+                        HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 6));
+                    }
+                }
+
+
+            }
+
+            this.setSpeed(speed);
         }
 
 
@@ -290,7 +284,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
             this.moveRelative(this.getSpeed(), pTravelVector);
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
-            if (this.horizontalCollision && this.level().getBlockState(this.blockPosition().above()).isAir()) {
+            if (this.horizontalCollision) { //&& this.level().getBlockState(this.blockPosition().above()).isAir()) {
                 final float f1 = this.getYRot() * Mth.DEG_TO_RAD;
                 this.setDeltaMovement(this.getDeltaMovement().add(-Mth.sin(f1) * 0.1f, 0.05D, Mth.cos(f1) * 0.1f));
             }
@@ -316,18 +310,17 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                 float f1;
                 float f2;
                 if (this.isInWater()) {
-                    f1 = pPlayer.zza * 1.5F;
+                    f1 = pPlayer.zza * 0.75F;
 
                     float angle= Mth.wrapDegrees(this.getYRot() - this.getYHeadRot());
                     f2 = Mth.sin(angle * Mth.DEG_TO_RAD) * (float)this.getDeltaMovement().length();
                 } else {
                     f1 = pPlayer.zza * 0.5F;
                     f2 = pPlayer.xxa * 0.2F;
-
                 }
-
                 if (f1 < 0.0F)
                     f1 *= 0.25F;
+
                 yield new Vec3(f2, 0, f1);
             }
         };

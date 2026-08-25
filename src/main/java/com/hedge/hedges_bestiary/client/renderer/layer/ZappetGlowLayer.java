@@ -1,4 +1,4 @@
-package com.hedge.hedges_bestiary.client.layer;
+package com.hedge.hedges_bestiary.client.renderer.layer;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.client.HBRenderTypes;

@@ -174,7 +174,6 @@ public class MurkModel extends HBModel<MurkEntity> {
 		if (entity.isInWater()) {
 			headPitch *= 0.6F;
 			this.swimcontrol.xRot = headPitch;
-			this.animate(entity.idleAnimationState, MurkBasicsAnimation.SWIM_IDLE, ageInTicks, 0.5f);
 			this.animate(entity.multiBiteAnimationState, entity.swingingLeft() ? MurkAttacksAnimation.MULTI_BITE_LEFT: MurkAttacksAnimation.MULTI_BITE_RIGHT, ageInTicks, 1);
 
 			this.animate(entity.roarAnimationState, MurkAttacksAnimation.ROAR, ageInTicks, 1f);

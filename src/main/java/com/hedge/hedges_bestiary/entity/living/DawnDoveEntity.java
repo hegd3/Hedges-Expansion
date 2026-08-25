@@ -156,37 +156,31 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
 
         if (isControlledByLocalInstance() && getControllingPassenger() != null && getControllingPassenger() instanceof Player rider) {
             float speed =(float) this.getAttributeValue(Attributes.MOVEMENT_SPEED);
-
-            if (isControlledByLocalInstance()) {
-
-                if (Minecraft.getInstance().options.keyJump.isDown() && this.meterAmount > 0) {
-                    this.meterAmount-= 0.02F;
-                    this.setDeltaMovement(this.getDeltaMovement().add(0, 0.03, 0));
-                    if (!this.isFlying()) {
-                        this.setFlying(true);
-                        HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 3));
-                    }
-
-                } else if (Minecraft.getInstance().options.keySprint.isDown() && this.isFlying()) {
-                    this.setDeltaMovement(this.getDeltaMovement().add(0, -0.03, 0));
+            if (Minecraft.getInstance().options.keyJump.isDown() && this.meterAmount > 0) {
+                this.meterAmount-= 0.02F;
+                this.setDeltaMovement(this.getDeltaMovement().add(0, 0.03, 0));
+                if (!this.isFlying()) {
+                    this.setFlying(true);
+                    HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 3));
                 }
 
-                if (this.getAnimState() == 0) {
-                    if (Minecraft.getInstance().options.keyAttack.isDown()) {
-                        HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 4));
-                    } else if (HBKeyMappings.MOUNT_ABILITY_KEY.isDown()) {
-                        HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 5));
-                    } else if (Minecraft.getInstance().options.keyUse.isDown() && this.isFlying()) {
-                        HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 6));
-                    }
-                }
-
-
-                this.setSpeed(this.isFlying() ? speed * 4f : speed);
-            } else if (rider instanceof Player && this.getAnimState() != 3) {
-                setDeltaMovement(Vec3.ZERO);
-                return;
+            } else if (Minecraft.getInstance().options.keySprint.isDown() && this.isFlying()) {
+                this.setDeltaMovement(this.getDeltaMovement().add(0, -0.03, 0));
             }
+
+            if (this.getAnimState() == 0) {
+                if (Minecraft.getInstance().options.keyAttack.isDown()) {
+                    HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 4));
+                } else if (HBKeyMappings.MOUNT_ABILITY_KEY.isDown()) {
+                    HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 5));
+                } else if (Minecraft.getInstance().options.keyUse.isDown() && this.isFlying()) {
+                    HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 6));
+                }
+            }
+
+
+            this.setSpeed(this.isFlying() ? speed * 4f : speed);
+
         }
         super.travel(vec3d);
     }

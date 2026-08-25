@@ -2,7 +2,7 @@ package com.hedge.hedges_bestiary.client.renderer;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.client.EntityLayers;
-import com.hedge.hedges_bestiary.client.layer.MurkRiderLayer;
+import com.hedge.hedges_bestiary.client.renderer.layer.MurkRiderLayer;
 import com.hedge.hedges_bestiary.client.models.MurkModel;
 import com.hedge.hedges_bestiary.entity.living.MurkEntity;
 import com.mojang.blaze3d.vertex.PoseStack;

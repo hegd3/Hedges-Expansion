@@ -5,8 +5,8 @@ import net.minecraft.world.item.Item;
 public class TreatItem extends Item {
 
     private final int tier;
-    public TreatItem(int tier) {
-        super(new Item.Properties());
+    public TreatItem(Item.Properties properties, int tier) {
+        super(properties);
         this.tier = tier;
     }
 

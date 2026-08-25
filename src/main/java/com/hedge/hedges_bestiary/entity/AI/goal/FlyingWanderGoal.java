@@ -1,5 +1,6 @@
 package com.hedge.hedges_bestiary.entity.AI.goal;
 
+import com.hedge.hedges_bestiary.util.WorldHelpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -16,14 +17,16 @@ public class FlyingWanderGoal extends Goal {
     protected final float speedModifier;
     private final int flightRange;
     private final int flightHeight;
+    private final int minY;
     protected double x;
     protected double y;
     protected double z;
 
-    public FlyingWanderGoal(PathfinderMob mob, float speedModifier, int flightRange, int flightHeight) {
+    public FlyingWanderGoal(PathfinderMob mob, float speedModifier, int flightRange, int flightHeight, int minY) {
         this.setFlags(EnumSet.of(Flag.MOVE));
         this.flightRange = flightRange;
         this.flightHeight = flightHeight;
+        this.minY = minY;
         this.speedModifier = speedModifier;
         this.mob = mob;
     }
@@ -65,7 +68,15 @@ public class FlyingWanderGoal extends Goal {
     protected Vec3 findFlightPos() {
         Vec3 heightAdjusted = mob.position().add(mob.getRandom().nextInt(flightRange * 2) - flightRange, 0, mob.getRandom().nextInt(flightRange * 2) - flightRange);
         Vec3 ground = groundPosition(heightAdjusted);
-        heightAdjusted = new Vec3(heightAdjusted.x, ground.y + flightHeight + mob.getRandom().nextInt(6), heightAdjusted.z);
+        if (mob.level().getBlockState(WorldHelpers.fromVec3(ground)).isAir()) {
+            if (mob.getY() < this.minY) {
+                heightAdjusted = new Vec3(heightAdjusted.x, minY + mob.getRandom().nextInt(6), heightAdjusted.z);
+            } else {
+                heightAdjusted = new Vec3(heightAdjusted.x, minY - mob.getRandom().nextInt(6), heightAdjusted.z);
+            }
+        } else {
+            heightAdjusted = new Vec3(heightAdjusted.x, ground.y + flightHeight + mob.getRandom().nextInt(6), heightAdjusted.z);
+        }
         BlockHitResult result = mob.level().clip(new ClipContext(mob.getEyePosition(), heightAdjusted, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, mob));
         if (result.getType() == HitResult.Type.MISS) {
             return heightAdjusted;

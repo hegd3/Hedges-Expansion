@@ -6,6 +6,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Rarity;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -30,15 +31,15 @@ public class HBItems {
     // CRAFTED ITEMS
 
     public static final RegistryObject<Item> PLAIN_TREAT = ITEMS.register("plain_treat",
-            () -> new TreatItem(0));
+            () -> new TreatItem(new Item.Properties().rarity(Rarity.COMMON), 0));
     public static final RegistryObject<Item> SEASONED_TREAT = ITEMS.register("seasoned_treat",
-            () -> new TreatItem(1));
+            () -> new TreatItem(new Item.Properties().rarity(Rarity.UNCOMMON).craftRemainder(Items.GLASS_BOTTLE),1));
 
     public static final RegistryObject<Item> HEARTY_TREAT = ITEMS.register("hearty_treat",
-            () -> new TreatItem(2));
+            () -> new TreatItem(new Item.Properties().rarity(Rarity.RARE),2));
 
     public static final RegistryObject<Item> ENDGELIC_JUDGEMENT = ITEMS.register("endgelic_judgement",
-            () -> new EndgelicJudgementItem(new Item.Properties().defaultDurability(500)));
+            () -> new EndgelicJudgementItem(new Item.Properties().durability(500).rarity(Rarity.EPIC)));
     // FOODS
 
     public static final RegistryObject<Item> RAW_URKMEAT = ITEMS.register("raw_urkmeat",

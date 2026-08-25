@@ -1,4 +1,4 @@
-package com.hedge.hedges_bestiary.client.layer;
+package com.hedge.hedges_bestiary.client.renderer.layer;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.client.models.DawnDoveModel;
@@ -16,7 +16,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.world.entity.Entity;
 
-public class DawnDoveRiderLayer extends RenderLayer<DawnDoveEntity, DawnDoveModel> {
+public class DawnDoveRiderLayer extends RiderLayer<DawnDoveEntity, DawnDoveModel> {
     public DawnDoveRiderLayer(DawnDoveRenderer render) {
         super(render);
     }
@@ -64,28 +64,4 @@ public class DawnDoveRiderLayer extends RenderLayer<DawnDoveEntity, DawnDoveMode
         }
     }
 
-    public static <E extends Entity> void renderPassenger(E entityIn, double x, double y, double z, float yaw, float partialTicks, PoseStack matrixStack, MultiBufferSource bufferIn, int packedLight) {
-        EntityRenderer<? super E> render = null;
-        EntityRenderDispatcher manager = Minecraft.getInstance().getEntityRenderDispatcher();
-        try {
-            render = manager.getRenderer(entityIn);
-
-            if (render != null) {
-                try {
-                    render.render(entityIn, yaw, partialTicks, matrixStack, bufferIn, packedLight);
-                } catch (Throwable throwable1) {
-                    throw new ReportedException(CrashReport.forThrowable(throwable1, "Rendering entity in world"));
-                }
-            }
-        } catch (Throwable throwable3) {
-            CrashReport crashreport = CrashReport.forThrowable(throwable3, "Rendering entity in world");
-            CrashReportCategory crashreportcategory = crashreport.addCategory("Entity being rendered");
-            entityIn.fillCrashReportCategory(crashreportcategory);
-            CrashReportCategory crashreportcategory1 = crashreport.addCategory("Renderer details");
-            crashreportcategory1.setDetail("Assigned renderer", render);
-            crashreportcategory1.setDetail("Rotation", Float.valueOf(yaw));
-            crashreportcategory1.setDetail("Delta", Float.valueOf(partialTicks));
-            throw new ReportedException(crashreport);
-        }
-    }
 }

@@ -14,8 +14,10 @@ import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
 import com.hedge.hedges_bestiary.entity.types.AttackStateMob;
 import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
+import com.hedge.hedges_bestiary.entity.util.MathHelpers;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -24,6 +26,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -37,11 +40,13 @@ import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -90,7 +95,7 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
 
     @Override
     protected boolean canOwnerMount(Player player) {
-        return false;
+        return !this.isBaby();
     }
 
     @Override
@@ -110,6 +115,7 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
     protected void registerGoals() {
         int i = 0;
         this.goalSelector.addGoal(i++, new FloatGoal(this));
+        this.goalSelector.addGoal(i++, new MountOverrideGoal(this));
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this));
         this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.1D, 1.3D, 7.0f, 4.0f));
         this.goalSelector.addGoal(i++, new AvoidTargetWhenLowGoal(this, 1.3f, 20, 30, 20, 3));
@@ -129,11 +135,6 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
         this.targetSelector.addGoal(2, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(3, new TargetPlayersGoal(this));
         this.targetSelector.addGoal(4, new TargetMonstersGoal(this));
-    }
-
-    @Override
-    public boolean canFreeze() {
-        return false;
     }
 
     @Override
@@ -211,6 +212,8 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
         }
     }
 
+
+
     @Override
     public boolean isPushable() {
         return false;
@@ -228,23 +231,6 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
         this.yawnAnimationState.animateWhen(animState == 5, this.tickCount);
     }
 
-    @Override
-    public @NotNull SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @javax.annotation.Nullable SpawnGroupData pSpawnData, @javax.annotation.Nullable CompoundTag pDataTag) {
-
-        if (!this.level().isClientSide()) {
-            this.setHasHome(true);
-            this.setHomePos(this.blockPosition());
-            if (pReason == MobSpawnType.CHUNK_GENERATION || pReason == MobSpawnType.NATURAL) {
-                long dayTime = this.level().getDayTime();
-                if ((dayTime < 12000 || dayTime > 18000) && dayTime < 23000 && dayTime > 8000) {
-                    this.setNapping(true);
-                }
-            }
-        }
-
-        return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
-    }
-
         @Override
     public boolean isInvulnerableTo(DamageSource source) {
 
@@ -258,6 +244,63 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
         this.multiAttackCD += 5;
     }
 
+    @Override
+    public LivingEntity getControllingPassenger() {
+        Entity entity = this.getFirstPassenger();
+        if (entity instanceof Player) {
+            return (Player) entity;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public void travel(Vec3 pTravelVector) {
+        if (isControlledByLocalInstance() && getControllingPassenger() instanceof Player rider) {
+            this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED));
+        }
+        super.travel(pTravelVector);
+    }
+
+    @Override
+    protected void tickRidden(@NotNull Player pPlayer, @NotNull Vec3 pTravelVector) {
+        super.tickRidden(pPlayer, pTravelVector);
+        float turnSpeed = 5.0F;
+        float currentYaw = this.getYRot();
+        float targetYaw = pPlayer.getYRot();
+        float deltaYaw = Mth.wrapDegrees(targetYaw - currentYaw);
+
+        float newYaw = currentYaw + Mth.clamp(deltaYaw, -turnSpeed, turnSpeed);
+        this.setYRot(newYaw);
+        this.setYHeadRot(pPlayer.getYHeadRot());
+        this.setXRot(Mth.clamp(pPlayer.getXRot(), -10, 10));
+    }
+
+    @Override
+    protected Vec3 getRiddenInput(Player pPlayer, @NotNull Vec3 pTravelVector) {
+        if (this.getAnimState() == 2 || this.isScratching()) {
+            return Vec3.ZERO;
+        }
+        float f1 = pPlayer.zza * 0.75F;
+        float f2 = pPlayer.xxa * 0.2F;
+        if (f1 < 0.0F)
+            f1 *= 0.25F;
+        return new Vec3(f2, 0, f1);
+    }
+
+    @Override
+    protected void positionRider(Entity passenger, MoveFunction moveFunc) {
+        final float angle = (MathHelpers.STARTING_ANGLE * this.yBodyRot);
+        double targetY = this.getY() + passenger.getBbHeight();
+        double extraX = -Mth.sin(Mth.PI + angle) * 0.5F;
+        double extraZ = -Mth.cos(angle) * 0.5F;
+        if (this.getAnimState() == 2 || this.isScratching()) {
+            Vec3 offset = new Vec3(0, 0, 1).yRot(this.getYRot() * Mth.DEG_TO_RAD);
+            extraX += offset.x;
+            extraZ += offset.z;
+        }
+        moveFunc.accept(passenger, this.getX() + extraX, targetY, this.getZ() + extraZ);
+    }
 
     @Override
     public void setAttacking() {
@@ -326,6 +369,11 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
     @Override
     public TurnType getTurnType() {
         return this.turnType;
+    }
+
+    @Override
+    public boolean isFood(ItemStack pStack) {
+        return pStack.is(ItemTags.LEAVES) && super.isFood(pStack);
     }
 
     static class PlomboScratchLeavesGoal extends MoveToBlockGoal {
@@ -414,5 +462,7 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
             return mutable;
         }
     }
+
+
 
 }

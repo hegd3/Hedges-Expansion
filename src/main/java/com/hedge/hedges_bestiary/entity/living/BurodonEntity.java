@@ -146,6 +146,8 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
     }
 
 
+
+
     @Override
     public boolean isAlliedTo(Entity pEntity) {
         if (pEntity instanceof BurodonEntity burodon && burodon.getOwnerUUID() == this.getOwnerUUID()) {
@@ -293,7 +295,7 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
 
     @Override
     public boolean isFood(ItemStack pStack) {
-        return super.isFood(pStack);
+        return pStack.is(HBTags.DAWN_DOVE_FOOD) && super.isFood(pStack);
     }
 
     @Override

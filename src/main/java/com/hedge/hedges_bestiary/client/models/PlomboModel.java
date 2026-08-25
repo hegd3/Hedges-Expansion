@@ -12,10 +12,10 @@ import net.minecraft.util.Mth;
 public class PlomboModel extends HBModel<PlomboEntity> {
 	public static final ModelLayerLocation LAYER_LOCATION = EntityLayers.PLOMBO_LAYER;
 	private final ModelPart root;
-	private final ModelPart bodyfrontlegs;
-	private final ModelPart body;
+	public final ModelPart bodyfrontlegs;
+	public final ModelPart body;
 	private final ModelPart mainbody;
-	private final ModelPart body2;
+	public final ModelPart body2;
 	private final ModelPart head;
 	private final ModelPart nose;
 	private final ModelPart leftear;

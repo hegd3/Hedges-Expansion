@@ -1,10 +1,12 @@
 package com.hedge.hedges_bestiary.entity.AI.targeting;
 
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
+import com.hedge.hedges_bestiary.entity.types.SemiFlyer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.phys.AABB;
 
 public class TargetMonstersGoal extends NearestAttackableTargetGoal<Monster> {
 
@@ -20,5 +22,15 @@ public class TargetMonstersGoal extends NearestAttackableTargetGoal<Monster> {
             return super.canUse();
         }
         return false;
+    }
+
+    @Override
+    protected AABB getTargetSearchArea(double pTargetDistance) {
+        if (this.mob instanceof SemiFlyer flyer && flyer.isFlying()) {
+            AABB aabb = this.mob.getBoundingBox();
+            double newDistance = 2.0F;
+            return new AABB(aabb.minX - newDistance, mob.level().getMinBuildHeight() - 5, aabb.minZ - newDistance, aabb.maxX + newDistance, aabb.maxY + 1, aabb.maxZ + newDistance);
+        }
+        return super.getTargetSearchArea(pTargetDistance);
     }
 }
