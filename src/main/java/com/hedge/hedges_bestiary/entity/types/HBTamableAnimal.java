@@ -2,6 +2,7 @@ package com.hedge.hedges_bestiary.entity.types;
 
 import com.hedge.hedges_bestiary.config.HBConfig;
 import com.hedge.hedges_bestiary.HedgesBestiary;
+import com.hedge.hedges_bestiary.entity.living.ZappetEntity;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.menu.HBTamableMenu;
 import com.hedge.hedges_bestiary.message.DanceJukeboxMessage;
@@ -50,6 +51,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     protected static final EntityDataAccessor<Boolean> IS_DANCING = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.BOOLEAN);
     protected static final EntityDataAccessor<Boolean> IS_NAPPING = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.BOOLEAN);
     protected static final EntityDataAccessor<Boolean> HAS_HOME = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DIGGING = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.BOOLEAN);
     protected static final EntityDataAccessor<Integer> AUTO_TARGET_TYPE = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.INT);
 
     protected int animTicks = 0;
@@ -154,6 +156,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
         this.entityData.define(IS_DANCING, false);
         this.entityData.define(IS_NAPPING, false);
         this.entityData.define(HAS_HOME, false);
+        this.entityData.define(DIGGING, false);
         this.entityData.define(AUTO_TARGET_TYPE, 0);
         this.entityData.define(TAME_COMMAND, 0);
     }
@@ -407,26 +410,12 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
         }
     }
 
-    @Override
-    public void handleEntityEvent(byte pId) {
+    public boolean isDigging() {
+        return this.entityData.get(DIGGING);
+    }
 
-        if (pId == 77) {
-            float radius = this.getBbWidth() * 0.55F;
-            float particleCount = (5 + random.nextInt(5)) * radius;
-            for (int i1 = 0; i1 < particleCount; i1++) {
-                double motionX = (getRandom().nextFloat() - 0.5F) * 0.7D;
-                double motionY = getRandom().nextFloat() * 0.7D + 0.8F;
-                double motionZ = (getRandom().nextFloat() - 0.5F) * 0.7D;
-                float angle = (0.01745329251F * (this.yBodyRot + (i1 / particleCount) * 360F));
-                double extraX = radius * Mth.sin((float) (Math.PI + angle));
-                double extraZ = radius * Mth.cos(angle);
-                BlockState groundState = this.level().getBlockState(this.blockPosition().below());
-                if (groundState.isSolid()) {
-                    level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, groundState), true, this.getX() + extraX, this.getY(), this.getZ() + extraZ, motionX, motionY, motionZ);
-                }
-            }
-        }
-        super.handleEntityEvent(pId);
+    public void setDigging(boolean b) {
+        this.entityData.set(DIGGING, b);
     }
 
     @Override

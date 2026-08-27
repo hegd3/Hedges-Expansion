@@ -15,8 +15,8 @@ import net.minecraft.util.Mth;
 public class FerocetusModel extends HBModel<FerocetusEntity> {
 	public static final ModelLayerLocation LAYER_LOCATION = EntityLayers.FEROCETUS_LAYER;
 	private final ModelPart root;
-	private final ModelPart swimcontrol;
-	private final ModelPart jaw;
+	public final ModelPart swimcontrol;
+	public final ModelPart jaw;
 	private final ModelPart leftfin;
 	private final ModelPart rightfin;
 	private final ModelPart fin;
@@ -79,23 +79,26 @@ public class FerocetusModel extends HBModel<FerocetusEntity> {
 		this.tail.yRot = Mth.lerp(0.3F, this.tail.yRot, tailYaw * 0.25F);
 
 
-		this.animateSmooth(entity.biteAnimationState, entity.swingingLeft() ? FerocetusAnimation.bite_left : FerocetusAnimation.bite_right, ageInTicks, 1f);
-		this.animateSmooth(entity.ramAnimationState, FerocetusAnimation.ram, ageInTicks, 1f);
-		this.animateSmooth(entity.airAnimationState, FerocetusAnimation.air, ageInTicks, 1f);
-		this.animate(entity.spinAnimationState, entity.swingingLeft() ? FerocetusAnimation.spin_left : FerocetusAnimation.spin_right, ageInTicks, 1f);
-		this.animateSmooth(entity.callAnimationState, FerocetusAnimation.call, ageInTicks, 1f);
+		this.animateSmooth(entity.biteAnimationState, entity.swingingLeft() ? FerocetusAnimation.BITE_LEFT : FerocetusAnimation.BITE_RIGHT, ageInTicks, 1f);
+		this.animateSmooth(entity.ramAnimationState, FerocetusAnimation.RAM, ageInTicks, 1f);
+		this.animateSmooth(entity.airAnimationState, FerocetusAnimation.AIR, ageInTicks, 1f);
+		this.animateSmooth(entity.grabAnimationState, entity.isGrabbing() ? FerocetusAnimation.CHEW : FerocetusAnimation.GRAB, ageInTicks, 1f);
+		this.animateSmooth(entity.grabbingAnimationState, FerocetusAnimation.GRABBING, ageInTicks, 1f);
+
+		this.animate(entity.spinAnimationState, entity.swingingLeft() ? FerocetusAnimation.SPIN_LEFT : FerocetusAnimation.SPIN_RIGHT, ageInTicks, 1f);
+		this.animateSmooth(entity.callAnimationState, FerocetusAnimation.CALL, ageInTicks, 1f);
 		if (entity.isInFluidType()) {
 			this.swimcontrol.xRot = headPitch;
 			this.swimcontrol.zRot = entity.roll;
-			this.animateWalk(FerocetusAnimation.swim, limbSwing, limbSwingAmount, 1.3f, 1f);
-			this.animateSmooth(entity.idleAnimationState, FerocetusAnimation.idle, ageInTicks, 0.5f);
+			this.animateWalk(FerocetusAnimation.SWIM, limbSwing, limbSwingAmount, 1.3f, 1f);
+			this.animateSmooth(entity.idleAnimationState, FerocetusAnimation.IDLE, ageInTicks, 0.5f);
 		} else {
 			if (entity.groundTimer == 0 ) {
 				this.swimcontrol.xRot = headPitch;
 				this.tail.xRot += -headPitch * 0.5f;
 				this.tail2.xRot += -headPitch * 0.7f;
 			} else {
-				this.animate(entity.idleAnimationState, FerocetusAnimation.beached, ageInTicks, 0.5f);
+				this.animate(entity.idleAnimationState, FerocetusAnimation.BEACHED, ageInTicks, 0.5f);
 			}
 		}
 	}

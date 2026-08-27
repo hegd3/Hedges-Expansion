@@ -162,6 +162,9 @@ public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer 
         super.tick();
         if (this.level().isClientSide()) {
             this.setUpAnimStates();
+            if (this.hasEgg() && this.onGround()) {
+                this.tickDig();
+            }
         } else {
             if (this.getAnimState() == 1) {
                 this.animTicks++;

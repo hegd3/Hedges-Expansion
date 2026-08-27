@@ -87,7 +87,10 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     private int eatProgress = 0;
 
     private int tameAttempts = 3;
+
+    @Nullable
     private Entity grabbedEntity;
+
     public DawnDoveEntity(EntityType<? extends DawnDoveEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
     }
@@ -372,6 +375,9 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
             if (this.eatAnimationState.isStarted() && this.tickCount % 10 == 0) {
                 this.addEatingParticles();
             }
+            if (this.hasEgg() && this.onGround()) {
+                this.tickDig();
+            }
         } else {
             this.attackCD = Math.max(this.attackCD - 1, 0);
             this.shootCD = Math.max(this.shootCD - 1, 0);
@@ -519,12 +525,15 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     }
 
     private void tickGrab() {
+        if (!this.level().isClientSide()) {
+            if (!this.grabbedEntity.isAlive() || this.distanceToSqr(grabbedEntity) > 8) {
+                this.setGrabbedEntityID(-1);
+                this.grabbedEntity = null;
+                return;
+            }
+        }
         this.grabbedEntity.setDeltaMovement(this.getX() - grabbedEntity.getX(), this.getY() - grabbedEntity.getY() - grabbedEntity.getBbHeight(), this.getZ() - grabbedEntity.getZ());
         this.grabbedEntity.fallDistance = 0.0F;
-        if (!this.level().isClientSide() && !this.grabbedEntity.isAlive()) {
-            this.setGrabbedEntityID(-1);
-            this.grabbedEntity = null;
-        }
     }
 
     public void releaseGrab() {

@@ -214,6 +214,9 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
         if (this.level().isClientSide()) {
             this.setUpAnimStates();
             this.tickGlow();
+            if (this.hasEgg() && this.onGround()) {
+                this.tickDig();
+            }
         } else {
             if (this.isCharged()) {
                 if (--this.chargeTicks <= 0) {

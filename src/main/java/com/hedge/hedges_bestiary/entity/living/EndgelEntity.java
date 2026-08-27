@@ -18,6 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -34,6 +35,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 
 public class EndgelEntity extends HBMonster {
@@ -265,6 +267,10 @@ public class EndgelEntity extends HBMonster {
         this.projAngle = -180;
     }
 
+    @Override
+    public void playAmbientSound() {
+        this.playSound(HBSounds.ENDGEL_AMBIENT.get(), 2.5F, 1.0F - this.getRandom().nextFloat() * 0.5F);
+    }
 
     @Override
     public void setAttacking() {

@@ -1,5 +1,6 @@
 package com.hedge.hedges_bestiary.entity.AI.control;
 
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -51,7 +52,6 @@ public class SwimmingMoveControl extends MoveControl {
 
                     double y = Mth.clamp(f1 * d1 * 0.01D, f1 * -0.1D, f1 * 0.1D);
                     this.mob.setDeltaMovement(this.mob.getDeltaMovement().add(0.0D, y, 0.0D));
-
                 } else {
                     float f5 = Math.abs(Mth.wrapDegrees(this.mob.getYRot() - f));
                     float f2 = getTurningSpeedFactor(f5);

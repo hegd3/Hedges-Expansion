@@ -27,6 +27,9 @@ public class JumpFromWaterGoal extends JumpGoal {
     }
 
     public boolean canUse() {
+        if (this.mob.getTarget() != null) {
+            return false;
+        }
         this.jumpCD = Math.max(0, this.jumpCD - 1);
         if (this.jumpCD > 0 && this.mob.getRandom().nextInt(this.interval) != 0) {
             return false;
@@ -62,7 +65,7 @@ public class JumpFromWaterGoal extends JumpGoal {
 
     public boolean canContinueToUse() {
         if (this.breached) {
-            return !this.mob.isInFluidType();
+            return !this.mob.isInWater();
         }
         double d0 = this.mob.getDeltaMovement().y;
         return (!(d0 * d0 < (double)0.03F) || this.mob.getXRot() == 0.0F || !(Math.abs(this.mob.getXRot()) < 10.0F) || !this.mob.isInWater()) && !this.mob.onGround();
@@ -74,7 +77,7 @@ public class JumpFromWaterGoal extends JumpGoal {
 
     @Override
     public void stop() {
-        this.jumpCD = 20;
+        this.jumpCD = 100;
     }
 
     public void start() {

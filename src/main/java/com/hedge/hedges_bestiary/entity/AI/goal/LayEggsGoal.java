@@ -46,8 +46,6 @@ public class LayEggsGoal<E extends HBTamableAnimal & EggLayer> extends MoveToBlo
     }
 
     protected void onReachedTarget() {
-        this.mob.walkAnimation.update(0.5F, 0.4F);
-        this.mob.level().broadcastEntityEvent(this.mob, (byte) 77);
         if (this.layEggTimer++ > this.maxTime) {
             Level level = this.mob.level();
             level.playSound(null, blockPos, SoundEvents.TURTLE_LAY_EGG, SoundSource.BLOCKS, 0.3F, 0.9F + level.random.nextFloat() * 0.2F);
@@ -62,8 +60,8 @@ public class LayEggsGoal<E extends HBTamableAnimal & EggLayer> extends MoveToBlo
             }
             this.eggLayer.setHasEgg(false);
             this.eggLayer.setInLoveTime(600);
-            this.mob.level().broadcastEntityEvent(this.mob, (byte) 78);
-
+        } else if (this.layEggTimer % 10 == 0) {
+            this.mob.playSound(mob.level().getBlockState(blockPos).getSoundType().getBreakSound());
         }
     }
 

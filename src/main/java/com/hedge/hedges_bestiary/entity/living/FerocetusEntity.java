@@ -1,5 +1,6 @@
 package com.hedge.hedges_bestiary.entity.living;
 
+import com.hedge.hedges_bestiary.client.HBSounds;
 import com.hedge.hedges_bestiary.entity.AI.control.SwimmingMoveControl;
 import com.hedge.hedges_bestiary.entity.AI.goal.*;
 import com.hedge.hedges_bestiary.entity.AI.targeting.HBHurtByTargetGoal;
@@ -19,7 +20,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
@@ -42,6 +45,9 @@ import java.util.function.Predicate;
 
 public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, IdleAnimMob {
 
+
+    public static final EntityDataAccessor<Boolean> LEFT = SynchedEntityData.defineId(FerocetusEntity.class, EntityDataSerializers.BOOLEAN);
+    public static final EntityDataAccessor<Integer> GRABBED_ENTITY_ID = SynchedEntityData.defineId(FerocetusEntity.class, EntityDataSerializers.INT);
     private static final Predicate<LivingEntity> FEROCETUS_TARGETS = living -> living.getType().is(HBTags.FEROCETUS_TARGETS);
 
     private float prevTrail;
@@ -52,6 +58,7 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
 
 
     private int jumpCD = 0;
+    private int grabTicks = 0;
     private int attackCD = 0;
     private boolean leftWater = false;
 
@@ -60,9 +67,11 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
     public final SmoothAnimationState airAnimationState = new SmoothAnimationState();
     public final SmoothAnimationState spinAnimationState = new SmoothAnimationState();
     public final SmoothAnimationState callAnimationState = new SmoothAnimationState();
+    public final SmoothAnimationState grabAnimationState = new SmoothAnimationState();
+    public final SmoothAnimationState grabbingAnimationState = new SmoothAnimationState(0.1F);
 
-
-    public static final EntityDataAccessor<Boolean> LEFT = SynchedEntityData.defineId(FerocetusEntity.class, EntityDataSerializers.BOOLEAN);
+    @Nullable
+    private Entity grabbedEntity;
 
     public FerocetusEntity(EntityType<? extends FerocetusEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -82,6 +91,8 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(LEFT, false);
+        this.entityData.define(GRABBED_ENTITY_ID, -1);
+
     }
 
     @Override
@@ -90,6 +101,14 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
             return true;
         }
         return super.isAlliedTo(pEntity);
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        if (pKey == GRABBED_ENTITY_ID && this.level().isClientSide() && this.getGrabbedEntityID() == -1) {
+            this.grabbedEntity = null;
+        }
+        super.onSyncedDataUpdated(pKey);
     }
 
     @Override
@@ -114,7 +133,8 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
         this.goalSelector.addGoal(i++, new FerocetusAttackGoal(this));
         this.goalSelector.addGoal(i++, new FindAndPickItemGoal(this, CommonPredicates.EATS_FISH));
         this.goalSelector.addGoal(i++, new GroupFollowLeaderGoal<>(this,10F, 7F));
-        this.goalSelector.addGoal(i++, new CustomSwimGoal(this, 1.0f, 25, 5, 3, true));
+        this.goalSelector.addGoal(i++, new CustomSwimGoal(this, 1.0f, 25, 5, 2, true));
+        this.goalSelector.addGoal(i++, new JumpFromWaterGoal(this, 10, 0.7));
         this.goalSelector.addGoal(i++, new IdleAnimationGoal<>(this));
         this.goalSelector.addGoal(i, new LeaveGroupGoal<>(this));
 
@@ -127,8 +147,15 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
     @Override
     public void tick() {
         super.tick();
+        if (this.getGrabbedEntityID() != -1 && this.grabbedEntity == null) {
+            this.grabbedEntity = this.level().getEntity(this.getGrabbedEntityID());
+        }
+        if (this.isGrabbing()) {
+            this.tickGrab();
+        }
         if (this.onGround()) {
             this.groundTimer = 20;
+
         } else {
             this.groundTimer = Math.max(groundTimer - 1, 0);
 
@@ -146,6 +173,28 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
 
     }
 
+    private void tickGrab() {
+        if (!this.level().isClientSide()) {
+
+            if (!this.grabbedEntity.isAlive() || this.distanceToSqr(grabbedEntity) > 8) {
+                this.releaseGrab();
+                this.grabTicks = 0;
+                return;
+            }
+
+            if (this.grabTicks++ > 100) {
+                this.releaseGrab();
+                this.grabTicks = 0;
+                return;
+            } else if (this.getAnimState() == 0 && this.attackCD == 0) {
+                this.setAnimState(4);
+            }
+        }
+        Vec3 v = this.getLookAngle().scale(2F);
+        this.grabbedEntity.setDeltaMovement(this.getX() + v.x - grabbedEntity.getX(), this.getY() + v.y - grabbedEntity.getY() - grabbedEntity.getBbHeight(), this.getZ() + v.z - grabbedEntity.getZ());
+        this.grabbedEntity.fallDistance = 0.0F;
+    }
+
     private void tickTrailYaw() {
         this.prevTrail = this.trail;
         this.trail += (-(this.yBodyRot - this.yBodyRotO) - this.trail) * 0.15F;
@@ -160,6 +209,11 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
             this.moveRelative(this.getSpeed(), pTravelVector);
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
+            if (this.horizontalCollision && this.level().getFluidState(blockPosition().above()).is(FluidTags.WATER)) {
+                final float f1 = this.getYRot() * Mth.DEG_TO_RAD;
+
+                this.setDeltaMovement(this.getDeltaMovement().add(-Mth.sin(f1) * 0.1f, 0.025F, Mth.cos(f1) * 0.1f));
+            }
         } else {
             super.travel(pTravelVector);
         }
@@ -178,8 +232,10 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
         super.setUpAnimStates();
         this.biteAnimationState.animateWhen(this.getAnimState() == 1, this.tickCount);
         this.ramAnimationState.animateWhen(this.getAnimState() == 2, this.tickCount);
-        this.spinAnimationState.animateWhen(this.getAnimState() == 4, this.tickCount);
-        this.callAnimationState.animateWhen(this.getAnimState() == 5, this.tickCount);
+        this.grabAnimationState.animateWhen(this.getAnimState() == 4, this.tickCount);
+        this.grabbingAnimationState.animateWhen(this.isGrabbing(), this.tickCount);
+        this.spinAnimationState.animateWhen(this.getAnimState() == 5, this.tickCount);
+        this.callAnimationState.animateWhen(this.getAnimState() == 6, this.tickCount);
         this.airAnimationState.animateWhen(this.groundTimer == 0 && !this.isInFluidType(), this.tickCount);
     }
 
@@ -210,7 +266,7 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
                 }
                 case 2 -> {
                     this.getNavigation().stop();
-                    if (this.animTicks <= 10) {
+                    if (this.animTicks <= 5) {
                         LivingEntity target = this.getTarget();
                         if (target != null) {
                             this.getLookControl().setLookAt(target, 15f, 0f);
@@ -218,19 +274,19 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
                             this.setXRot(0);
                         }
                     }
-                    else if (this.animTicks == 20) {
-                        this.addDeltaMovement(EntityHelpers.bodyAngle(this, this.getXRot() * 4 - 20).scale(1.1));
+                    else if (this.animTicks == 10) {
+                        this.addDeltaMovement(EntityHelpers.bodyAngle(this).scale(1.1));
                     }
-                    else if (this.animTicks == 24) {
+                    else if (this.animTicks == 15) {
                         for (LivingEntity entity : AttackHelpers.zoneHitbox(this, EntityHelpers.bodyAngle(this, this.getXRot()).scale(1.4), 3, 3, 3, 10)) {
                             if (AttackHelpers.betterHurt(this, entity, 1.8f, 1.8f)) {
                                 EntityHelpers.knockUp(entity, 1.5);
                             }
                         }
-                    } else if (this.animTicks >= 45) {
+                    } else if (this.animTicks >= 30) {
                         this.resetAnimState();
                     } else {
-                        this.setXRot(Mth.approachDegrees(this.getXRot(), 0, 10));
+                        this.setXRot(Mth.approachDegrees(this.getXRot(), 0, 20));
                     }
                 }
                 case 3 -> {
@@ -248,20 +304,38 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
                                 EntityHelpers.knockUp(entity, 0.7);
                             }
                         }
-                        this.jumpCD = 60;
+                        this.jumpCD = 200;
                         this.resetAnimState();
                     } else if (this.onGround() || (this.animTicks >= 60 && this.isInFluidType())) {
-                        this.jumpCD = 60;
+                        this.jumpCD = 200;
                         this.resetAnimState();
                     }
                 }
                 case 4 -> {
+                    if (this.isGrabbing()) {
+                        if (this.animTicks == 10) {
+                            AttackHelpers.betterHurt(this, (LivingEntity)this.grabbedEntity, 0.5F);
+                        } else if (this.animTicks > 22) {
+                            this.resetAnimState();
+                        }
+                    } else {
+                        if (this.animTicks == 10) {
+                            if (this.getTarget() != null && this.canGrab(this.getTarget())) {
+                                this.grab(this.getTarget());
+                                this.resetAnimState();
+                            }
+                        } else if (this.animTicks > 22) {
+                            this.resetAnimState();
+                        }
+                    }
+                }
+                case 5 -> {
                     if (this.animTicks >= 78) {
                         this.setLeft(!this.swingingLeft());
                         this.resetAnimState();
                     }
                 }
-                case 5 -> {
+                case 6 -> {
                     if (this.animTicks >= 38) {
                         this.resetAnimState();
                     }
@@ -272,7 +346,7 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
 
     @Override
     public boolean isPushable() {
-        if (this.getAnimState() >= 2) {
+        if (this.isGrabbing() || this.getAnimState() >= 2) {
             return false;
         }
         return super.isPushable();
@@ -317,7 +391,7 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
 
     @Override
     public double getAttackReachSqr(LivingEntity entity) {
-        return this.getBbWidth() * 2.2 * this.getBbWidth() * 2.2 + entity.getBbWidth();
+        return this.getBbWidth() * this.getBbWidth() * 3 + entity.getBbWidth();
     }
 
 
@@ -365,14 +439,46 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
         this.entityData.set(LEFT, b);
     }
 
+    public boolean canGrab(LivingEntity entity) {
+        return this.hasLineOfSight(entity) && this.distanceToSqr(entity) <= this.getAttackReachSqr(entity) && this.smallEnoughToGrab(entity);
+    }
+
+    public boolean smallEnoughToGrab(LivingEntity entity) {
+        return !entity.isVehicle() && !entity.isPassenger() && entity.getBbHeight() < this.getBbHeight() * 1.2f && entity.getBbWidth() < this.getBbWidth() * 0.75f;
+    }
+
+
+
+    public void grab(Entity entity) {
+        this.setGrabbedEntityID(entity.getId());
+    }
+
+    public boolean isGrabbing() {
+        return this.grabbedEntity != null;
+    }
+
+    public Entity getGrabbedEntity() {
+        return this.grabbedEntity;
+    }
+
+    public void releaseGrab() {
+        this.setGrabbedEntityID(-1);
+        this.grabbedEntity = null;
+    }
+
+    @Override
+    protected @Nullable SoundEvent getAmbientSound() {
+        return HBSounds.FEROCETUS_AMBIENT.get();
+    }
+
     @Override
     public void playIdle() {
-        this.setAnimState(this.getRandom().nextInt(2) + 4);
+        this.setAnimState(this.getRandom().nextInt(2) + 5);
     }
 
     @Override
     public boolean canPlayIdle() {
-        return this.tickCount % 20 == 0 && this.getTarget() == null && this.getAnimState() == 0 && this.isInFluidType();
+        return this.getTarget() == null && this.getAnimState() == 0 && this.isInWater();
     }
 
     @Override
@@ -388,5 +494,13 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
     @Override
     public boolean isStaticIdling() {
         return false;
+    }
+
+    public int getGrabbedEntityID() {
+        return this.entityData.get(GRABBED_ENTITY_ID);
+    }
+
+    public void setGrabbedEntityID(int i) {
+        this.entityData.set(GRABBED_ENTITY_ID, i);
     }
 }

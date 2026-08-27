@@ -50,7 +50,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
-import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -109,6 +108,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     private int eatProgress = 0;
     private int tameAttempts = 3;
     private boolean ateSkib = false;
+
 
     public MurkEntity(EntityType<? extends MurkEntity> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -182,7 +182,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.goalSelector.addGoal(i++, new MurkAttackGoal(this));
         this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
         this.goalSelector.addGoal(i++, new FindAndPickItemGoal(this, FOOD));
-        this.goalSelector.addGoal(i++, new TemptGoal(this, 1.1, Ingredient.of(HBItems.SKIB.get()), false));
+        this.goalSelector.addGoal(i++, new HBTemptGoal(this, 1.1, Ingredient.of(HBItems.SKIB.get()), false));
         this.goalSelector.addGoal(i++, new NapGoal(this, false));
         this.goalSelector.addGoal(i, new CustomSwimGoal(this, 1.0, 10, 4, 7, true));
         this.goalSelector.addGoal(i++, new RandomStrollGoal(this, 1.0) {
@@ -451,6 +451,9 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                 this.playSound(SoundEvents.GENERIC_EAT);
                 this.addEatingParticles();
             }
+            if (this.hasEgg() && this.onGround()) {
+                this.tickDig();
+            }
             this.tickTrailYaw();
         } else {
             this.attackCD = Math.max(this.attackCD - 1, 0);
@@ -539,6 +542,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                     }
                     case 4 -> {
                         if (this.animTicks == 23) {
+                            this.playSound(HBSounds.MURK_ROAR.get(), 5, 1);
                             this.setCharged(true);
                             this.chargedExplode();
                             this.chargeProgress = 1;
@@ -752,9 +756,10 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     public void playIdle() {
         if (this.getRandom().nextBoolean()) {
             this.setAnimState(6);
-            this.playSound(HBSounds.MURK_CLICKS.get(), 1 - (this.getRandom().nextFloat() / 2), 1 - (this.getRandom().nextFloat() / 4));
+            this.playSound(HBSounds.MURK_CLICKS.get(), 1.5f, (this.isBaby() ? 1.5F : 1) - (this.getRandom().nextFloat() / 4));
         } else {
             this.setAnimState(7);
+            this.playSound(HBSounds.MURK_YAWN.get(), 1.5f, (this.isBaby() ? 1.5F : 1) - (this.getRandom().nextFloat() / 4));
         }
     }
 
@@ -762,6 +767,8 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     protected void playSwimSound(float pVolume) {
 
     }
+
+
 
     @Override
     protected void playStepSound(BlockPos pPos, BlockState pState) {

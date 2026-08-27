@@ -21,7 +21,16 @@ public class HBSounds {
 
     public static final RegistryObject<SoundEvent> MURK_CLICKS = createSoundEvent("murk_clicks");
 
+    public static final RegistryObject<SoundEvent> MURK_YAWN = createSoundEvent("murk_yawn");
+
+    public static final RegistryObject<SoundEvent> MURK_ROAR = createSoundEvent("murk_roar");
+
+    public static final RegistryObject<SoundEvent> FEROCETUS_AMBIENT = createSoundEvent("ferocetus_ambient");
+
+
     public static final RegistryObject<SoundEvent> ZAP = createSoundEvent("zap");
+
+    public static final RegistryObject<SoundEvent> ENDGEL_AMBIENT = createSoundEvent("endgel_ambient");
 
     public static final RegistryObject<SoundEvent> ENDGEL_SHOOT = createSoundEvent("endgel_shoot");
 

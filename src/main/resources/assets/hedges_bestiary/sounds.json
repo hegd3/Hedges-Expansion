@@ -44,6 +44,36 @@
     ],
     "subtitle": "hedgesbestiary.sound.subtitle.murk_clicks"
   },
+  "murk_yawn": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "hedges_bestiary:murk_yawn"
+      }
+    ],
+    "subtitle": "hedgesbestiary.sound.subtitle.murk_yawn"
+  },
+  "murk_roar": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "hedges_bestiary:murk_roar"
+      }
+    ],
+    "subtitle": "hedgesbestiary.sound.subtitle.murk_roar"
+  },
+  "ferocetus_ambient": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "hedges_bestiary:ferocetus_ambient_0"
+      },
+      {
+        "name": "hedges_bestiary:ferocetus_ambient_1"
+      }
+    ],
+    "subtitle": "hedgesbestiary.sound.subtitle.ferocetus_ambient"
+  },
   "zap": {
     "category": "neutral",
     "sounds": [
@@ -58,6 +88,18 @@
       }
     ],
     "subtitle": "hedgesbestiary.sound.subtitle.zap"
+  },
+  "endgel_ambient": {
+    "category": "hostile",
+    "sounds": [
+      {
+        "name": "hedges_bestiary:endgel_ambient_0"
+      },
+      {
+        "name": "hedges_bestiary:endgel_ambient_1"
+      }
+    ],
+    "subtitle": "hedgesbestiary.sound.subtitle.endgel_ambient"
   },
   "endgel_shoot": {
     "category": "hostile",
