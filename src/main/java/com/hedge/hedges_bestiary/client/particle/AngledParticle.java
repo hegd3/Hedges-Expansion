@@ -4,8 +4,11 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -93,5 +96,16 @@ public class AngledParticle extends TextureSheetParticle {
     }
 
 
+    @OnlyIn(Dist.CLIENT)
+    public static class IceShockwaveProvider implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet sprites;
 
+        public IceShockwaveProvider(SpriteSet pSprites) {
+            this.sprites = pSprites;
+        }
+
+        public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
+            return new AngledParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites, 7, 3f, 1.0f, -90, 0);
+        }
+    }
 }

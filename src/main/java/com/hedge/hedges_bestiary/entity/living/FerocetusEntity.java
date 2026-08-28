@@ -176,7 +176,7 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
     private void tickGrab() {
         if (!this.level().isClientSide()) {
 
-            if (!this.grabbedEntity.isAlive() || this.distanceToSqr(grabbedEntity) > 8) {
+            if (!this.grabbedEntity.isAlive() || this.distanceToSqr(grabbedEntity) > this.getAttackReachSqr((LivingEntity)grabbedEntity)) {
                 this.releaseGrab();
                 this.grabTicks = 0;
                 return;
@@ -444,7 +444,7 @@ public class FerocetusEntity extends HBSchoolingMob implements AttackStateMob, I
     }
 
     public boolean smallEnoughToGrab(LivingEntity entity) {
-        return !entity.isVehicle() && !entity.isPassenger() && entity.getBbHeight() < this.getBbHeight() * 1.2f && entity.getBbWidth() < this.getBbWidth() * 0.75f;
+        return !entity.isVehicle() && !entity.isPassenger() && entity.getBbHeight() < this.getBbHeight() * 1.2f && entity.getBbWidth() < this.getBbWidth() * 0.5f;
     }
 
 

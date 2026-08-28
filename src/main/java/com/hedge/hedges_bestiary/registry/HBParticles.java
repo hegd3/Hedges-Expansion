@@ -14,6 +14,8 @@ import net.minecraftforge.registries.RegistryObject;
 public class HBParticles {
     public static final DeferredRegister<ParticleType<?>> DEF_REG = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, HedgesBestiary.MODID);
 
+    public static final RegistryObject<SimpleParticleType> ICE_SHOCKWAVE = DEF_REG.register("ice_shockwave", ()-> new SimpleParticleType(false));
+
     public static final RegistryObject<SimpleParticleType> MURK_CHARGE = DEF_REG.register("murk_charge", ()-> new SimpleParticleType(false));
     public static final RegistryObject<SimpleParticleType> MURK_CHARGE_SHOOT = DEF_REG.register("murk_charge_shoot", ()-> new SimpleParticleType(false));
     public static final RegistryObject<SimpleParticleType> MURK_EXPLODE = DEF_REG.register("murk_explode", ()-> new SimpleParticleType(false));

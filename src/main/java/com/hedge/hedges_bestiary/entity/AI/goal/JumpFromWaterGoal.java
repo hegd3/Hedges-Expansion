@@ -31,7 +31,7 @@ public class JumpFromWaterGoal extends JumpGoal {
             return false;
         }
         this.jumpCD = Math.max(0, this.jumpCD - 1);
-        if (this.jumpCD > 0 && this.mob.getRandom().nextInt(this.interval) != 0) {
+        if (this.jumpCD > 0 || this.mob.getRandom().nextInt(this.interval) != 0) {
             return false;
         } else {
             return this.canJump();
@@ -77,7 +77,7 @@ public class JumpFromWaterGoal extends JumpGoal {
 
     @Override
     public void stop() {
-        this.jumpCD = 100;
+        this.jumpCD = 20;
     }
 
     public void start() {
