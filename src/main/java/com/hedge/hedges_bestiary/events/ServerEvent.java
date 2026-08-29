@@ -59,6 +59,7 @@ public class ServerEvent {
     public static void registerParticleFactories(RegisterParticleProvidersEvent event) {
 
         event.registerSpriteSet(HBParticles.ICE_SHOCKWAVE.get(), AngledParticle.IceShockwaveProvider::new);
+        event.registerSpriteSet(HBParticles.ICE_SHOCKWAVE_BIG.get(), AngledParticle.IceShockwaveBigProvider::new);
 
         event.registerSpriteSet(HBParticles.MURK_CHARGE.get(), AuraParticle.Provider::new);
         event.registerSpriteSet(HBParticles.MURK_CHARGE_SHOOT.get(), ProjectileTrailParticle.MurkChargeShotProvider::new);

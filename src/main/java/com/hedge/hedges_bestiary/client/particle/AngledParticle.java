@@ -108,4 +108,17 @@ public class AngledParticle extends TextureSheetParticle {
             return new AngledParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites, 7, 3f, 1.0f, -90, 0);
         }
     }
+
+    @OnlyIn(Dist.CLIENT)
+    public static class IceShockwaveBigProvider implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet sprites;
+
+        public IceShockwaveBigProvider(SpriteSet pSprites) {
+            this.sprites = pSprites;
+        }
+
+        public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
+            return new AngledParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, this.sprites, 10, 6f, 1.0f, -90, 0);
+        }
+    }
 }

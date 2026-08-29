@@ -20,10 +20,12 @@ import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.hedge.hedges_bestiary.registry.HBTags;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -39,6 +41,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -240,7 +243,7 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
                         this.roarCD = 400;
                         this.resetAnimState();
                     } else if (this.animTicks == 15) {
-                        List<LivingEntity> hit = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(2.0F));
+                        List<LivingEntity> hit = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4.0F, 2.0F, 4.0F));
                         for (LivingEntity livingEntity : hit) {
                             if (livingEntity != this) {
                                 if (livingEntity.isAlliedTo(this)) {
@@ -250,7 +253,7 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
                                 }
                             }
                         }
-                        this.level().broadcastEntityEvent(this, (byte)39);
+                        this.level().broadcastEntityEvent(this, (byte)40);
                     }
                 }
                 case YAWN_ANIM -> {
@@ -299,13 +302,8 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
     }
 
     @Override
-    protected int calculateFallDamage(float pFallDistance, float pDamageMultiplier) {
-        if (pFallDistance > 2 && !this.level().isClientSide) {
-
-            this.level().broadcastEntityEvent(this, (byte)39);
-        }
-
-        return 0;
+    public boolean causeFallDamage(float pFallDistance, float pMultiplier, DamageSource pSource) {
+        return false;
     }
 
     @Override
@@ -446,9 +444,12 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
     @Override
     public void handleEntityEvent(byte pId) {
         if (pId == 39) {
-            this.level().addParticle(HBParticles.ICE_SHOCKWAVE.get(), true, this.getX(), this.getY() + 0.2F, this.getZ(), 0, 0, 0);
+            this.level().addParticle(HBParticles.ICE_SHOCKWAVE.get(), true, this.getX(), this.getY() + 0.1F, this.getZ(), 0, 0, 0);
+        } else if (pId == 40) {
+            this.level().addParticle(HBParticles.ICE_SHOCKWAVE_BIG.get(), true, this.getX(), this.getY() + 0.1F, this.getZ(), 0, 0, 0);
         } else {
             super.handleEntityEvent(pId);
+
         }
     }
 }
