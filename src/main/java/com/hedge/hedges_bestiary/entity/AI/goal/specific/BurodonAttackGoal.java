@@ -1,5 +1,6 @@
 package com.hedge.hedges_bestiary.entity.AI.goal.specific;
 
+import com.hedge.hedges_bestiary.client.HBSounds;
 import com.hedge.hedges_bestiary.entity.AI.goal.GenericMeleeGoal;
 import com.hedge.hedges_bestiary.entity.living.BurodonEntity;
 import net.minecraft.world.entity.LivingEntity;
@@ -31,11 +32,14 @@ public class BurodonAttackGoal extends GenericMeleeGoal<BurodonEntity> {
 
             if (animState == 0) {
                 if (this.mob.canJump(livingentity, attackReach, dist)) {
+                    this.mob.getNavigation().stop();
                     this.mob.setAnimState(BurodonEntity.JUMP_ANIM);
                 }
                 else if (this.mob.canUseAttack(livingentity, attackReach, dist)) {
                     this.mob.setAttacking();
-                } else if (this.mob.canRoar()) {
+                } else if (this.mob.canRoar(attackReach, dist)) {
+                    this.mob.getNavigation().stop();
+                    this.mob.playSound(HBSounds.BURODON_ROAR.get(), 1.5F, 1 + mob.getRandom().nextFloat() * 0.25F);
                     this.mob.setAnimState(BurodonEntity.ROAR_ANIM);
                 }
             }

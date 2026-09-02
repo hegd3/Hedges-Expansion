@@ -25,10 +25,12 @@ import com.hedge.hedges_bestiary.registry.HBKeyMappings;
 import com.hedge.hedges_bestiary.registry.HBTags;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -62,7 +64,7 @@ import java.util.function.Predicate;
 
 
 public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStateMob, HUDMount {
-
+    private static final ResourceLocation SPRITE = new ResourceLocation(HedgesBestiary.MODID, "textures/gui/mount/dawn_dove_hud.png");
     public static final EntityDataAccessor<Integer> GRABBED_ENTITY_ID = SynchedEntityData.defineId(DawnDoveEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> HAS_EGG = SynchedEntityData.defineId(DawnDoveEntity.class, EntityDataSerializers.BOOLEAN);
 
@@ -160,7 +162,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         if (isControlledByLocalInstance() && getControllingPassenger() != null && getControllingPassenger() instanceof Player rider) {
             float speed =(float) this.getAttributeValue(Attributes.MOVEMENT_SPEED);
             if (Minecraft.getInstance().options.keyJump.isDown() && this.meterAmount > 0) {
-                this.meterAmount-= 0.02F;
+                this.meterAmount-= 0.01F;
                 this.setDeltaMovement(this.getDeltaMovement().add(0, 0.03, 0));
                 if (!this.isFlying()) {
                     this.setFlying(true);
@@ -174,7 +176,8 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
             if (this.getAnimState() == 0) {
                 if (Minecraft.getInstance().options.keyAttack.isDown()) {
                     HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 4));
-                } else if (HBKeyMappings.MOUNT_ABILITY_KEY.isDown()) {
+                } else if (this.shootCD == 64 && HBKeyMappings.MOUNT_ABILITY_KEY.isDown()) {
+                    this.shootCD = 0;
                     HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 5));
                 } else if (Minecraft.getInstance().options.keyUse.isDown() && this.isFlying()) {
                     HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 6));
@@ -301,11 +304,11 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
             if (source.getEntity() == this.grabbedEntity) {
                 pAmount *= 0.5f;
             }
-            if (super.hurt(source, pAmount) && this.getRandom().nextInt(5) == 0) {
+            boolean hurt = super.hurt(source, pAmount);
+            if (hurt && this.getRandom().nextInt(5) == 0) {
                 this.releaseGrab();
-                return true;
             }
-            return false;
+            return hurt;
         }
         return super.hurt(source, pAmount);
     }
@@ -369,6 +372,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
         if (this.level().isClientSide()) {
             this.setUpAnimStates();
             this.tickTrailYaw();
+            this.shootCD = Math.min(this.shootCD + 1, 64);
             if (this.onGround() && this.meterAmount < 1.0F && this.tickCount % 5 == 0) {
                 this.meterAmount+=0.02F;
             }
@@ -586,21 +590,6 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
     }
 
     @Override
-    public Vec2 getUVOffset() {
-        return Vec2.ZERO;
-    }
-
-    @Override
-    public Vec2 getSpriteDimensions() {
-        return new Vec2(70, 52);
-    }
-
-    @Override
-    public float getSpriteHeight() {
-        return this.meterAmount;
-    }
-
-    @Override
     public boolean isFood(ItemStack pStack) {
         return this.isTame() && pStack.is(HBTags.DAWN_DOVE_FOOD);
     }
@@ -646,9 +635,7 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
             case 4 -> {
                 if (attackCD == 0) this.setAnimState(1);
             }
-            case 5 -> {
-                if (shootCD == 0) this.setAnimState(2);
-            }
+            case 5 -> this.setAnimState(2);
             case 6 -> {
                 if (this.attackCD == 0) {
                     if (!this.isGrabbing()) this.setAnimState(3);
@@ -660,5 +647,26 @@ public class DawnDoveEntity extends TamableFlyer implements EggLayer, AttackStat
             }
             default -> super.onKeyPacket(keyPresser, type);
         }
+    }
+
+    @Override
+    public void renderHUD(GuiGraphics guiGraphics) {
+        int screenWidth = guiGraphics.guiWidth(), screenHeight = guiGraphics.guiHeight();
+        int imageWidth = 192, imageHeight = 61;
+        int x = (screenWidth - imageWidth) / 2;
+        guiGraphics.blit(SPRITE, x, screenHeight - 82, 0, 0, imageWidth, imageHeight, 256, 128);
+        imageWidth = (int) (192 * this.meterAmount);
+
+        guiGraphics.blit(SPRITE, x, screenHeight - 27, 0, 61, imageWidth, 6, 256, 128);
+
+        imageWidth = (int)(this.shootCD / 64F * 192);
+
+        guiGraphics.blit(SPRITE, x, screenHeight - 31, 0, 67, imageWidth, 5, 256, 128);
+
+        imageHeight = (int) (this.getHealth() / this.getMaxHealth() * 11);
+        x = (screenWidth - 13) / 2;
+
+        guiGraphics.blit(SPRITE, x, screenHeight - 31 - imageHeight, 0, 83 - imageHeight, 13, imageHeight, 256, 128);
+
     }
 }

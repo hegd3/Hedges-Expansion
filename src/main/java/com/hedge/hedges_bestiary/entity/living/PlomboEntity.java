@@ -1,5 +1,6 @@
 package com.hedge.hedges_bestiary.entity.living;
 
+import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.config.HBConfig;
 import com.hedge.hedges_bestiary.entity.AI.control.ATMLookControl;
 import com.hedge.hedges_bestiary.entity.AI.control.ATMMoveControl;
@@ -12,12 +13,16 @@ import com.hedge.hedges_bestiary.entity.AI.targeting.TargetMonstersGoal;
 import com.hedge.hedges_bestiary.entity.AI.targeting.TargetPlayersGoal;
 import com.hedge.hedges_bestiary.entity.types.HBTamableAnimal;
 import com.hedge.hedges_bestiary.entity.types.AttackStateMob;
+import com.hedge.hedges_bestiary.entity.types.HUDMount;
 import com.hedge.hedges_bestiary.entity.util.AttackHelpers;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.entity.util.MathHelpers;
+import com.hedge.hedges_bestiary.message.EntityKeyMessage;
 import com.hedge.hedges_bestiary.registry.HBEntities;
+import com.hedge.hedges_bestiary.registry.HBKeyMappings;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -53,7 +58,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumSet;
 import java.util.List;
 
-public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurner {
+public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurner, HUDMount {
 
     private static final EntityDataAccessor<Boolean> LEFT = SynchedEntityData.defineId(PlomboEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> SCRATCHING = SynchedEntityData.defineId(PlomboEntity.class, EntityDataSerializers.BOOLEAN);
@@ -258,6 +263,16 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
     public void travel(Vec3 pTravelVector) {
         if (isControlledByLocalInstance() && getControllingPassenger() instanceof Player rider) {
             this.setSpeed((float) this.getAttributeValue(Attributes.MOVEMENT_SPEED));
+            if (this.getAnimState() == 0) {
+
+                if (Minecraft.getInstance().options.keyAttack.isDown()) {
+                    HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 4));
+                } else if (HBKeyMappings.MOUNT_ABILITY_KEY.isDown()) {
+                    HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 5));
+                }
+
+
+            }
         }
         super.travel(pTravelVector);
     }
@@ -278,10 +293,13 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
 
     @Override
     protected Vec3 getRiddenInput(Player pPlayer, @NotNull Vec3 pTravelVector) {
-        if (this.getAnimState() == 2 || this.isScratching()) {
+        if (this.isScratching()) {
             return Vec3.ZERO;
         }
-        float f1 = pPlayer.zza * 0.75F;
+        if (this.getAnimState() == 2) {
+            return new Vec3(0, 0, 0.05);
+        }
+        float f1 = pPlayer.zza * 0.35F;
         float f2 = pPlayer.xxa * 0.2F;
         if (f1 < 0.0F)
             f1 *= 0.25F;
@@ -294,11 +312,12 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
         double targetY = this.getY() + passenger.getBbHeight();
         double extraX = -Mth.sin(Mth.PI + angle) * 0.5F;
         double extraZ = -Mth.cos(angle) * 0.5F;
+
         if (this.getAnimState() == 2 || this.isScratching()) {
-            Vec3 offset = new Vec3(0, 0, 1).yRot(this.getYRot() * Mth.DEG_TO_RAD);
-            extraX += offset.x;
-            extraZ += offset.z;
+            extraX *=4F;
+            extraZ *=4F;
         }
+
         moveFunc.accept(passenger, this.getX() + extraX, targetY, this.getZ() + extraZ);
     }
 
@@ -374,6 +393,25 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
     @Override
     public boolean isFood(ItemStack pStack) {
         return pStack.is(ItemTags.LEAVES) && super.isFood(pStack);
+    }
+
+    @Override
+    public void renderHUD(GuiGraphics guiGraphics) {
+
+    }
+
+    @Override
+    public void onKeyPacket(Entity keyPresser, int type) {
+        if (type == 4) {
+            if (this.multiAttackCD == 0) {
+                this.setLeft(!this.swingingLeft());
+                this.setAnimState(2);
+            } else {
+                this.setAttacking();
+            }
+        } else {
+            super.onKeyPacket(keyPresser, type);
+        }
     }
 
     static class PlomboScratchLeavesGoal extends MoveToBlockGoal {

@@ -50,6 +50,7 @@ public class HedgesBestiary
     {
         IEventBus modEventBus = context.getModEventBus();
         context.registerConfig(ModConfig.Type.COMMON, HBConfig.SPEC, "hedges_bestiary.toml");
+
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::onModConfigEvent);
         MinecraftForge.EVENT_BUS.register(this);

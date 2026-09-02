@@ -16,7 +16,7 @@ public class IdleAnimationGoal<E extends PathfinderMob & IdleAnimMob> extends Go
     public IdleAnimationGoal(E pMob, int cooldown) {
         this.mob = pMob;
         this.cooldown = cooldown;
-        this.resetCD();
+        this.animCD = 0;
     }
 
     @Override

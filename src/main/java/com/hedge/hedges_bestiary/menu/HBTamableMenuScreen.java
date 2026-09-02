@@ -52,7 +52,6 @@ public class HBTamableMenuScreen extends AbstractContainerScreen<HBTamableMenu> 
     }
 
     public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-        this.renderBackground(guiGraphics);
         this.xMouse = (float) i;
         this.yMouse = (float) j;
         super.render(guiGraphics, i, j, f);

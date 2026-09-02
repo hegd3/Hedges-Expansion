@@ -1,5 +1,6 @@
 package com.hedge.hedges_bestiary.entity.util;
 
+import com.hedge.hedges_bestiary.util.WorldHelpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -67,31 +68,25 @@ public class EntityHelpers {
         return Vec3.directionFromRotation(xRot, entity.yBodyRot);
     }
 
-    @Nullable
     public static Vec3 getRandomSwimPos(PathfinderMob mob, int radius, int verticalDistance, boolean preferSurface) {
         Level level = mob.level();
-        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
-        int maxAttempts = radius * radius * radius;
-        boolean nearBoundary = preferSurface ? EntityHelpers.closeToSurface(mob, verticalDistance) : EntityHelpers.closeToBottom(mob, verticalDistance);
-
-        for (int i = 0; i < maxAttempts; i++) {
-            Vec3 candidate = DefaultRandomPos.getPos(mob, radius * radius, verticalDistance);
-            if (candidate == null) continue;
-
-
-            Vec3 adjusted = candidate.add(0, nearBoundary ? -1 : 1, 0);
-            mutablePos.set(adjusted.x, adjusted.y, adjusted.z);
-
-            if (level.getBlockState(mutablePos).isPathfindable(level, mutablePos, PathComputationType.WATER)) {
-                return adjusted;
+        RandomSource random = mob.getRandom();
+        Vec3 candidate = mob.position().add(radius * random.nextFloat() - radius * random.nextFloat(), 0, radius * random.nextFloat());
+        BlockPos pos = WorldHelpers.fromVec3(candidate);
+        if (preferSurface) {
+            for (int i = 0; i < verticalDistance; i++) {
+                if (level.getFluidState(pos.above()).is(FluidTags.WATER)) {
+                    pos = pos.above();
+                }
             }
-
-            if (i == maxAttempts - 1) {
-                return candidate;
+        } else {
+            for (int i = 0; i < verticalDistance; i++) {
+                if (level.getFluidState(pos.below()).is(FluidTags.WATER)) {
+                    pos = pos.below();
+                }
             }
         }
-
-        return null;
+        return new Vec3(pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Nullable

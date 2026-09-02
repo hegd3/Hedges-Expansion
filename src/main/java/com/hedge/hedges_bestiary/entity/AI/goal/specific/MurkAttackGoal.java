@@ -1,5 +1,6 @@
 package com.hedge.hedges_bestiary.entity.AI.goal.specific;
 
+import com.hedge.hedges_bestiary.client.HBSounds;
 import com.hedge.hedges_bestiary.entity.AI.control.AdvancedTurner;
 import com.hedge.hedges_bestiary.entity.AI.goal.GenericMeleeGoal;
 import com.hedge.hedges_bestiary.entity.living.MurkEntity;
@@ -95,6 +96,7 @@ public class MurkAttackGoal extends GenericMeleeGoal<MurkEntity> {
                     } else if (this.mob.getNavigation().isDone() || this.pathTicks > 40) {
                         if (this.mob.canRoar(this.attackReach, this.dist)) {
                             this.mob.setAnimState(4);
+                            this.mob.playSound(HBSounds.MURK_ROAR.get(), 1.5F, 1F);
                             this.mob.getNavigation().stop();
                             this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
                         } else if (this.mob.getProjCD() == 0) {
@@ -106,6 +108,7 @@ public class MurkAttackGoal extends GenericMeleeGoal<MurkEntity> {
                     }
                 } else if (this.mob.canRoar(this.attackReach, this.dist)) {
                     this.mob.setAnimState(4);
+                    this.mob.playSound(HBSounds.MURK_ROAR.get(), 1.5F, 1F);
                     this.mob.getNavigation().stop();
                     this.mob.setTurnType(AdvancedTurner.TurnType.WHOLE_BODY);
                 } else if (this.mob.canMultiBite(this.attackReach, this.dist)) {

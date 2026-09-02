@@ -35,6 +35,15 @@
     ],
     "subtitle": "hedgesbestiary.sound.subtitle.gurk_die"
   },
+  "burodon_roar": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "hedges_bestiary:burodon_roar"
+      }
+    ],
+    "subtitle": "hedgesbestiary.sound.subtitle.burodon_roar"
+  },
   "murk_clicks": {
     "category": "neutral",
     "sounds": [
@@ -52,6 +61,24 @@
       }
     ],
     "subtitle": "hedgesbestiary.sound.subtitle.murk_yawn"
+  },
+  "murk_hurt": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "hedges_bestiary:murk_hurt"
+      }
+    ],
+    "subtitle": "hedgesbestiary.sound.subtitle.murk_hurt"
+  },
+  "murk_stomp": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "hedges_bestiary:murk_stomp"
+      }
+    ],
+    "subtitle": "hedgesbestiary.sound.subtitle.murk_stomp"
   },
   "murk_roar": {
     "category": "neutral",
@@ -73,6 +100,24 @@
       }
     ],
     "subtitle": "hedgesbestiary.sound.subtitle.ferocetus_ambient"
+  },
+  "ferocetus_hurt": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "hedges_bestiary:ferocetus_hurt"
+      }
+    ],
+    "subtitle": "hedgesbestiary.sound.subtitle.ferocetus_hurt"
+  },
+  "ferocetus_die": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "hedges_bestiary:ferocetus_die"
+      }
+    ],
+    "subtitle": "hedgesbestiary.sound.subtitle.ferocetus_die"
   },
   "zap": {
     "category": "neutral",

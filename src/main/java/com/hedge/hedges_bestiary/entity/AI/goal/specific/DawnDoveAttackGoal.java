@@ -110,13 +110,12 @@ public class DawnDoveAttackGoal extends GenericMeleeGoal<DawnDoveEntity> {
                     if (this.mob.canShoot(livingentity, attackReach, dist)) {
                         this.mob.lookAt(livingentity, 90.0F, 90.0F);
                         this.mob.setAnimState(2);
-                        this.phaseTicks++;
                     } else if (this.mob.canUseClawAttack(livingentity, attackReach, dist)) {
                         this.mob.setAnimState(3);
                         this.reachedDropPos = false;
                     } else if (this.mob.canUseAttack(livingentity, attackReach, dist)) {
                         this.mob.setAttacking();
-                        this.phaseTicks+=2;
+                        this.phaseTicks++;
                     }
                 }
             }

@@ -13,7 +13,7 @@ public class LeaveGroupGoal<E extends LivingEntity &HBGroupMob<E>> extends Goal 
     @Override
     public boolean canUse() {
         if (this.mob.isFollower()) {
-            return !this.mob.inRangeOfLeader();
+            return !this.mob.inRangeOfLeader() || !this.mob.getLeader().canBeFollowed();
         }
         return false;
     }

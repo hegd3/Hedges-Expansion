@@ -11,9 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 public class FerocetusRenderer extends MobRenderer<FerocetusEntity, FerocetusModel> {
@@ -22,7 +20,7 @@ public class FerocetusRenderer extends MobRenderer<FerocetusEntity, FerocetusMod
 
     public FerocetusRenderer(EntityRendererProvider.Context pContext) {
         super(pContext, new FerocetusModel(pContext.bakeLayer(EntityLayers.FEROCETUS_LAYER)), 1.2f);
-        this.addLayer(new FerocetusGrabbedMobLayer(this));
+        this.addLayer(new FerocetusMountLayer(this));
     }
 
     @Override
@@ -30,14 +28,33 @@ public class FerocetusRenderer extends MobRenderer<FerocetusEntity, FerocetusMod
         return texture;
     }
 
-    private static class FerocetusGrabbedMobLayer extends RiderLayer<FerocetusEntity, FerocetusModel> {
+    private static class FerocetusMountLayer extends RiderLayer<FerocetusEntity, FerocetusModel> {
 
-        public FerocetusGrabbedMobLayer(FerocetusRenderer pRenderer) {
+        public FerocetusMountLayer(FerocetusRenderer pRenderer) {
             super(pRenderer);
         }
 
         @Override
         public void render(PoseStack poseStack, MultiBufferSource bufferIn, int packedLightIn, FerocetusEntity entity, float limbSwing, float limbSwingAmount, float partialTicks, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
+            if (entity.isVehicle()) {
+                float bodyYaw = entity.yBodyRotO + (entity.yBodyRot - entity.yBodyRotO) * partialTicks;
+                for (Entity passenger : entity.getPassengers()) {
+                    if (passenger == Minecraft.getInstance().player && Minecraft.getInstance().options.getCameraType().isFirstPerson()) {
+                        continue;
+                    }
+                    HedgesBestiary.PROXY.releaseRenderingEntity(passenger.getUUID());
+                    poseStack.pushPose();
+                    this.getParentModel().root().translateAndRotate(poseStack);
+                    this.getParentModel().swimcontrol.translateAndRotate(poseStack);
+                    poseStack.translate(0, passenger.getBbHeight() / -3f, 0.05f);
+                    poseStack.mulPose(Axis.XN.rotationDegrees(180F));
+                    poseStack.mulPose(Axis.YN.rotationDegrees(360F - bodyYaw));
+
+                    renderPassenger(passenger, 0, 0, 0, 0, partialTicks, poseStack, bufferIn, packedLightIn);
+                    poseStack.popPose();
+                    HedgesBestiary.PROXY.blockRenderingEntity(passenger.getUUID());
+                }
+            }
             if (entity.isGrabbing()) {
                 Entity grabbed = entity.getGrabbedEntity();
                 if (grabbed == Minecraft.getInstance().player && Minecraft.getInstance().options.getCameraType().isFirstPerson()) {

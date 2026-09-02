@@ -35,7 +35,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
@@ -65,7 +67,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fluids.FluidType;
@@ -76,6 +77,9 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class MurkEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurner, EggLayer, HUDMount{
+
+    private static final ResourceLocation SPRITE = new ResourceLocation(HedgesBestiary.MODID, "textures/gui/mount/murk_hud.png");
+
     private static final EntityDataAccessor<Boolean> CHARGED = SynchedEntityData.defineId(MurkEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> LEFT = SynchedEntityData.defineId(MurkEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> HAS_EGG = SynchedEntityData.defineId(MurkEntity.class, EntityDataSerializers.BOOLEAN);
@@ -245,23 +249,14 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         if (isControlledByLocalInstance() && getControllingPassenger() instanceof Player rider) {
             float speed = (float) this.getAttributeValue(Attributes.MOVEMENT_SPEED);
 
-            if (this.isInWater()) {
-                //speed*= 1.25f;
-                if (Minecraft.getInstance().options.keyJump.isDown()) {
-                    this.setDeltaMovement(this.getDeltaMovement().add(0, 0.03, 0));
-                } else if (Minecraft.getInstance().options.keySprint.isDown()) {
-                    this.setDeltaMovement(this.getDeltaMovement().add(0, -0.03, 0));
-                }
-            }
-
             if (this.getAnimState() == 0) {
 
                 if (Minecraft.getInstance().options.keyAttack.isDown()) {
                     HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 4));
                 } else if (HBKeyMappings.MOUNT_ABILITY_KEY.isDown()) {
                     if (!this.isCharged() && this.chargeProgress >= 1F) {
-                        HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 5));
                         this.chargeProgress = 1F;
+                        HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 5));
                         this.roarCD = 0F;
                     } else {
                         HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.getId(), rider.getId(), 6));
@@ -272,6 +267,17 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
             }
 
             this.setSpeed(speed);
+            if (this.isInWater()) {
+                if (Minecraft.getInstance().options.keyJump.isDown()) {
+                    this.setDeltaMovement(this.getDeltaMovement().add(0, 0.03, 0));
+                } else if (Minecraft.getInstance().options.keySprint.isDown()) {
+                    this.setDeltaMovement(this.getDeltaMovement().add(0, -0.03, 0));
+                }
+                this.moveRelative(this.getSpeed(), pTravelVector);
+                this.move(MoverType.SELF, this.getDeltaMovement());
+                this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
+
+            }
         }
 
 
@@ -304,13 +310,13 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     protected Vec3 getRiddenInput(Player pPlayer, @NotNull Vec3 pTravelVector) {
 
         return switch (this.getAnimState()) {
-            case 2, 4 -> Vec3.ZERO;
-            case 3, 5 -> new Vec3(0, 0, 0.4f);
+            case 4 -> Vec3.ZERO;
+            case 3, 5 -> new Vec3(0, 0, 0.01f);
             default -> {
                 float f1;
                 float f2;
                 if (this.isInWater()) {
-                    f1 = pPlayer.zza * 0.75F;
+                    f1 = pPlayer.zza * 0.1F;
 
                     float angle= Mth.wrapDegrees(this.getYRot() - this.getYHeadRot());
                     f2 = Mth.sin(angle * Mth.DEG_TO_RAD) * (float)this.getDeltaMovement().length();
@@ -542,7 +548,6 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                     }
                     case 4 -> {
                         if (this.animTicks == 23) {
-                            this.playSound(HBSounds.MURK_ROAR.get(), 5, 1);
                             this.setCharged(true);
                             this.chargedExplode();
                             this.chargeProgress = 1;
@@ -624,6 +629,8 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
             }
         }
     }
+
+
 
 
 
@@ -773,7 +780,8 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     @Override
     protected void playStepSound(BlockPos pPos, BlockState pState) {
         if (!this.isInWater()) {
-            super.playStepSound(pPos, pState);
+            this.playSound(HBSounds.MURK_STOMP.get(), 0.8F, 1.0F - this.getRandom().nextFloat() / 4);
+
         }
     }
 
@@ -831,6 +839,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
             }
             case 5 -> {
                 this.setAnimState(4);
+                this.playSound(HBSounds.MURK_ROAR.get(), 1.5F, 1F);
                 this.turnType = TurnType.WHOLE_BODY;
             }
             case 6 -> {
@@ -869,39 +878,49 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     }
 
     @Override
-    public Vec2 getUVOffset() {
-        return new Vec2(0, 156);
-    }
-
-    @Override
-    public Vec2 getSpriteDimensions() {
-        return new Vec2(64, 51);
-    }
-
-    @Override
-    public float getSpriteHeight() {
-        return (this.isCharged() || this.getAnimState() == 4) ? this.chargeProgress : this.roarCD;
-    }
-
-    @Override
     public boolean isFood(ItemStack pStack) {
         return super.isFood(pStack) && pStack.is(HBItems.SKIB.get());
     }
 
     @Override
+    protected @Nullable SoundEvent getHurtSound(DamageSource pDamageSource) {
+        return HBSounds.MURK_HURT.get();
+    }
+
+    @Override
     public void renderHUD(GuiGraphics guiGraphics) {
-        HUDMount.super.renderHUD(guiGraphics);
-        if (this.chargeProgress > 0F || this.isCharged()) {
-            int screenWidth = guiGraphics.guiWidth(), screenHeight = guiGraphics.guiHeight();
+        int screenWidth = guiGraphics.guiWidth(), screenHeight = guiGraphics.guiHeight();
+        int imageWidth = 192, imageHeight = 45;
+        int x = (screenWidth - imageWidth) / 2;
+        if (this.isCharged()) {
+            guiGraphics.blit(SPRITE, x, screenHeight - 66, 0, 55, imageWidth, imageHeight, 256, 256);
 
-            int x = (screenWidth - 64) / 2;
-            int y = screenHeight - 80;
-            int visibleHeight = (int) (51 * this.chargeProgress);
-            int spriteYOffset = 51 - visibleHeight;
+            imageWidth = (int) (192 * this.chargeProgress);
 
-            guiGraphics.blit(SPRITE, x, y + spriteYOffset, 64, spriteYOffset + 207, 64, 52, 256, 512);
+            guiGraphics.blit(SPRITE, x, screenHeight - 31, 0, 45, imageWidth, 10, 256, 256);
+
+            guiGraphics.blit(SPRITE, x, screenHeight - 31, 0, 100, imageWidth, 10, 256, 256);
+
+
+        } else {
+            guiGraphics.blit(SPRITE, x, screenHeight - 66, 0, 0, imageWidth, imageHeight, 256, 256);
+
+            imageWidth = (int) (192 * (this.getAnimState() == 4 ? this.chargeProgress : this.roarCD));
+
+            guiGraphics.blit(SPRITE, x, screenHeight - 31, 0, 45, imageWidth, 10, 256, 256);
+
+            imageWidth = (int) (192 * this.chargeProgress);
+
+            guiGraphics.blit(SPRITE, x, screenHeight - 31, 0, 100, imageWidth, 10, 256, 256);
 
         }
+        imageHeight = (int) (this.getHealth() / this.getMaxHealth() * 11);
+        x = (screenWidth - 13) / 2;
+
+        guiGraphics.blit(SPRITE, x, screenHeight - 31 - imageHeight, 0, 122 - imageHeight, 13, imageHeight, 256, 256);
+
+
+
 
     }
 

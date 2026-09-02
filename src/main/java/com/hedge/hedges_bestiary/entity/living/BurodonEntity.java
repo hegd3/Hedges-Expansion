@@ -23,16 +23,14 @@ import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -40,6 +38,7 @@ import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -92,11 +91,11 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
 
     public static AttributeSupplier.Builder bakeAttributes(){
         return Animal.createLivingAttributes()
-                .add(Attributes.MAX_HEALTH, 40.0D)
+                .add(Attributes.MAX_HEALTH, 35.0D)
                 .add(Attributes.ATTACK_DAMAGE, 5.0D)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.5D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.6)
-                .add(Attributes.FOLLOW_RANGE, 45F)
+                .add(Attributes.FOLLOW_RANGE, 25F)
                 .add(Attributes.MOVEMENT_SPEED, 0.25F);
     }
 
@@ -130,6 +129,8 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
         this.goalSelector.addGoal(i++, new AvoidTargetWhenLowGoal(this, 1.4D, 20, 15, 16, 7));
         this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2D, 1.4D, 7.0f, 10.0f));
         this.goalSelector.addGoal(i++, new BurodonAttackGoal(this));
+        this.goalSelector.addGoal(i++, new BreedGoal(this, 1.0f));
+        this.goalSelector.addGoal(i++, new HBTemptGoal(this, 1.1f, Ingredient.of(HBTags.DAWN_DOVE_FOOD), false));
         this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
         this.goalSelector.addGoal(i++, new NapGoal(this));
         this.goalSelector.addGoal(i++, new GroupFollowLeaderGoal<>(this, 10F, 5F));
@@ -152,11 +153,17 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
     }
 
 
-
+    @Override
+    public boolean hurt(DamageSource source, float pAmount) {
+        if (source.is(DamageTypeTags.IS_FREEZING)) {
+            pAmount *= 0.25F;
+        }
+        return super.hurt(source, pAmount);
+    }
 
     @Override
     public boolean isAlliedTo(Entity pEntity) {
-        if (pEntity instanceof BurodonEntity burodon && burodon.getOwnerUUID() == this.getOwnerUUID()) {
+        if (!this.isTame() && pEntity instanceof BurodonEntity burodon && !burodon.isTame()) {
             return true;
         }
         return super.isAlliedTo(pEntity);
@@ -214,7 +221,6 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
                     }
                 }
                 case JUMP_ANIM-> {
-                    this.navigation.stop();
                     if (this.getAnimTicks() < 5) {
                         if (target != null) {
                             if (this.jumpAway && jumpVector != null) {
@@ -236,19 +242,18 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
                     }
                 }
                 case ROAR_ANIM -> {
-                    this.navigation.stop();
                     if (target != null)
                         this.getLookControl().setLookAt(target);
                     if (this.animTicks >= 39) {
-                        this.roarCD = 400;
+                        this.roarCD = 300 + this.getRandom().nextInt(100);
                         this.resetAnimState();
                     } else if (this.animTicks == 15) {
                         List<LivingEntity> hit = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4.0F, 2.0F, 4.0F));
                         for (LivingEntity livingEntity : hit) {
                             if (livingEntity != this) {
-                                if (livingEntity.isAlliedTo(this)) {
+                                if (this.isAlliedTo(livingEntity)) {
                                     livingEntity.heal(5);
-                                } else {
+                                } else if (livingEntity.canFreeze()) {
                                     livingEntity.setTicksFrozen(200);
                                 }
                             }
@@ -273,6 +278,11 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
                 }
             }
         }
+    }
+
+    @Override
+    public boolean canFreeze() {
+        return false;
     }
 
     @Override
@@ -341,14 +351,14 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
         this.setAnimState(BITE_ANIM);
     }
 
-    public boolean canRoar() {
-        return this.roarCD == 0 && this.random.nextInt(6) == 0;
+    public boolean canRoar(double attackReach, double dist) {
+        return this.roarCD == 0 && attackReach * 6 >= dist;
     }
 
     public boolean canJump(LivingEntity entity, double attackReach, double dist) {
         if (this.jumpCD > 0)
             return false;
-        if (this.getHealth() < 15) {
+        if (this.getHealth() < 20) {
             this.jumpAway = true;
         }
         if (this.jumpAway) {
@@ -444,9 +454,9 @@ public class BurodonEntity extends HBTamableAnimal implements AttackStateMob, Ad
     @Override
     public void handleEntityEvent(byte pId) {
         if (pId == 39) {
-            this.level().addParticle(HBParticles.ICE_SHOCKWAVE.get(), true, this.getX(), this.getY() + 0.1F, this.getZ(), 0, 0, 0);
+            this.level().addParticle(HBParticles.ICE_SHOCKWAVE.get(), true, this.getX(), this.getY() + 0.25F, this.getZ(), 0, 0, 0);
         } else if (pId == 40) {
-            this.level().addParticle(HBParticles.ICE_SHOCKWAVE_BIG.get(), true, this.getX(), this.getY() + 0.1F, this.getZ(), 0, 0, 0);
+            this.level().addParticle(HBParticles.ICE_SHOCKWAVE_BIG.get(), true, this.getX(), this.getY() + 0.25F, this.getZ(), 0, 0, 0);
         } else {
             super.handleEntityEvent(pId);
 

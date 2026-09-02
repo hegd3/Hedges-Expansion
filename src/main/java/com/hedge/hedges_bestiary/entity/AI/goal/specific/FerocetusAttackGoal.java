@@ -7,6 +7,7 @@ import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.phys.Vec3;
 
 
@@ -28,11 +29,11 @@ public class FerocetusAttackGoal extends GenericMeleeGoal<FerocetusEntity> {
         if (livingentity != null && this.mob.isInWater()) {
             if (this.mob.isGrabbing()) {
                 if (this.mob.getNavigation().isDone()) {
-                    Vec3 pos = EntityHelpers.getRandomSwimPos(this.mob, 10, 5, true);
+                    Vec3 pos = EntityHelpers.getRandomSwimPos(this.mob, 10, 10, true);
                     if (pos != null) {
                         this.mob.getNavigation().moveTo(pos.x, pos.y, pos.z, 1.6F);
                     }
-                }
+            }
             } else {
                 this.attackReach = this.mob.getAttackReachSqr(livingentity);
                 this.dist = this.mob.distanceToSqr(livingentity);
