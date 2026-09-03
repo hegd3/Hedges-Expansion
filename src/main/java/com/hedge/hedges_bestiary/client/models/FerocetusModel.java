@@ -73,7 +73,8 @@ public class FerocetusModel extends HBModel<FerocetusEntity> {
 	@Override
 	public void setupAnim(FerocetusEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		headPitch = (entity.getAnimState() == 2 ? headPitch : Mth.clamp(headPitch, -45.0F, 45.0F)) * ((float) Math.PI / 180F);
+		headPitch = (Mth.clamp(headPitch, -25.0F, 25.0F)) * Mth.DEG_TO_RAD;
+		float pitch = entity.getPitch(ageInTicks - entity.tickCount) * Mth.DEG_TO_RAD;
 		float tailYaw = entity.getTrailYaw(ageInTicks - entity.tickCount);
 		this.tail.yRot = Mth.lerp(0.3F, this.tail.yRot, tailYaw * 0.3F);
 		this.tail.yRot = Mth.lerp(0.3F, this.tail.yRot, tailYaw * 0.25F);
@@ -90,14 +91,14 @@ public class FerocetusModel extends HBModel<FerocetusEntity> {
 		this.animateSmooth(entity.idleAnimationState, FerocetusAnimation.IDLE, ageInTicks, 0.5f);
 		this.animateSmooth(entity.beachedAnimationState, FerocetusAnimation.BEACHED, ageInTicks, 0.5f);
 		if (entity.isInFluidType()) {
-			this.swimcontrol.xRot = headPitch;
+			this.swimcontrol.xRot = headPitch + entity.getPitch(ageInTicks - entity.tickCount) * Mth.DEG_TO_RAD;
 			this.swimcontrol.zRot = entity.roll;
 			this.animateWalk(FerocetusAnimation.SWIM, limbSwing, limbSwingAmount, 1.3f, 1f);
 		} else {
 			if (entity.groundTimer == 0 ) {
-				this.swimcontrol.xRot = headPitch;
-				this.tail.xRot += -headPitch * 0.5f;
-				this.tail2.xRot += -headPitch * 0.7f;
+				this.swimcontrol.xRot = pitch;
+				this.tail.xRot += -pitch * 0.5f;
+				this.tail2.xRot += -pitch * 0.7f;
 			}
 		}
 	}

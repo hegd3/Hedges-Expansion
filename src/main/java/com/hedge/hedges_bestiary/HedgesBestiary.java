@@ -59,6 +59,7 @@ public class HedgesBestiary
         HBBlocks.registerBlocks(modEventBus);
         HBBlockEntities.register(modEventBus);
         HBItems.register(modEventBus);
+        HBEffects.register(modEventBus);
         HBParticles.register(modEventBus);
         HBSounds.register(modEventBus);
         HBStructures.register(modEventBus);

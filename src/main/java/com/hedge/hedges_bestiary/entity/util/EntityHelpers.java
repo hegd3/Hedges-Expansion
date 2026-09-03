@@ -89,42 +89,6 @@ public class EntityHelpers {
         return new Vec3(pos.getX(), pos.getY(), pos.getZ());
     }
 
-    @Nullable
-    public static Vec3 getSmartSwimAwayTarget(PathfinderMob mob, int radius, int verticalDistance, boolean preferSurface) {
-        Level level = mob.level();
-        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
-        int maxAttempts = radius * radius * radius;
-        boolean nearBoundary = preferSurface
-                ? EntityHelpers.closeToSurface(mob, verticalDistance)
-                : EntityHelpers.closeToBottom(mob, verticalDistance);
-
-        for (int i = 0; i < maxAttempts; i++) {
-            Vec3 candidate = DefaultRandomPos.getPosAway(mob, radius * radius, verticalDistance, mob.position());
-            if (candidate == null) continue;
-
-
-            Vec3 adjusted = candidate.add(0, nearBoundary ? -1 : 1, 0);
-            mutablePos.set(adjusted.x, adjusted.y, adjusted.z);
-
-            if (level.getBlockState(mutablePos).isPathfindable(level, mutablePos, PathComputationType.WATER)) {
-                return adjusted;
-            }
-
-            if (i == maxAttempts - 1) {
-                return candidate;
-            }
-        }
-
-        return null;
-    }
-
-    public static void snapTowardsEntity(LivingEntity entity, Entity target) {
-        Vec3 towardTarget = target.position().subtract(entity.position()).normalize();
-        float yaw = (float)(Mth.atan2(towardTarget.z, towardTarget.x) * (180F / Math.PI)) - 90.0F;
-
-        entity.setYHeadRot(yaw);
-        entity.setYBodyRot(yaw);
-    }
 
     public static boolean isAir(Level world, BlockPos pos) {
         return world.getBlockState(pos).isAir();

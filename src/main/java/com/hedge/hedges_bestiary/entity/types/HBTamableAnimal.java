@@ -36,12 +36,13 @@ import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Objects;
 
 public abstract class HBTamableAnimal extends TamableAnimal implements AnimStateMob, IdleAnimMob, KeybindUsing {
     public final SmoothAnimationState sitAnimationState = new SmoothAnimationState(0.25f);
     public final SmoothAnimationState napAnimationState = new SmoothAnimationState(0.1f);
-    public final SmoothAnimationState idleAnimationState = new SmoothAnimationState();
+    public final SmoothAnimationState idleAnimationState = new SmoothAnimationState(0.1f);
     public final SmoothAnimationState danceAnimationState = new SmoothAnimationState();
 
     protected static final EntityDataAccessor<BlockPos> HOME_POS = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.BLOCK_POS);
@@ -194,6 +195,15 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
         if (this.isTame()) {
             pCompound.putInt("Tame_Command", this.getCommand());
             pCompound.putInt("Auto_Target_Type", this.getAutoTargetType());
+        }
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        if (pKey == ANIM_STATE) {
+            this.animTicks = 0;
+        } else {
+            super.onSyncedDataUpdated(pKey);
         }
     }
 

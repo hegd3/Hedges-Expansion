@@ -1,5 +1,8 @@
 package com.hedge.hedges_bestiary.entity.types;
 
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -112,4 +115,13 @@ public class HBSchoolingMob extends HBAquaticMob implements HBGroupMob<HBSchooli
         });
     }
 
+    @Override
+    protected @org.jetbrains.annotations.Nullable SoundEvent getHurtSound(DamageSource pDamageSource) {
+        return SoundEvents.COD_HURT;
+    }
+
+    @Override
+    protected @org.jetbrains.annotations.Nullable SoundEvent getDeathSound() {
+        return SoundEvents.COD_DEATH;
+    }
 }

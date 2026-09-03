@@ -99,14 +99,16 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
-    // Put repositories for dependencies here
-    // ForgeGradle automatically adds the Forge maven and Maven Central for you
-
-    // If you have mod jar dependencies in ./libs, you can declare them as a repository like so.
-    // See https://docs.gradle.org/current/userguide/declaring_repositories.html#sub:flat_dir_resolver
-    // flatDir {
-    //     dir 'libs'
-    // }
+    maven {
+        url "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    maven {
+        name "Modrinth"
+        url "https://api.modrinth.com/maven"
+    }
 }
 
 dependencies {
@@ -114,6 +116,13 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+
+    runtimeOnly fg.deobf("curse.maven:worldedit-225608:4586218")
+    runtimeOnly fg.deobf("curse.maven:patchouli-306770:6164575")
+    runtimeOnly fg.deobf("curse.maven:cloth-config-348521:5729105")
+    runtimeOnly fg.deobf("curse.maven:playeranimator-658587:4587214")
+    runtimeOnly fg.deobf("curse.maven:better-combat-by-daedelus-639842:7287334")
+
 }
 
 tasks.named('processResources', ProcessResources).configure {

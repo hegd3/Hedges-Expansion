@@ -303,9 +303,7 @@ public class ZappetEntity extends TamableFlyer implements HBGroupMob<ZappetEntit
 
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
-        if (pKey == ANIM_STATE) {
-            this.animTicks = 0;
-        } else if (pKey == TARGETED_BLOCK_POS && this.level().isClientSide()) {
+        if (pKey == TARGETED_BLOCK_POS && this.level().isClientSide()) {
             BlockPos pos = this.getTargetedPos();
             if (pos != null) {
                 this.level().addParticle(HBParticles.LIGHTNING_EXPLODE.get(), true, pos.getX(), pos.getY(), pos.getZ(), 0, 0, 0);

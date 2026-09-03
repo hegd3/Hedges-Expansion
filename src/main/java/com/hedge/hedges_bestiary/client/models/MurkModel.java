@@ -156,8 +156,9 @@ public class MurkModel extends HBModel<MurkEntity> {
 	public void setupAnim(MurkEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
 
-		netHeadYaw = Mth.clamp(netHeadYaw, -25.0F, 25.0F) * ((float)Math.PI / 180F);
-		headPitch = Mth.clamp(headPitch, -25.0F, 25.0F) * ((float)Math.PI / 180F);
+		netHeadYaw = Mth.clamp(netHeadYaw, -25.0F, 25.0F) * Mth.DEG_TO_RAD;
+		headPitch = Mth.clamp(headPitch, -25.0F, 25.0F) * Mth.DEG_TO_RAD;
+		float pitch = entity.getPitch(ageInTicks - entity.tickCount) * Mth.DEG_TO_RAD;
 		float tailYaw = entity.getTrailYaw(ageInTicks - entity.tickCount);
 
 
@@ -173,7 +174,7 @@ public class MurkModel extends HBModel<MurkEntity> {
 
 		if (entity.isInWater()) {
 			headPitch *= 0.6F;
-			this.swimcontrol.xRot = headPitch;
+			this.swimcontrol.xRot = pitch;
 			this.animate(entity.multiBiteAnimationState, entity.swingingLeft() ? MurkAttacksAnimation.MULTI_BITE_LEFT: MurkAttacksAnimation.MULTI_BITE_RIGHT, ageInTicks, 1);
 
 			this.animate(entity.roarAnimationState, MurkAttacksAnimation.ROAR, ageInTicks, 1f);

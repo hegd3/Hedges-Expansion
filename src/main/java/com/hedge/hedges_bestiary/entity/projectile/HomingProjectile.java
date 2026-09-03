@@ -31,7 +31,7 @@ public abstract class HomingProjectile extends GenericProjectile {
         float yRot;
         if (this.target != null) {
             Vec3 v = target.position().subtract(this.position()).normalize().scale(3);
-            motion = WorldHelpers.lerpVec3(this.getLerpSpeed(), motion, v);
+            motion = motion.lerp(v, this.getLerpSpeed());
             this.setDeltaMovement(motion);
         }
         xRot = -((float) (Mth.atan2(motion.horizontalDistance(), motion.y) * (double) (180F / (float) Math.PI)) - 90.0F);

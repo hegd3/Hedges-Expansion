@@ -17,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -279,11 +280,11 @@ public class SpottedStrikerEntity extends HBAquaticMob implements AttackStateMob
         if (cloaked) {
             List<PathfinderMob> mobs = this.level().getEntitiesOfClass(PathfinderMob.class, this.getBoundingBox().inflate(10.0D));
             for (PathfinderMob entity : mobs) {
+                if (entity.getLastHurtByMob() == this) {
+                    entity.setLastHurtByMob(null);
+                }
                 if (entity.getTarget() == this) {
                     entity.setTarget(null);
-                    if (entity.getLastHurtByMob() == this) {
-                        entity.setLastHurtByMob(null);
-                    }
                 }
             }
         }
@@ -314,6 +315,16 @@ public class SpottedStrikerEntity extends HBAquaticMob implements AttackStateMob
     @Override
     protected PathNavigation createNavigation(Level pLevel) {
         return new FluidPathNavigation(this, pLevel);
+    }
+
+    @Override
+    protected @org.jetbrains.annotations.Nullable SoundEvent getHurtSound(DamageSource pDamageSource) {
+        return SoundEvents.COD_HURT;
+    }
+
+    @Override
+    protected @org.jetbrains.annotations.Nullable SoundEvent getDeathSound() {
+        return SoundEvents.COD_DEATH;
     }
 
     private static class SpottedStrikerFleeGoal extends AvoidTargetWhenLowGoal {

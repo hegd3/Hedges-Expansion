@@ -55,6 +55,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -78,6 +79,8 @@ public class FerocetusEntity extends HBTamableAnimal implements AttackStateMob, 
 
     public int groundTimer = 0;
     public float roll = 0.0f;
+    public float prevPitch = 0.0F;
+    public float pitch = 0.0F;
 
 
     private int jumpCD = 0;
@@ -87,7 +90,7 @@ public class FerocetusEntity extends HBTamableAnimal implements AttackStateMob, 
 
     public final SmoothAnimationState biteAnimationState = new SmoothAnimationState();
     public final SmoothAnimationState ramAnimationState = new SmoothAnimationState();
-    public final SmoothAnimationState airAnimationState = new SmoothAnimationState();
+    public final SmoothAnimationState airAnimationState = new SmoothAnimationState(0.1F);
     public final SmoothAnimationState spinAnimationState = new SmoothAnimationState();
     public final SmoothAnimationState callAnimationState = new SmoothAnimationState();
     public final SmoothAnimationState grabAnimationState = new SmoothAnimationState();
@@ -103,7 +106,6 @@ public class FerocetusEntity extends HBTamableAnimal implements AttackStateMob, 
         this.lookControl = new SmoothSwimmingLookControl(this, 0);
         this.setPathfindingMalus(BlockPathTypes.WATER, 0.0f);
         this.setPathfindingMalus(BlockPathTypes.WATER_BORDER, 0.0f);
-
     }
 
     public int getMaxHeadXRot() {
@@ -277,18 +279,12 @@ public class FerocetusEntity extends HBTamableAnimal implements AttackStateMob, 
     @Override
     public void tick() {
         super.tick();
+        boolean mount = this.hasControllingPassenger();
         if (this.level().isClientSide()) {
             this.setUpAnimStates();
             this.tickTrailYaw();
+            this.tickPitch();
             this.tickRoll();
-            if (this.hasControllingPassenger()) {
-
-                float added = (float) (position().y() * (this.getY() - this.yo));
-                float xTilt = Mth.clamp(added, -25.0F, 20.0F);
-
-                setXRot(-Mth.lerp(getXRot(), xTilt, xTilt));
-
-            }
         } else {
             this.attackCD = Math.max(this.attackCD - 1, 0);
             this.jumpCD = Math.max(this.jumpCD - 1, 0);
@@ -364,7 +360,7 @@ public class FerocetusEntity extends HBTamableAnimal implements AttackStateMob, 
                             }
                         } else {
                             if (this.animTicks == 10) {
-                                if (this.hasControllingPassenger()) {
+                                if (mount) {
                                     for (LivingEntity entity : AttackHelpers.zoneHitbox(this, EntityHelpers.bodyAngle(this, this.getXRot()).scale(1.3), 2.5, 2.5, 2.5, 5)) {
                                         if (this.smallEnoughToGrab(entity)) {
                                             this.grab(entity);
@@ -407,17 +403,6 @@ public class FerocetusEntity extends HBTamableAnimal implements AttackStateMob, 
 
         } else {
             this.groundTimer = Math.max(groundTimer - 1, 0);
-
-            if (!this.level().isClientSide() && this.groundTimer == 0 && !this.isInFluidType()) {
-                Vec3 vec3 = this.getDeltaMovement();
-                if (vec3.y * vec3.y < (double) 0.03F && this.getXRot() != 0.0F) {
-                    this.setXRot(Mth.rotLerp(0.2F, this.getXRot(), 0.0F));
-                } else if (vec3.length() > (double) 1.0E-5F) {
-                    double d0 = vec3.horizontalDistance();
-                    double d1 = Math.atan2(-vec3.y, d0) * (double) (180F / (float) Math.PI);
-                    this.setXRot((float) d1);
-                }
-            }
         }
 
 
@@ -446,6 +431,18 @@ public class FerocetusEntity extends HBTamableAnimal implements AttackStateMob, 
         this.grabbedEntity.fallDistance = 0.0F;
     }
 
+    private void tickPitch() {
+        this.prevPitch = this.pitch;
+        float target = (Mth.clamp((float)this.getDeltaMovement().y * 2F, -1F, 2F)) * -Mth.RAD_TO_DEG;
+        this.pitch = Mth.approachDegrees(pitch, target, 5F);
+
+    }
+
+    public float getPitch(float partialTick) {
+        return (this.prevPitch + (this.pitch - this.prevPitch) * partialTick);
+    }
+
+
     private void tickTrailYaw() {
         this.prevTrail = this.trail;
         this.trail += (-(this.yBodyRot - this.yBodyRotO) - this.trail) * 0.15F;
@@ -466,14 +463,15 @@ public class FerocetusEntity extends HBTamableAnimal implements AttackStateMob, 
 
         if (isControlledByLocalInstance() && getControllingPassenger() instanceof Player rider) {
             if (this.isInWater()) {
+                this.setDeltaMovement(this.getDeltaMovement().add(0, 0.005, 0));
                 if (this.leftWater) {
                     this.leftWater = false;
                 }
                 float speed = (float) this.getAttributeValue(Attributes.MOVEMENT_SPEED);
                 if (Minecraft.getInstance().options.keyJump.isDown()) {
-                    this.setDeltaMovement(this.getDeltaMovement().add(0, 0.05, 0));
+                    this.setDeltaMovement(this.getDeltaMovement().add(0, 0.06, 0));
                 } else if (Minecraft.getInstance().options.keySprint.isDown()) {
-                    this.setDeltaMovement(this.getDeltaMovement().add(0, -0.05, 0));
+                    this.setDeltaMovement(this.getDeltaMovement().add(0, -0.06, 0));
                 }
 
                 if (this.getAnimState() == 0) {
@@ -490,10 +488,10 @@ public class FerocetusEntity extends HBTamableAnimal implements AttackStateMob, 
                 this.moveRelative(this.getSpeed(), pTravelVector);
                 this.move(MoverType.SELF, this.getDeltaMovement());
                 this.setDeltaMovement(this.getDeltaMovement().scale(0.9D));
-            } else if (!this.leftWater && this.groundTimer < 20) {
+            } else if (!this.leftWater && this.groundTimer < 20 && this.pitch < -5F) {
                 this.leftWater = true;
-                Vec3 horizontal = EntityHelpers.bodyAngle(this, this.getXRot()).scale(this.getDeltaMovement().lengthSqr() * 45);
-                this.setDeltaMovement(this.getDeltaMovement().add(horizontal.x, horizontal.y * 1.5, horizontal.z));
+                Vec3 horizontal = EntityHelpers.bodyAngle(this, this.pitch * 1.2F).scale(this.getDeltaMovement().length() * 7);
+                this.setDeltaMovement(this.getDeltaMovement().add(horizontal.x, horizontal.y * 2, horizontal.z));
             }
         }
         if (this.isEffectiveAi() && this.isInWater()) {
@@ -510,6 +508,8 @@ public class FerocetusEntity extends HBTamableAnimal implements AttackStateMob, 
         }
 
     }
+
+
 
     @Override
     public boolean dismountsUnderwater() {
@@ -529,8 +529,8 @@ public class FerocetusEntity extends HBTamableAnimal implements AttackStateMob, 
     @Override
     protected void tickRidden(@NotNull Player pPlayer, @NotNull Vec3 pTravelVector) {
         super.tickRidden(pPlayer, pTravelVector);
-        if (this.isInWater() && pPlayer.zza != 0) {
-            float newYaw = Mth.lerp(0.1F, this.getYRot(), pPlayer.getYRot());
+        if (this.isInWater() && (pPlayer.zza != 0 || this.yya != 0)) {
+            float newYaw = Mth.rotLerp(0.1F, this.getYRot(), pPlayer.getYRot());
             this.setYRot(newYaw);
             this.setYHeadRot(pPlayer.getYHeadRot());
             this.setXRot(Mth.clamp(pPlayer.getXRot(), -30, 30));

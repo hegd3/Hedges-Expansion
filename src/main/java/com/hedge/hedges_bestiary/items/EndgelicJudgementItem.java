@@ -30,7 +30,7 @@ public class EndgelicJudgementItem extends ProjectileWeaponItem {
 
     public void releaseUsing(ItemStack pStack, Level pLevel, LivingEntity pEntityLiving, int pTimeLeft) {
         if (pEntityLiving instanceof Player player) {
-            boolean flag = player.getAbilities().instabuild || EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, pStack) > 0;
+            boolean flag = player.getAbilities().instabuild;
             ItemStack itemstack = player.getProjectile(pStack);
 
             int i = this.getUseDuration(pStack) - pTimeLeft;

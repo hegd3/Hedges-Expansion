@@ -25,6 +25,7 @@ import com.hedge.hedges_bestiary.entity.util.MathHelpers;
 import com.hedge.hedges_bestiary.items.HBItems;
 import com.hedge.hedges_bestiary.items.TreatItem;
 import com.hedge.hedges_bestiary.message.EntityKeyMessage;
+import com.hedge.hedges_bestiary.registry.HBEffects;
 import com.hedge.hedges_bestiary.registry.HBEntities;
 import com.hedge.hedges_bestiary.registry.HBKeyMappings;
 import com.hedge.hedges_bestiary.registry.HBParticles;
@@ -46,6 +47,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -98,6 +100,8 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     public final SmoothAnimationState sitAnimationState = new SmoothAnimationState();
 
     public float landProgress = 0;
+    public float prevPitch = 0.0F;
+    public float pitch = 0.0F;
 
     private TurnType turnType = TurnType.NORMAL;
     private int attackCD = 0;
@@ -182,7 +186,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         this.goalSelector.addGoal(i++, new HBSitWhenOrderedGoal(this, false));
         this.goalSelector.addGoal(i++, new EggLayerBreedGoal<>(this, 1.0f));
         this.goalSelector.addGoal(i++, new LayEggsGoal<>(this, 100, 1.0f));
-        this.goalSelector.addGoal(i++, new HBFollowOwnerGoal(this, 1.2, 1.6, 7.0f, 4.0f));
+        this.goalSelector.addGoal(i++, new AquaticFollowOwnerGoal(this, 1.2, 1.6, 7.0f, 4.0f, true));
         this.goalSelector.addGoal(i++, new MurkAttackGoal(this));
         this.goalSelector.addGoal(i++, new MoveToHomePosGoal(this));
         this.goalSelector.addGoal(i++, new FindAndPickItemGoal(this, FOOD));
@@ -311,15 +315,13 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
 
         return switch (this.getAnimState()) {
             case 4 -> Vec3.ZERO;
-            case 3, 5 -> new Vec3(0, 0, 0.01f);
+            case 3, 5 -> new Vec3(0, 0, this.isInWater() ? 0.1F : 0.3f);
             default -> {
                 float f1;
                 float f2;
                 if (this.isInWater()) {
                     f1 = pPlayer.zza * 0.1F;
-
-                    float angle= Mth.wrapDegrees(this.getYRot() - this.getYHeadRot());
-                    f2 = Mth.sin(angle * Mth.DEG_TO_RAD) * (float)this.getDeltaMovement().length();
+                    f2 = 0;
                 } else {
                     f1 = pPlayer.zza * 0.5F;
                     f2 = pPlayer.xxa * 0.2F;
@@ -336,12 +338,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
     @Override
     protected void tickRidden(@NotNull Player pPlayer, @NotNull Vec3 pTravelVector) {
         super.tickRidden(pPlayer, pTravelVector);
-        float turnSpeed = 5.0F;
-        float currentYaw = this.getYRot();
-        float targetYaw = pPlayer.getYRot();
-        float deltaYaw = Mth.wrapDegrees(targetYaw - currentYaw);
-
-        float newYaw = currentYaw + Mth.clamp(deltaYaw, -turnSpeed, turnSpeed);
+        float newYaw = Mth.rotLerp(0.15F, this.getYRot(), pPlayer.getYRot());
         this.setYRot(newYaw);
         this.setYHeadRot(pPlayer.getYHeadRot());
         this.setXRot(Mth.clamp(pPlayer.getXRot(), -10, 10));
@@ -427,6 +424,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
             if (this.landProgress > 0) {
                 this.landProgress -=0.25f;
             }
+            this.tickPitch();
 
         } else {
 
@@ -562,7 +560,6 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
                     }
                     case 5 -> {
                         if (this.animTicks < 15 && target != null) {
-                //            this.lookAt(target, 30f, 30f);
                             this.getLookControl().setLookAt(target, 30f, 30f);
 
                         } else if (this.animTicks == 20) {
@@ -598,6 +595,17 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
         }
     }
 
+    private void tickPitch() {
+        this.prevPitch = this.pitch;
+        float target = (Mth.clamp((float)this.getDeltaMovement().y * 4F, -1F, 1F)) * -Mth.RAD_TO_DEG;
+        this.pitch = Mth.approachDegrees(pitch, target, 2.5F);
+
+    }
+
+    public float getPitch(float partialTick) {
+        return (this.prevPitch + (this.pitch - this.prevPitch) * partialTick);
+    }
+
     private void tickTrailYaw() {
         this.prevTrail = this.trail;
         this.trail += (-(this.yBodyRot - this.yBodyRotO) - this.trail) * 0.15F;
@@ -616,6 +624,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
             for (LivingEntity entity : hit) {
                 if (!AttackHelpers.blockBreak(entity)) {
                     AttackHelpers.betterHurt(this, entity, 1.8f, 1.5f);
+                    entity.addEffect(new MobEffectInstance(HBEffects.VOLATILE.get(), 40, 1));
                 } else {
                     AttackHelpers.betterHurt(this, entity, 0.8f, 0.8f);
                 }
@@ -629,9 +638,6 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
             }
         }
     }
-
-
-
 
 
     private void spawnImpactParticle() {

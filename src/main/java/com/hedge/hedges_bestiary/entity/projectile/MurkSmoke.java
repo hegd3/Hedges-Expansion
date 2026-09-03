@@ -2,11 +2,13 @@ package com.hedge.hedges_bestiary.entity.projectile;
 
 
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
+import com.hedge.hedges_bestiary.registry.HBEffects;
 import com.hedge.hedges_bestiary.registry.HBParticles;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -26,7 +28,10 @@ public class MurkSmoke extends GenericProjectile {
     protected void onHitEntity(EntityHitResult hit) {
         super.onHitEntity(hit);
         if (!hit.getEntity().isAlliedTo(this)) {
-            hit.getEntity().hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), this.getDamage());
+            boolean hurt = hit.getEntity().hurt(this.damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), this.getDamage());
+            if (this.isCharged() && hurt && hit.getEntity() instanceof LivingEntity entity) {
+                entity.addEffect(new MobEffectInstance(HBEffects.VOLATILE.get(), 40, 0));
+            }
         }
     }
 

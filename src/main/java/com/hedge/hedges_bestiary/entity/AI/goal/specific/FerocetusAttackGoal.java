@@ -28,7 +28,22 @@ public class FerocetusAttackGoal extends GenericMeleeGoal<FerocetusEntity> {
         LivingEntity livingentity = this.mob.getTarget();
         if (livingentity != null && this.mob.isInWater()) {
             if (this.mob.isGrabbing()) {
-                if (this.mob.getNavigation().isDone()) {
+                if (this.mob.canJump(1, 0)) {
+                    this.mob.playSound(SoundEvents.DOLPHIN_JUMP);
+                    Vec3 toward = livingentity.position().subtract(this.mob.position()).normalize();
+                    Vec3 dash = new Vec3(toward.x, 1, toward.z).normalize().scale(1.5);
+                    this.mob.setDeltaMovement(dash);
+                    float yaw = (float) (Mth.atan2(dash.z, dash.x) * (180F / Math.PI)) - 90.0F;
+                    float pitch = (float) (-(Mth.atan2(dash.y, Mth.sqrt((float) (dash.x * dash.x + dash.z * dash.z))) * (180F / Math.PI))) * 0.5f;
+
+                    this.mob.setYHeadRot(yaw);
+                    this.mob.setYRot(yaw);
+
+                    this.mob.setXRot(pitch);
+                    this.mob.setAnimState(3);
+
+                }
+                else if (this.mob.getNavigation().isDone()) {
                     Vec3 pos = EntityHelpers.getRandomSwimPos(this.mob, 10, 10, true);
                     if (pos != null) {
                         this.mob.getNavigation().moveTo(pos.x, pos.y, pos.z, 1.6F);

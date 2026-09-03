@@ -33,6 +33,8 @@
   "entity.hedges_bestiary.dawn_dove_fireball": "Dawn Dove Fireball",
   "entity.hedges_bestiary.murk_smoke": "Murk Smoke",
 
+  "effect.hedges_bestiary.volatile": "Volatile",
+
   "item.hedges_bestiary.burodon_spawn_egg": "Burodon Spawn Egg",
   "item.hedges_bestiary.chub_spawn_egg": "Chub Spawn Egg",
   "item.hedges_bestiary.dawn_dove_spawn_egg": "Dawn Dove Spawn Egg",
@@ -46,17 +48,20 @@
   "item.hedges_bestiary.spotted_striker_spawn_egg": "Spotted Striker Spawn Egg",
   "item.hedges_bestiary.tearacuda_spawn_egg": "Tearacuda Spawn Egg",
   "item.hedges_bestiary.zappet_spawn_egg": "Zappet Spawn Egg",
+
   "item.hedges_bestiary.plain_treat": "Plain Treat",
   "item.hedges_bestiary.seasoned_treat": "Seasoned Treat",
   "item.hedges_bestiary.hearty_treat": "Hearty Treat",
-  "item.hedges_bestiary.endgelic_judgement": "§aEndgelic Judgement",
+  "item.hedges_bestiary.endgelic_judgement": "Endgelic Judgement",
+  "item.hedges_bestiary.murks_melody": "Murk's Melody",
 
   "item.hedges_bestiary.chub_bucket": "Bucket of Chub",
   "item.hedges_bestiary.gild_glider_bucket": "Bucket of Gild Glider",
   "item.hedges_bestiary.skib_bucket": "Bucket of Skib",
   "item.hedges_bestiary.raw_urkmeat": "Raw Urkmeat",
   "item.hedges_bestiary.cooked_urkmeat": "Cooked Urkmeat",
-  "item.hedges_bestiary.endgelic_heart": "§aEndgelic Heart",
+  "item.hedges_bestiary.murk_spike": "Murk Spike",
+  "item.hedges_bestiary.endgelic_heart": "Endgelic Heart",
 
   "item.hedges_bestiary.skib": "Skib",
   "item.hedges_bestiary.dawn_dove_egg": "Dawn Dove Egg",

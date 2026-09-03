@@ -2,6 +2,7 @@ package com.hedge.hedges_bestiary.items;
 
 import com.hedge.hedges_bestiary.HedgesBestiary;
 import com.hedge.hedges_bestiary.registry.HBEntities;
+import net.minecraft.ChatFormatting;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
@@ -18,6 +19,9 @@ import java.util.function.Supplier;
 public class HBItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, HedgesBestiary.MODID);
 
+    public static final Rarity RARITY_ENDGELIC = Rarity.create("hedges_bestiary:endgelic", ChatFormatting.GREEN);
+    public static final Rarity RARITY_AQUATIC = Rarity.create("hedges_bestiary:aquatic", ChatFormatting.BLUE);
+
     public static final RegistryObject<Item> MURK_SPIKE = ITEMS.register("murk_spike",
             () -> new Item(new Item.Properties()));
 
@@ -25,7 +29,7 @@ public class HBItems {
             () -> new Item(new Item.Properties()));
 
     public static final RegistryObject<Item> ENDGELIC_HEART = ITEMS.register("endgelic_heart",
-            () -> new Item(new Item.Properties()));
+            () -> new Item(new Item.Properties().rarity(RARITY_ENDGELIC)));
 
 
     // CRAFTED ITEMS
@@ -39,7 +43,11 @@ public class HBItems {
             () -> new TreatItem(new Item.Properties().rarity(Rarity.RARE),2));
 
     public static final RegistryObject<Item> ENDGELIC_JUDGEMENT = ITEMS.register("endgelic_judgement",
-            () -> new EndgelicJudgementItem(new Item.Properties().durability(500).rarity(Rarity.EPIC)));
+            () -> new EndgelicJudgementItem(new Item.Properties().durability(500).rarity(RARITY_ENDGELIC)));
+
+    public static final RegistryObject<Item> MURKS_MELODY = ITEMS.register("murks_melody",
+            () -> new MurksMelodyItem(new Item.Properties().durability(500).rarity(RARITY_AQUATIC)));
+
     // FOODS
 
     public static final RegistryObject<Item> RAW_URKMEAT = ITEMS.register("raw_urkmeat",
