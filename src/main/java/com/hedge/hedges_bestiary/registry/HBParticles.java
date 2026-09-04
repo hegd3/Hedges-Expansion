@@ -20,6 +20,7 @@ public class HBParticles {
     public static final RegistryObject<SimpleParticleType> MURK_CHARGE = DEF_REG.register("murk_charge", ()-> new SimpleParticleType(false));
     public static final RegistryObject<SimpleParticleType> MURK_CHARGE_SHOOT = DEF_REG.register("murk_charge_shoot", ()-> new SimpleParticleType(false));
     public static final RegistryObject<SimpleParticleType> MURK_EXPLODE = DEF_REG.register("murk_explode", ()-> new SimpleParticleType(false));
+    public static final RegistryObject<SimpleParticleType> VOLATILE_EXPLODE = DEF_REG.register("volatile_explode", ()-> new SimpleParticleType(false));
     public static final RegistryObject<SimpleParticleType> MURK_IMPACT = DEF_REG.register("murk_impact", ()-> new SimpleParticleType(false));
 
     public static final RegistryObject<SimpleParticleType> ELECTRIC_SPARKS = DEF_REG.register("electric_sparks", ()-> new SimpleParticleType(false));

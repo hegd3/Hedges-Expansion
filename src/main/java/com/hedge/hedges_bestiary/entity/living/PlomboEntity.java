@@ -25,7 +25,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -33,7 +32,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
@@ -48,7 +46,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -64,7 +61,8 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
     private static final EntityDataAccessor<Boolean> SCRATCHING = SynchedEntityData.defineId(PlomboEntity.class, EntityDataSerializers.BOOLEAN);
 
 
-    public final AnimationState biteAnimationState = new AnimationState();
+    public final AnimationState swipeAnimationState = new AnimationState();
+
     public final AnimationState multiAttackAnimationState = new AnimationState();
     public final SmoothAnimationState scratchAnimationState = new SmoothAnimationState(0.2f);
 
@@ -164,9 +162,10 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
             LivingEntity target = this.getTarget();
             switch (this.getAnimState()) {
                 case 1 -> {
-                    if (this.animTicks == 10 && target != null && this.canHurtTarget(target, this.getAttackReachSqr(target), this.distanceToSqr(target))) {
+                    if (this.animTicks == 13 && target != null && this.canHurtTarget(target, this.getAttackReachSqr(target), this.distanceToSqr(target))) {
                         this.doHurtTarget(target);
-                    } else if (this.animTicks >= 21) {
+                    } else if (this.animTicks > 20) {
+                        this.setLeft(!this.swingingLeft());
                         this.resetAnimState();
                     }
                 }
@@ -229,7 +228,7 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
         super.setUpAnimStates();
         this.scratchAnimationState.animateWhen(this.isScratching(), this.tickCount);
         int animState = this.getAnimState();
-        this.biteAnimationState.animateWhen(animState == 1, this.tickCount);
+        this.swipeAnimationState.animateWhen(animState == 1, this.tickCount);
         this.multiAttackAnimationState.animateWhen(animState == 2, this.tickCount);
         this.earflickAnimationState.animateWhen(animState == 3, this.tickCount);
         this.sniffAnimationState.animateWhen(animState == 4, this.tickCount);
@@ -324,6 +323,7 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
     @Override
     public void setAttacking() {
         this.setAnimState(1);
+        this.setTurnType(TurnType.WHOLE_BODY);
     }
 
     public boolean canUseMultiAttack(double attackReach, double dist) {

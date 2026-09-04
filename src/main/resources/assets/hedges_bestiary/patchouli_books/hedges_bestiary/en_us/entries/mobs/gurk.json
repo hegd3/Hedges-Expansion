@@ -1,0 +1,25 @@
+{
+  "name": "Gurk",
+  "icon": "hedges_bestiary:plain_treat",
+  "category": "hedges_bestiary:mobs_category",
+  "pages": [
+    {
+      "type": "hedges_bestiary:tamable_mob_template",
+      "aggression": "passive",
+      "taming": "Feed 1* plain treat",
+      "habitat": "Swamps, mangroves, rivers, beaches",
+      "breeding": "Seagrass (lays eggs)",
+      "misc": "Comes in different biome-dependent variants. There's even a rumored $(#E8C82A)shiny breed!"
+    },
+    {
+      "type": "patchouli:image",
+      "images": [
+        "hedges_bestiary:textures/gui/book/gurks.png"
+      ],
+      "border": true,
+      "text": "From top to bottom: $(#5890D1)Marine Gurk, $(#A68F76)River Gurk, $(#368F2E)Swamp Gurk"
+
+    }
+
+  ]
+}

@@ -624,7 +624,7 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
             for (LivingEntity entity : hit) {
                 if (!AttackHelpers.blockBreak(entity)) {
                     AttackHelpers.betterHurt(this, entity, 1.8f, 1.5f);
-                    entity.addEffect(new MobEffectInstance(HBEffects.VOLATILE.get(), 40, 1));
+                    entity.addEffect(new MobEffectInstance(HBEffects.VOLATILITY.get(), 40, 1));
                 } else {
                     AttackHelpers.betterHurt(this, entity, 0.8f, 0.8f);
                 }
@@ -876,6 +876,14 @@ public class MurkEntity extends HBTamableAnimal implements AttackStateMob, Advan
             this.navigation = new MMPathNavigatorGround(this, this.level());
 
         }
+    }
+
+    @Override
+    public boolean canBeAffected(MobEffectInstance pEffectInstance) {
+        if (pEffectInstance.getEffect() == HBEffects.VOLATILITY.get()) {
+            return false;
+        }
+        return super.canBeAffected(pEffectInstance);
     }
 
     @Override

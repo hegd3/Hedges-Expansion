@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "hedges_bestiary:item/chub_bucket"
+    "layer0": "hedges_bestiary:item/hedges_bestiary"
   }
 }

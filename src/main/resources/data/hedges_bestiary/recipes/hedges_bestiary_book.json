@@ -1,0 +1,12 @@
+{
+  "type": "patchouli:shapeless_book_recipe",
+  "ingredients": [
+    {
+      "item": "minecraft:book"
+    },
+    {
+      "tag": "minecraft:leaves"
+    }
+  ],
+  "book": "hedges_bestiary:hedges_bestiary"
+}

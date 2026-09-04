@@ -17,7 +17,7 @@ public class PlomboAttackGoal extends GenericMeleeGoal<PlomboEntity> {
     @Override
     protected double getSpeedModifier() {
         return switch (this.mob.getAnimState()) {
-            case 1, 2 -> 1;
+            case 1, 2, 3 -> 1;
             default -> super.getSpeedModifier();
         };
     }

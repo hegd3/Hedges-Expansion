@@ -133,7 +133,7 @@ public class PlomboModel extends HBModel<PlomboEntity> {
 		}
 		this.animate(entity.idleAnimationState, PlomboAnimation.IDLE, ageInTicks, 0.5f);
 		this.animateWalk(PlomboAnimation.WALK, limbSwing, limbSwingAmount, 2.5f, 1.5f);
-		this.animate(entity.biteAnimationState, PlomboAnimation.BITE, ageInTicks);
+		this.animate(entity.swipeAnimationState, entity.swingingLeft() ? PlomboAnimation.SWIPE_LEFT : PlomboAnimation.SWIPE_RIGHT, ageInTicks);
 		this.animate(entity.multiAttackAnimationState, entity.swingingLeft() ? PlomboAnimation.MULTIATTACK_LEFT : PlomboAnimation.MULTIATTACK_RIGHT, ageInTicks);
 
 		this.animateSmooth(entity.napAnimationState, PlomboAnimation.SLEEP, ageInTicks, 1f);

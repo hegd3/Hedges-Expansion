@@ -1,0 +1,10 @@
+{
+  "components": [
+    {
+      "type": "patchouli:text",
+      "text": "Aggression: #aggression#$(br2)Taming: #taming#$(br2)Habitat: #habitat#$(br2)Breed With: #breeding#$(br2)Additional comments: #misc#",
+      "x": 0,
+      "y": 0
+    }
+  ]
+}
