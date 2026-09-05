@@ -13,6 +13,8 @@ public class PlomboRenderer extends MobRenderer<PlomboEntity, PlomboModel> {
 
     private static final ResourceLocation TEXTURE = new ResourceLocation(HedgesBestiary.MODID, "textures/entity/plombo/plombo.png");
     private static final ResourceLocation SLEEPING = new ResourceLocation(HedgesBestiary.MODID, "textures/entity/plombo/plombo_sleeping.png");
+    private static final ResourceLocation TEXTURE_BARRELED = new ResourceLocation(HedgesBestiary.MODID, "textures/entity/plombo/plombo_barreled.png");
+    private static final ResourceLocation SLEEPING_BARRELED = new ResourceLocation(HedgesBestiary.MODID, "textures/entity/plombo/plombo_barreled_sleeping.png");
 
     public PlomboRenderer(EntityRendererProvider.Context pContext) {
         super(pContext, new PlomboModel(pContext.bakeLayer(EntityLayers.PLOMBO_LAYER)), 1.5f);
@@ -21,6 +23,10 @@ public class PlomboRenderer extends MobRenderer<PlomboEntity, PlomboModel> {
 
     @Override
     public ResourceLocation getTextureLocation(PlomboEntity pEntity) {
+        if (pEntity.hasBarrel()) {
+            return pEntity.isNapping() ? SLEEPING_BARRELED : TEXTURE_BARRELED;
+
+        }
         return pEntity.isNapping() ? SLEEPING : TEXTURE;
     }
 }

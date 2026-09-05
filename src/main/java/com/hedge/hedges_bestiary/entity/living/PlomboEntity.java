@@ -25,13 +25,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
@@ -44,22 +48,29 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.Tags;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 import java.util.List;
 
-public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurner, HUDMount {
+public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, AdvancedTurner, HUDMount  {
 
+    private static final ResourceLocation FORAGE_LOOT_TABLE = ResourceLocation.fromNamespaceAndPath("hedges_bestiary", "gameplay/plombo_foraging");
     private static final EntityDataAccessor<Boolean> LEFT = SynchedEntityData.defineId(PlomboEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> SCRATCHING = SynchedEntityData.defineId(PlomboEntity.class, EntityDataSerializers.BOOLEAN);
-
+    private static final EntityDataAccessor<Boolean> HAS_BARREL = SynchedEntityData.defineId(PlomboEntity.class, EntityDataSerializers.BOOLEAN);
 
     public final AnimationState swipeAnimationState = new AnimationState();
 
@@ -106,12 +117,53 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
         return player.isShiftKeyDown();
     }
 
+    @Override
+    public boolean hasInventory() {
+        return true;
+    }
+
+    @Override
+    public boolean canAccessInventory() {
+        return this.hasBarrel();
+    }
+
+    @Override
+    public int getInventorySize() {
+        return 27;
+    }
+
+    @Override
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        if (this.isTame() && !this.hasBarrel() && player == this.getOwner() && player.getItemInHand(hand).is(Tags.Items.BARRELS_WOODEN)) {
+            if (!this.level().isClientSide()) {
+                if (!player.getAbilities().instabuild) {
+                    player.getItemInHand(hand).shrink(1);
+                }
+                this.setHasBarrel(true);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        return super.mobInteract(player, hand);
+    }
 
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(LEFT, false);
         this.entityData.define(SCRATCHING, false);
+        this.entityData.define(HAS_BARREL, false);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag compound) {
+        super.readAdditionalSaveData(compound);
+        this.setHasBarrel(compound.getBoolean("Has_Barrel"));
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        pCompound.putBoolean("Has_Barrel", this.hasBarrel());
     }
 
     @Override
@@ -223,6 +275,8 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
         return false;
     }
 
+
+
     @Override
     public void setUpAnimStates() {
         super.setUpAnimStates();
@@ -320,6 +374,8 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
         moveFunc.accept(passenger, this.getX() + extraX, targetY, this.getZ() + extraZ);
     }
 
+
+
     @Override
     public void setAttacking() {
         this.setAnimState(1);
@@ -343,6 +399,15 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
     private boolean canHurtTarget(LivingEntity entity, double attackreach, double dist) {
         return this.hasLineOfSight(entity) && attackreach >= dist;
     }
+
+    public boolean hasBarrel() {
+        return this.entityData.get(HAS_BARREL);
+    }
+
+    public void setHasBarrel(boolean b) {
+        this.entityData.set(HAS_BARREL, b);
+    }
+
 
     public boolean swingingLeft() {
         return this.entityData.get(LEFT);
@@ -414,6 +479,12 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
         }
     }
 
+    private void addForageItems() {
+        LootTable loottable = level().getServer().getLootData().getLootTable(FORAGE_LOOT_TABLE);
+        List<ItemStack> items = loottable.getRandomItems((new LootParams.Builder((ServerLevel) level())).withParameter(LootContextParams.THIS_ENTITY, this).create(LootContextParamSets.PIGLIN_BARTER));
+        items.forEach(item -> inventory.addItem(item));
+    }
+
     static class PlomboScratchLeavesGoal extends MoveToBlockGoal {
 
         private final PlomboEntity plombo;
@@ -438,7 +509,10 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
                 }
             } else if (this.isReachedTarget()) {
                 this.plombo.getNavigation().stop();
+                Vec3 pos = this.plombo.position();
+                this.plombo.setDeltaMovement(blockPos.getX() - pos.x, 0, blockPos.getZ() - pos.z);
                 this.plombo.setScratching(true);
+                this.plombo.setTurnType(TurnType.WHOLE_BODY);
                 this.plombo.getLookControl().setLookAt(blockPos.getX(), blockPos.getY(), blockPos.getZ());
             } else {
                 this.plombo.getLookControl().setLookAt(blockPos.getX(), blockPos.getY(), blockPos.getZ());
@@ -446,14 +520,15 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
             }
         }
 
+
+
         public double acceptedDistance() {
-            return 2D;
+            return 4D;
         }
 
 
         @Override
         public boolean canUse() {
-
             return !this.plombo.isBaby() && !this.plombo.isNapping() && !this.plombo.isSitting() && super.canUse();
         }
 
@@ -471,6 +546,7 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
             return super.canContinueToUse();
         }
 
+
         @Override
         public void start() {
             super.start();
@@ -481,6 +557,13 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
         public void stop() {
             if (this.plombo.isScratching()) {
                 this.plombo.setScratching(false);
+                this.plombo.setTurnType(TurnType.NORMAL);
+                if (this.plombo.hasBarrel() && this.ticksScratching > 199) {
+                    this.plombo.addForageItems();
+                    if (isValidTarget(plombo.level(), blockPos)) {
+                        plombo.level().destroyBlock(blockPos, false, plombo);
+                    }
+                }
             }
             super.stop();
         }
@@ -491,6 +574,7 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
             return (state.is(BlockTags.LEAVES));
         }
 
+
         @Override
         protected @NotNull BlockPos getMoveToTarget() {
             BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos().set(blockPos);
@@ -499,6 +583,8 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
             }
             return mutable;
         }
+
+
     }
 
 

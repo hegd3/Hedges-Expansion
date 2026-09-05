@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class HBTamableMenu extends AbstractContainerMenu {
     private final HBTamableAnimal animal;
+
     public HBTamableMenu(int pContainerId, HBTamableAnimal animal) {
         super(null, pContainerId);
         this.animal = animal;

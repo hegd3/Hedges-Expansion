@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -21,6 +22,9 @@ public class HBTamableMenuScreen extends AbstractContainerScreen<HBTamableMenu> 
     private static final Component COMMAND_TEXT = Component.translatable("entity.hedges_bestiary.tamable_menu.display_command");
     private static final Component HOME_POSITION_TEXT = Component.translatable("entity.hedges_bestiary.tamable_menu.home");
     private static final Component AUTO_ATTACKS_TEXT = Component.translatable("entity.hedges_bestiary.tamable_menu.auto_targets");
+    private static final Component ACCESS_TEXT = Component.translatable("entity.hedges_bestiary.tamable_menu.access");
+    private static final Component INVENTORY_TEXT = Component.translatable("entity.hedges_bestiary.tamable_menu.inventory");
+
     private static final Component NONE = Component.translatable("entity.hedges_bestiary.tamable_menu.null");
 
 
@@ -34,13 +38,21 @@ public class HBTamableMenuScreen extends AbstractContainerScreen<HBTamableMenu> 
         this.imageWidth = 225;
         this.imageHeight = 158;
         this.titleLabelX+=30;
-        buttons = new HBTamableMenuButton[]{
+        if (!this.animal.canAccessInventory()) {
+            buttons = new HBTamableMenuButton[]{
+                    new CommandButton(this.leftPos + 150, this.topPos + 100, this),
+                    new AutoTargetButton(this.leftPos + 280, this.topPos + 100, this),
+                    new HomeButton(this.leftPos + 215, this.topPos + 200, this),
 
-                new CommandButton(this.leftPos + 150, this.topPos + 100, this),
-                new AutoTargetButton(this.leftPos + 280, this.topPos + 100, this),
-                new HomeButton(this.leftPos + 215, this.topPos + 200, this),
-
-        };
+            };
+        } else {
+            buttons = new HBTamableMenuButton[]{
+                    new CommandButton(this.leftPos + 150, this.topPos + 100, this),
+                    new AutoTargetButton(this.leftPos + 280, this.topPos + 100, this),
+                    new HomeButton(this.leftPos + 150, this.topPos + 200, this),
+                    new AccessInventoryButton(this.leftPos + 280, this.topPos + 200, this),
+            };
+        }
 
     }
 
@@ -59,7 +71,6 @@ public class HBTamableMenuScreen extends AbstractContainerScreen<HBTamableMenu> 
         for (HBTamableMenuButton button : this.buttons) {
             guiGraphics.pose().pushPose();
             button.render(guiGraphics, i, j, f);
-            guiGraphics.pose().popPose();
         }
     }
 
@@ -102,6 +113,8 @@ public class HBTamableMenuScreen extends AbstractContainerScreen<HBTamableMenu> 
                     (int)((this.getX() + 23) / 0.7f),
                     (int)((this.getY() + 15) / 0.7f),
                     0xFFFFFF);
+            pGuiGraphics.pose().popPose();
+
         }
 
         @Override
@@ -132,6 +145,8 @@ public class HBTamableMenuScreen extends AbstractContainerScreen<HBTamableMenu> 
                     (int)((this.getX() + 23) / 0.7f),
                     (int)((this.getY() + 15) / 0.7f),
                     0xFFFFFF);
+            pGuiGraphics.pose().popPose();
+
         }
 
         @Override
@@ -166,6 +181,33 @@ public class HBTamableMenuScreen extends AbstractContainerScreen<HBTamableMenu> 
         @Override
         public void onPress() {
             HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.screen.getMob().getId(), this.screen.getMob().getOwner().getId(), 2));
+        }
+    }
+
+    private static class AccessInventoryButton extends HBTamableMenuButton {
+        public AccessInventoryButton(int pX, int pY, HBTamableMenuScreen screen) {
+            super (pX, pY, screen, ACCESS_TEXT, 0.65f);
+        }
+
+        @Override
+        public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+            super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
+            pGuiGraphics.pose().popPose();
+            pGuiGraphics.pose().pushPose();
+            pGuiGraphics.pose().scale(0.7f, 0.7f, 0.7f);
+            pGuiGraphics.drawCenteredString(this.screen.getMinecraft().font,
+                    INVENTORY_TEXT,
+                    (int)((this.getX() + 23) / 0.7f),
+                    (int)((this.getY() + 15) / 0.7f),
+                    0xFFFFFF);
+
+            pGuiGraphics.pose().popPose();
+
+        }
+
+        @Override
+        public void onPress() {
+            HedgesBestiary.sendMSGToServer(new EntityKeyMessage(this.screen.getMob().getId(), this.screen.getMob().getOwner().getId(), 3));
         }
     }
 }

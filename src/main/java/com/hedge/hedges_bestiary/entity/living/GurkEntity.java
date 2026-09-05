@@ -108,9 +108,9 @@ public class GurkEntity extends HBTamableAnimal implements VariantMob, EggLayer 
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag pCompound) {
-        super.readAdditionalSaveData(pCompound);
-        this.setVariant(pCompound.getInt("Variant"));
+    public void readAdditionalSaveData(CompoundTag compound) {
+        super.readAdditionalSaveData(compound);
+        this.setVariant(compound.getInt("Variant"));
     }
 
     @Override

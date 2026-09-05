@@ -63,7 +63,9 @@ public class PlomboModel extends HBModel<PlomboEntity> {
 
 		PartDefinition body = bodyfrontlegs.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 49).addBox(-12.5F, 11.0F, -18.0F, 25.0F, 3.0F, 23.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -9.0F, -12.0F));
 
-		PartDefinition mainbody = body.addOrReplaceChild("mainbody", CubeListBuilder.create().texOffs(0, 0).addBox(-12.5F, -26.0F, -11.0F, 25.0F, 26.0F, 23.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 11.0F, -7.0F));
+		PartDefinition mainbody = body.addOrReplaceChild("mainbody", CubeListBuilder.create().texOffs(0, 0).addBox(-12.5F, -26.0F, -11.0F, 25.0F, 26.0F, 23.0F, new CubeDeformation(0.0F))
+				.texOffs(6, 198).addBox(9.5F, -28.0F, 1.0F, 7.0F, 16.0F, 10.0F, new CubeDeformation(0.0F))
+				.texOffs(6, 198).mirror().addBox(-16.5F, -28.0F, 1.0F, 7.0F, 16.0F, 10.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(0.0F, 11.0F, -7.0F));
 
 		PartDefinition body2 = body.addOrReplaceChild("body2", CubeListBuilder.create().texOffs(0, 75).addBox(-11.5F, -13.0F, 0.0F, 23.0F, 21.0F, 14.0F, new CubeDeformation(0.0F))
 				.texOffs(128, 106).addBox(0.0F, 2.0F, 14.0F, 0.0F, 6.0F, 2.0F, new CubeDeformation(0.0F))

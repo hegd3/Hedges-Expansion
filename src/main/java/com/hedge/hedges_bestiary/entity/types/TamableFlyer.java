@@ -41,9 +41,9 @@ public abstract class TamableFlyer extends HBTamableAnimal implements SemiFlyer 
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag pCompound) {
-        super.readAdditionalSaveData(pCompound);
-        this.setFlying(pCompound.getBoolean("Flying"));
+    public void readAdditionalSaveData(CompoundTag compound) {
+        super.readAdditionalSaveData(compound);
+        this.setFlying(compound.getBoolean("Flying"));
     }
 
     @Override

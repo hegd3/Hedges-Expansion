@@ -12,8 +12,9 @@
 
   "entity.hedges_bestiary.tamable_menu.home": "Home:",
   "entity.hedges_bestiary.tamable_menu.null": "None",
-  "entity.hedges_bestiary.tamable_menu.true": "True",
-  "entity.hedges_bestiary.tamable_menu.false": "False",
+
+  "entity.hedges_bestiary.tamable_menu.access": "Access",
+  "entity.hedges_bestiary.tamable_menu.inventory": "Inventory",
 
   "entity.hedges_bestiary.burodon": "Burodon",
   "entity.hedges_bestiary.chub": "Chub",

@@ -14,25 +14,31 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.*;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
+import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -56,13 +62,16 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     protected static final EntityDataAccessor<Integer> AUTO_TARGET_TYPE = SynchedEntityData.defineId(HBTamableAnimal.class, EntityDataSerializers.INT);
 
     protected int animTicks = 0;
-
-
+    protected SimpleContainer inventory;
+    protected boolean hasDroppedChest = false;
     @Nullable
     private BlockPos jukebox;
 
     public HBTamableAnimal(EntityType<? extends HBTamableAnimal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
+        if (this.hasInventory()) {
+            this.createInventory();
+        }
     }
 
     @Override
@@ -122,6 +131,85 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
         }
     }
 
+    public boolean canAccessInventory() {
+        return false;
+    }
+
+    public boolean hasInventory() {
+        return false;
+    }
+
+    public int getInventorySize() {
+        return 0;
+    }
+
+    protected void createInventory() {
+        SimpleContainer simplecontainer = this.inventory;
+        this.inventory = new SimpleContainer(this.getInventorySize()) {
+            @Override
+            public boolean stillValid(Player pPlayer) {
+                return HBTamableAnimal.this.isAlive() && !HBTamableAnimal.this.isInsidePortal;
+            }
+        };
+        if (simplecontainer != null) {
+            int i = Math.min(simplecontainer.getContainerSize(), this.inventory.getContainerSize());
+
+            for(int j = 0; j < i; j++) {
+                ItemStack itemstack = simplecontainer.getItem(j);
+                if (!itemstack.isEmpty()) {
+                    this.inventory.setItem(j, itemstack.copy());
+                }
+            }
+        }
+
+    }
+
+
+    @Override
+    protected void dropEquipment() {
+        super.dropEquipment();
+        if (this.inventory != null) {
+            for(int i = 0; i < this.inventory.getContainerSize(); ++i) {
+                ItemStack itemstack = this.inventory.getItem(i);
+                if (!itemstack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemstack)) {
+                    this.spawnAtLocation(itemstack);
+                }
+            }
+
+        }
+    }
+
+    @Override
+    public void die(DamageSource pCause) {
+        super.die(pCause);
+        if (this.hasInventory() && this.inventory != null && !this.level().isClientSide) {
+            for (int i = 0; i < inventory.getContainerSize(); ++i) {
+                ItemStack itemstack = inventory.getItem(i);
+                if (!itemstack.isEmpty()) {
+                    this.spawnAtLocation(itemstack, 0.0F);
+                }
+            }
+        }
+    }
+
+    public void openGUI(Player playerEntity) {
+        if (!this.hasPassenger(playerEntity)) {
+            NetworkHooks.openScreen((ServerPlayer) playerEntity, new MenuProvider() {
+                @Override
+                public AbstractContainerMenu createMenu(int p_createMenu_1_, Inventory p_createMenu_2_, Player p_createMenu_3_) {
+                    return ChestMenu.threeRows(p_createMenu_1_, p_createMenu_2_, inventory);
+                }
+
+                @Override
+                public Component getDisplayName() {
+                    return HBTamableAnimal.this.getDisplayName();
+                }
+
+            });
+        }
+    }
+
+
 
     protected abstract boolean canOwnerMount(Player player);
 
@@ -135,6 +223,17 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     public void tick() {
         super.tick();
         this.tickNap();
+        if (this.hasDroppedChest && inventory != null && !this.hasInventory()) {
+            for (int i = 3; i < 18; i++) {
+                if (!inventory.getItem(i).isEmpty()) {
+                    if (!this.level().isClientSide) {
+                        this.spawnAtLocation(inventory.getItem(i), 1);
+                    }
+                    inventory.removeItemNoUpdate(i);
+                }
+            }
+            hasDroppedChest = false;
+        }
     }
 
     protected void tickNap() {
@@ -163,21 +262,43 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag pCompound) {
-        super.readAdditionalSaveData(pCompound);
-        this.setSitting(pCompound.getBoolean("Is_Sitting"));
-        this.setNapping(pCompound.getBoolean("Is_Napping"));
-        this.setHasHome(pCompound.getBoolean("Has_Home"));
+    public void readAdditionalSaveData(CompoundTag compound) {
+        super.readAdditionalSaveData(compound);
+        this.setSitting(compound.getBoolean("Is_Sitting"));
+        this.setNapping(compound.getBoolean("Is_Napping"));
+        this.setHasHome(compound.getBoolean("Has_Home"));
         if (this.hasHome()) {
-            int i = pCompound.getInt("HomePosX");
-            int j = pCompound.getInt("HomePosY");
-            int k = pCompound.getInt("HomePosZ");
+            int i = compound.getInt("HomePosX");
+            int j = compound.getInt("HomePosY");
+            int k = compound.getInt("HomePosZ");
             this.setHomePos(new BlockPos(i, j, k));
         }
         if (this.isTame()) {
-            this.setCommand(pCompound.getInt("Tame_Command"));
-            this.setAutoTargetType(pCompound.getInt("Auto_Target_Type"));
+            this.setCommand(compound.getInt("Tame_Command"));
+            this.setAutoTargetType(compound.getInt("Auto_Target_Type"));
         }
+        if (this.hasInventory()) {
+            if (this.inventory != null) {
+                ListTag nbttaglist = compound.getList("Items", 10);
+                this.createInventory();
+                for (int i = 0; i < nbttaglist.size(); ++i) {
+                    CompoundTag CompoundNBT = nbttaglist.getCompound(i);
+                    int j = CompoundNBT.getByte("Slot") & 255;
+                    this.inventory.setItem(j, ItemStack.of(CompoundNBT));
+                }
+            } else {
+                ListTag nbttaglist = compound.getList("Items", 10);
+                this.createInventory();
+                for (int i = 0; i < nbttaglist.size(); ++i) {
+                    CompoundTag CompoundNBT = nbttaglist.getCompound(i);
+                    int j = CompoundNBT.getByte("Slot") & 255;
+                    this.createInventory();
+                    this.inventory.setItem(j, ItemStack.of(CompoundNBT));
+                }
+            }
+        }
+
+
 
     }
 
@@ -196,7 +317,21 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
             pCompound.putInt("Tame_Command", this.getCommand());
             pCompound.putInt("Auto_Target_Type", this.getAutoTargetType());
         }
+        if (inventory != null) {
+            ListTag nbttaglist = new ListTag();
+            for (int i = 0; i < this.inventory.getContainerSize(); ++i) {
+                ItemStack itemstack = this.inventory.getItem(i);
+                if (!itemstack.isEmpty()) {
+                    CompoundTag CompoundNBT = new CompoundTag();
+                    CompoundNBT.putByte("Slot", (byte) i);
+                    itemstack.save(CompoundNBT);
+                    nbttaglist.add(CompoundNBT);
+                }
+            }
+            pCompound.put("Items", nbttaglist);
+        }
     }
+
 
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
@@ -445,6 +580,12 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
                 }
             }
             case 2 -> this.setAutoTargetType(this.getAutoTargetType() == 3 ? 0 : this.getAutoTargetType() + 1);
+            case 3 -> {
+                if (keyPresser instanceof Player player) {
+                    player.closeContainer();
+                    this.openGUI(player);
+                }
+            }
         }
     }
 
