@@ -1,0 +1,25 @@
+{
+  "name": "Murk",
+  "icon": "hedges_bestiary:hearty_treat",
+  "category": "hedges_bestiary:mobs_category",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "hedges_bestiary:tamable_mob_template",
+      "behavior": "Neutral, hunts skibs",
+      "taming": "When charged, feed a bucket of skib, then a hearty treat; repeat this process several times",
+      "habitat": "Regular & deep oceans",
+      "breeding": "Skib (lays eggs)",
+      "misc": "Can be ridden when tamed-- $(k:hedges_bestiary.mountSpecialKey) to charge; shoots projectiles instead when charge on cooldown"
+    },
+    {
+      "type": "patchouli:image",
+      "images": [
+        "hedges_bestiary:textures/gui/book/murk.png"
+      ],
+      "text": "Murks consume skibs to harness their volatile red energy"
+
+    }
+
+  ]
+}

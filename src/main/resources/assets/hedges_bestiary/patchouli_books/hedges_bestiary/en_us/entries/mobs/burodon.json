@@ -1,0 +1,25 @@
+{
+  "name": "Burodon",
+  "icon": "hedges_bestiary:seasoned_treat",
+  "category": "hedges_bestiary:mobs_category",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "hedges_bestiary:tamable_mob_template",
+      "behavior": "Aggressive, hunts players & livestock",
+      "taming": "Feed 1* seasoned treat whilst it is roaring",
+      "habitat": "Snowy plains, snowy taigas, groves",
+      "breeding": "Raw mutton",
+      "misc": "A burodon's roar freezes its opponents whilst simultaneously healing its allies"
+    },
+    {
+      "type": "patchouli:image",
+      "images": [
+        "hedges_bestiary:textures/gui/book/burodon.png"
+      ],
+      "text": "Burodons typically hunt in packs of up to four individuals"
+
+    }
+
+  ]
+}

@@ -2,7 +2,6 @@ package com.hedge.hedges_bestiary.entity.types;
 
 import com.hedge.hedges_bestiary.config.HBConfig;
 import com.hedge.hedges_bestiary.HedgesBestiary;
-import com.hedge.hedges_bestiary.entity.living.ZappetEntity;
 import com.hedge.hedges_bestiary.entity.util.EntityHelpers;
 import com.hedge.hedges_bestiary.menu.HBTamableMenu;
 import com.hedge.hedges_bestiary.message.DanceJukeboxMessage;
@@ -10,7 +9,6 @@ import com.hedge.hedges_bestiary.message.OpenTamableScreenMessage;
 import com.hedge.hedges_bestiary.registry.HBParticles;
 import com.hedge.hedges_bestiary.util.SmoothAnimationState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -34,7 +32,6 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
@@ -118,6 +115,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
         return InteractionResult.PASS;
     }
 
+
     public void openCustomInventoryScreen(Player player) {
         if (!this.level().isClientSide && player instanceof ServerPlayer serverPlayer) {
             if (serverPlayer.containerMenu != serverPlayer.inventoryMenu) serverPlayer.closeContainer();
@@ -140,7 +138,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     }
 
     public int getInventorySize() {
-        return 0;
+        return 27;
     }
 
     protected void createInventory() {
@@ -169,12 +167,8 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     protected void dropEquipment() {
         super.dropEquipment();
         if (this.inventory != null) {
-            for(int i = 0; i < this.inventory.getContainerSize(); ++i) {
-                ItemStack itemstack = this.inventory.getItem(i);
-                if (!itemstack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemstack)) {
-                    this.spawnAtLocation(itemstack);
-                }
-            }
+            List<ItemStack> items = inventory.removeAllItems();
+            items.forEach(item -> {spawnAtLocation(item, 0.0F);});
 
         }
     }
@@ -183,16 +177,13 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
     public void die(DamageSource pCause) {
         super.die(pCause);
         if (this.hasInventory() && this.inventory != null && !this.level().isClientSide) {
-            for (int i = 0; i < inventory.getContainerSize(); ++i) {
-                ItemStack itemstack = inventory.getItem(i);
-                if (!itemstack.isEmpty()) {
-                    this.spawnAtLocation(itemstack, 0.0F);
-                }
-            }
+            List<ItemStack> items = inventory.removeAllItems();
+            items.forEach(item -> {spawnAtLocation(item, 0.0F);});
+
         }
     }
 
-    public void openGUI(Player playerEntity) {
+    public void openInventory(Player playerEntity) {
         if (!this.hasPassenger(playerEntity)) {
             NetworkHooks.openScreen((ServerPlayer) playerEntity, new MenuProvider() {
                 @Override
@@ -583,7 +574,7 @@ public abstract class HBTamableAnimal extends TamableAnimal implements AnimState
             case 3 -> {
                 if (keyPresser instanceof Player player) {
                     player.closeContainer();
-                    this.openGUI(player);
+                    this.openInventory(player);
                 }
             }
         }

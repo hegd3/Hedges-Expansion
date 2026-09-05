@@ -31,6 +31,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
@@ -49,6 +50,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -128,23 +130,37 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
     }
 
     @Override
-    public int getInventorySize() {
-        return 27;
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        if (this.isTame() && player == this.getOwner()) {
+            if (!this.hasBarrel()) {
+                if (player.getItemInHand(hand).is(Items.BARREL)) {
+                    if (!this.level().isClientSide()) {
+                        if (!player.getAbilities().instabuild) {
+                            player.getItemInHand(hand).shrink(1);
+                        }
+                        this.setHasBarrel(true);
+                        this.playSound(SoundEvents.HORSE_SADDLE, 1.0F, 1.0F);
+                    }
+                    return InteractionResult.SUCCESS;
+                }
+            } else if (player.getItemInHand(hand).is(Items.SHEARS)) {
+                if (!this.level().isClientSide()) {
+                    this.setHasBarrel(false);
+                    this.playSound(SoundEvents.SHEEP_SHEAR, 1.0F, 1.0F);
+                    this.spawnAtLocation(new ItemStack(Items.BARREL), 0.0F);
+                    List<ItemStack> items = inventory.removeAllItems();
+                    items.forEach(item -> {spawnAtLocation(item, 0.0F);});
+                }
+                return InteractionResult.SUCCESS;
+            }
+        }
+        InteractionResult result = super.mobInteract(player, hand);
+        if (result == InteractionResult.PASS && this.isSleeping() && !this.isTame() && this.isTamable()) {
+
+        }
+        return result;
     }
 
-    @Override
-    public InteractionResult mobInteract(Player player, InteractionHand hand) {
-        if (this.isTame() && !this.hasBarrel() && player == this.getOwner() && player.getItemInHand(hand).is(Tags.Items.BARRELS_WOODEN)) {
-            if (!this.level().isClientSide()) {
-                if (!player.getAbilities().instabuild) {
-                    player.getItemInHand(hand).shrink(1);
-                }
-                this.setHasBarrel(true);
-            }
-            return InteractionResult.SUCCESS;
-        }
-        return super.mobInteract(player, hand);
-    }
 
     @Override
     protected void defineSynchedData() {
@@ -489,8 +505,9 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
 
         private final PlomboEntity plombo;
         private int ticksScratching;
+        private int ticksWaited;
         public PlomboScratchLeavesGoal(PlomboEntity plombo) {
-            super(plombo, 1.2f, 8, 5);
+            super(plombo, 1.2f, 8, 2);
             this.plombo = plombo;
             this.setFlags(EnumSet.of(Flag.MOVE, Flag.JUMP, Flag.LOOK));
 
@@ -508,14 +525,14 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
                     plombo.level().levelEvent(2001, blockPos, Block.getId(state));
                 }
             } else if (this.isReachedTarget()) {
-                this.plombo.getNavigation().stop();
-                Vec3 pos = this.plombo.position();
-                this.plombo.setDeltaMovement(blockPos.getX() - pos.x, 0, blockPos.getZ() - pos.z);
-                this.plombo.setScratching(true);
-                this.plombo.setTurnType(TurnType.WHOLE_BODY);
-                this.plombo.getLookControl().setLookAt(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+                if (this.ticksWaited++ >= 40) {
+                    this.plombo.getNavigation().stop();
+                    this.plombo.setScratching(true);
+                    this.plombo.setTurnType(TurnType.WHOLE_BODY);
+                    this.plombo.getLookControl().setLookAt(blockPos.getX() + 0.5D, blockPos.getY() + 0.5D, blockPos.getZ());
+                }
             } else {
-                this.plombo.getLookControl().setLookAt(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+                this.plombo.getLookControl().setLookAt(blockPos.getX() + 0.5D, blockPos.getY() + 0.5D, blockPos.getZ());
                 super.tick();
             }
         }
@@ -523,7 +540,7 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
 
 
         public double acceptedDistance() {
-            return 4D;
+            return 2D;
         }
 
 
@@ -538,7 +555,7 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
                 return false;
             }
             if (this.plombo.isScratching()) {
-                if (this.ticksScratching > 20 && !blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance())) {
+                if (this.ticksScratching > 10 && !blockPos.closerToCenterThan(this.mob.position(), this.acceptedDistance())) {
                     return false;
                 }
                 return this.ticksScratching < 200 && this.isValidTarget(this.plombo.level(), this.blockPos);
@@ -551,6 +568,7 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
         public void start() {
             super.start();
             this.ticksScratching = 0;
+            this.ticksWaited = 0;
         }
 
         @Override
@@ -560,7 +578,7 @@ public class PlomboEntity extends HBTamableAnimal implements AttackStateMob, Adv
                 this.plombo.setTurnType(TurnType.NORMAL);
                 if (this.plombo.hasBarrel() && this.ticksScratching > 199) {
                     this.plombo.addForageItems();
-                    if (isValidTarget(plombo.level(), blockPos)) {
+                    if (plombo.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && isValidTarget(plombo.level(), blockPos)) {
                         plombo.level().destroyBlock(blockPos, false, plombo);
                     }
                 }
